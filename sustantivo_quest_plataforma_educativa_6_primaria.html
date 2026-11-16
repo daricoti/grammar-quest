@@ -1,0 +1,2383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sustantivo Quest · 6.º de Primaria</title>
+  <!-- Tailwind CSS para diseño adaptable y moderno -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fuentes Google: Fredoka para títulos lúdicos e Inter para lectura clara -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Librería MQTT sobre WebSockets para sincronización entre ordenadores de clase -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <!-- Librería ligera para generar códigos QR en la Pizarra Digital -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Tone.js para efectos de sonido sintetizados sin archivos externos -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Fredoka', 'sans-serif'],
+          },
+          animation: {
+            'bounce-slow': 'bounce 2.2s infinite',
+            'pop': 'pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          },
+          keyframes: {
+            pop: {
+              '0%': { transform: 'scale(0.85)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, .font-display {
+      font-family: 'Fredoka', sans-serif;
+    }
+    /* Transición suave para la subida de los equipos en la torre */
+    .tower-climber {
+      transition: bottom 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    /* Patrón sutil de cuadrícula de cuaderno escolar para la pizarra */
+    .notebook-bg {
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    /* Estilo personalizado para barras de desplazamiento */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ==================== BARRA DE NAVEGACIÓN SUPERIOR ==================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Logotipo y Título -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-display text-xl font-bold shadow-md shadow-indigo-200">
+          SQ
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-bold text-lg sm:text-xl text-slate-900 tracking-tight">Sustantivo Quest</span>
+            <span class="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">6.º Primaria</span>
+          </div>
+          <p class="text-[11px] text-slate-500 hidden md:block">Plataforma interactiva de análisis morfológico para el aula</p>
+        </div>
+      </div>
+
+      <!-- Selector de las 3 Vistas Principales -->
+      <nav class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 order-3 sm:order-2 w-full sm:w-auto justify-center" aria-label="Vistas de la aplicación">
+        <button onclick="switchView('board')" id="nav-board" class="nav-tab flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all">
+          <span>🖥️</span>
+          <span>Pizarra Digital</span>
+        </button>
+        <button onclick="switchView('play')" id="nav-play" class="nav-tab flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all">
+          <span>🎮</span>
+          <span>Mando Alumno</span>
+        </button>
+        <button onclick="switchView('editor')" id="nav-editor" class="nav-tab flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all">
+          <span>✏️</span>
+          <span>Editor Profesor</span>
+        </button>
+      </nav>
+
+      <!-- Estado de Conexión y Sonido -->
+      <div class="flex items-center gap-2 order-2 sm:order-3">
+        <div id="sync-status-badge" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200" title="Estado de sincronización en tiempo real">
+          <span id="sync-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span id="sync-label" class="hidden md:inline">Conectando...</span>
+        </div>
+        <button onclick="toggleSound()" id="btn-sound" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors" title="Activar o silenciar efectos de sonido">
+          🔊
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== CONTENEDOR PRINCIPAL DE VISTAS ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5">
+
+    <!-- ===================================================================== -->
+    <!-- VISTA 1: PIZARRA DIGITAL (PROYECTOR DE CLASE)                         -->
+    <!-- ===================================================================== -->
+    <section id="view-board" class="space-y-5">
+      <!-- Barra de Control del Docente en la Pizarra -->
+      <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <!-- Bloque PIN y Selector de Desafío -->
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+          <div class="bg-indigo-600 text-white px-4 py-2 rounded-2xl flex items-center gap-3 shadow-sm">
+            <div>
+              <div class="text-[10px] uppercase tracking-wider font-bold text-indigo-200">PIN de Sala</div>
+              <div id="board-pin-display" class="font-display text-2xl sm:text-3xl font-bold tracking-widest leading-none">----</div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <button onclick="copyJoinLink()" class="text-xs bg-indigo-500 hover:bg-indigo-400 px-2 py-1 rounded-lg font-medium transition" title="Copiar enlace directo para alumnos">
+                📋 Enlace
+              </button>
+              <button onclick="regeneratePin()" class="text-[11px] bg-indigo-700 hover:bg-indigo-800 px-2 py-0.5 rounded-lg text-indigo-200 transition" title="Generar nuevo PIN">
+                🔄 Nuevo
+              </button>
+            </div>
+          </div>
+
+          <div class="min-w-[210px] sm:min-w-[260px]">
+            <label for="board-challenge-select" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Desafío activo</label>
+            <select id="board-challenge-select" onchange="selectBoardChallenge(this.value)" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm font-semibold rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+              <!-- Se rellena dinámicamente -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Botones de Flujo de Partida -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="boardStartGame()" id="btn-board-start" class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-200 flex items-center gap-1.5 transition active:scale-95">
+            <span>▶️</span>
+            <span>Empezar</span>
+          </button>
+          <button onclick="boardRevealAnswer()" id="btn-board-reveal" disabled class="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:pointer-events-none text-white font-bold text-sm shadow-md shadow-amber-200 flex items-center gap-1.5 transition active:scale-95">
+            <span>👁️</span>
+            <span>Revelar</span>
+          </button>
+          <button onclick="boardNextWord()" id="btn-board-next" disabled class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none text-white font-bold text-sm shadow-md shadow-indigo-200 flex items-center gap-1.5 transition active:scale-95">
+            <span>⏭️</span>
+            <span>Siguiente</span>
+          </button>
+          <button onclick="confirmResetMatch()" id="btn-board-reset" class="px-3.5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm flex items-center gap-1.5 transition">
+            <span>🔁</span>
+            <span>Reiniciar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid Principal de la Pizarra: Área de Juego (8 cols) + Analítica y QR (4 cols) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- COLUMNA IZQUIERDA/CENTRAL (8 COLS) -->
+        <div class="lg:col-span-8 space-y-5">
+
+          <!-- ESTADO LOBBY: Sala de Espera con QR Grande y Equipos -->
+          <div id="board-lobby-panel" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm notebook-bg">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/95 p-5 rounded-2xl border border-slate-200">
+              <div class="space-y-3 text-center md:text-left max-w-md">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold">
+                  🏫 Sala preparada para jugar
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">¡Uníos desde vuestros ordenadores!</h2>
+                <ol class="text-sm text-slate-600 space-y-1.5 text-left">
+                  <li><strong class="text-slate-800">1.</strong> Escanead el código QR o abrid la pestaña <strong>Mando Alumno</strong>.</li>
+                  <li><strong class="text-slate-800">2.</strong> Escribid el PIN <span id="lobby-pin-inline" class="font-mono font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">----</span> y vuestro nombre.</li>
+                  <li><strong class="text-slate-800">3.</strong> Elegid uno de los <strong>4 equipos</strong> y esperad la señal.</li>
+                </ol>
+                <div id="local-file-warning" class="hidden text-xs bg-amber-50 border border-amber-200 text-amber-800 p-2.5 rounded-xl">
+                  💡 <strong>Nota:</strong> Estás abriendo el archivo localmente (<code>file://</code>). Para que otros ordenadores entren por QR, sube este HTML a un hosting gratuito (Netlify, GitHub Pages, Vercel) o abre otra pestaña en este mismo navegador para probarlo.
+                </div>
+              </div>
+
+              <!-- Contenedor QR Grande -->
+              <div class="flex flex-col items-center bg-white p-4 rounded-2xl border-2 border-indigo-100 shadow-sm shrink-0">
+                <div id="board-qr-large" class="w-40 h-40 flex items-center justify-center bg-slate-50 rounded-xl overflow-hidden"></div>
+                <span class="mt-2 text-xs font-bold text-slate-500">Acceso directo con PIN</span>
+              </div>
+            </div>
+
+            <!-- Listado de Alumnos Conectados por Equipo -->
+            <div class="mt-6">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-bold text-slate-800">Alumnos conectados (<span id="lobby-total-players">0</span>)</h3>
+                <button onclick="addDemoBots()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl transition">
+                  🤖 Simular 4 alumnos de prueba
+                </button>
+              </div>
+              <div id="lobby-teams-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                <!-- Tarjetas de equipos generadas por JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ESTADO PREGUNTA / REVELAR: Palabra Actual + Carrera Vertical de Torres -->
+          <div id="board-active-panel" class="hidden space-y-5">
+            <!-- Tarjeta de Palabra en Juego -->
+            <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm relative overflow-hidden">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <span id="board-word-counter" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold">
+                  Palabra 1 de 10
+                </span>
+                <div class="flex items-center gap-3">
+                  <span id="board-answers-count" class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
+                    ✍️ 0 / 0 respuestas
+                  </span>
+                  <span id="board-timer-badge" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-mono font-bold">
+                    ⏱️ 00s
+                  </span>
+                </div>
+              </div>
+
+              <!-- Sustantivo Gigante -->
+              <div class="text-center py-4">
+                <div class="text-xs uppercase tracking-widest font-bold text-slate-400 mb-1">Analiza el sustantivo</div>
+                <h1 id="board-current-word" class="text-4xl sm:text-6xl font-bold text-slate-900 tracking-tight animate-pop">
+                  ---
+                </h1>
+              </div>
+
+              <!-- Solución Oficial (visible solo al pulsar Revelar) -->
+              <div id="board-reveal-solution" class="hidden mt-4 pt-4 border-t border-slate-100 animate-pop">
+                <div class="text-center text-xs font-bold uppercase tracking-wider text-emerald-700 mb-2.5">
+                  ✅ Clasificación correcta
+                </div>
+                <div id="board-solution-pills" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <!-- Píldoras con la respuesta correcta -->
+                </div>
+              </div>
+            </div>
+
+            <!-- CARRERA VERTICAL DE LOS 4 EQUIPOS -->
+            <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900">🏔️ Escalada de Equipos</h3>
+                  <p class="text-xs text-slate-500">Cada categoría acertada suma 250 pts (+ bonus de rapidez al hacer pleno)</p>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600">Meta: Cima de la Torre</span>
+              </div>
+
+              <!-- Carriles Verticales -->
+              <div id="board-race-lanes" class="grid grid-cols-4 gap-2 sm:gap-4 pt-4">
+                <!-- Se renderizan los 4 carriles verticales: Zorro, Tortuga, Búho, León -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ESTADO FINALIZADO: Podio + Informe de Palabras Más Falladas -->
+          <div id="board-finished-panel" class="hidden space-y-5">
+            <!-- Podio Final -->
+            <div class="bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 text-white rounded-3xl p-6 sm:p-8 shadow-lg text-center">
+              <div class="inline-block px-3.5 py-1 rounded-full bg-white/15 text-xs font-bold uppercase tracking-wider mb-2">
+                🏆 ¡Desafío Completado!
+              </div>
+              <h2 class="text-3xl sm:text-4xl font-bold mb-6">Clasificación Final de Equipos</h2>
+              <div id="board-podium" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 items-end max-w-3xl mx-auto">
+                <!-- Tarjetas de podio -->
+              </div>
+            </div>
+
+            <!-- Informe Pedagógico de Palabras Más Falladas -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div>
+                  <h3 class="text-xl font-bold text-slate-900">📋 Informe de Repaso: Palabras con más dificultad</h3>
+                  <p class="text-xs text-slate-500">Ordenadas de mayor a menor porcentaje de error para comentar en clase</p>
+                </div>
+              </div>
+              <div id="board-missed-words-report" class="space-y-2.5">
+                <!-- Lista de palabras falladas -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUMNA DERECHA (4 COLS): TERMÓMETRO GRAMATICAL + QR COMPACTO -->
+        <aside class="lg:col-span-4 space-y-5">
+          <!-- Panel de Porcentaje de Acierto por Categoría -->
+          <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-1">
+              <h3 class="text-base font-bold text-slate-900">📊 Termómetro de la Clase</h3>
+              <span class="text-[11px] font-semibold text-slate-400">En directo</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">Porcentaje de acierto acumulado por categoría gramatical:</p>
+
+            <div id="board-category-stats" class="space-y-4">
+              <!-- Barras de las 4 categorías -->
+            </div>
+
+            <div id="board-pedagogical-tip" class="mt-5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed">
+              💡 Cuando los alumnos empiecen a responder, aquí verás qué concepto necesita repaso mañana.
+            </div>
+          </div>
+
+          <!-- Tarjeta QR Compacta (visible durante partida activa para alumnos rezagados) -->
+          <div id="board-mini-qr-card" class="hidden bg-white rounded-3xl p-4 border border-slate-200 shadow-sm flex items-center gap-4">
+            <div id="board-qr-small" class="w-20 h-20 shrink-0 bg-slate-50 rounded-xl flex items-center justify-center overflow-hidden border border-slate-200"></div>
+            <div>
+              <div class="text-xs font-bold text-indigo-600 uppercase">¿Alguien llegó tarde?</div>
+              <div class="text-sm font-bold text-slate-800">PIN de sala: <span id="mini-pin-text" class="font-mono text-indigo-700">----</span></div>
+              <p class="text-xs text-slate-500 mt-0.5">Escanea el QR o entra desde Mando Alumno para unirte en marcha.</p>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VISTA 2: MANDO DEL ALUMNO (ORDENADOR / TABLET DEL ESTUDIANTE)         -->
+    <!-- ===================================================================== -->
+    <section id="view-play" class="hidden max-w-2xl mx-auto">
+
+      <!-- PASO A: PANTALLA DE ACCESO DEL ALUMNO -->
+      <div id="student-join-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="text-center space-y-1.5">
+          <span class="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold">Mando del Jugador</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Entra en la partida</h2>
+          <p class="text-sm text-slate-500">Mira la Pizarra Digital, introduce el PIN y elige tu equipo.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="student-pin-input" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">PIN de la Pizarra</label>
+            <input type="text" id="student-pin-input" maxlength="4" inputmode="numeric" placeholder="Ej. 4829"
+              class="w-full text-center font-mono text-2xl font-bold tracking-widest bg-slate-50 border-2 border-slate-200 focus:border-indigo-500 focus:bg-white rounded-2xl px-4 py-3 outline-none transition" />
+          </div>
+          <div>
+            <label for="student-name-input" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Tu Nombre</label>
+            <input type="text" id="student-name-input" maxlength="20" placeholder="Ej. Lucía G."
+              class="w-full text-lg font-semibold bg-slate-50 border-2 border-slate-200 focus:border-indigo-500 focus:bg-white rounded-2xl px-4 py-3 outline-none transition" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Elige tu Equipo</label>
+          <div id="student-team-selector" class="grid grid-cols-2 gap-3">
+            <!-- 4 botones grandes de equipo generados por JS -->
+          </div>
+        </div>
+
+        <button onclick="studentJoinGame()" class="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-display font-bold text-lg shadow-lg shadow-indigo-200 transition active:scale-[0.99]">
+          🚀 ¡Entrar a jugar!
+        </button>
+      </div>
+
+      <!-- PASO B: ZONA DE JUEGO DEL ALUMNO (YA CONECTADO) -->
+      <div id="student-game-area" class="hidden space-y-4">
+        <!-- Cabecera del Jugador -->
+        <div id="student-header-bar" class="bg-white rounded-2xl p-3.5 sm:px-5 border border-slate-200 shadow-sm flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div id="student-avatar-badge" class="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-sm">
+              🦊
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span id="student-display-name" class="font-bold text-slate-900">Alumno</span>
+                <span id="student-team-pill" class="text-[11px] font-bold px-2 py-0.5 rounded-full">Equipo</span>
+              </div>
+              <div class="text-xs text-slate-500">Sala PIN: <span id="student-connected-pin" class="font-mono font-bold">----</span></div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-[10px] uppercase font-bold text-slate-400">Tus puntos</div>
+              <div id="student-personal-score" class="font-display text-xl font-bold text-indigo-600">0 pts</div>
+            </div>
+            <button onclick="studentLeaveGame()" class="text-xs text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-xl hover:bg-rose-50 transition" title="Salir de la sala">
+              Salir
+            </button>
+          </div>
+        </div>
+
+        <!-- SUBESTADO 1: ESPERANDO AL PROFESOR -->
+        <div id="student-waiting-screen" class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center space-y-4">
+          <div id="student-waiting-emoji" class="text-6xl animate-bounce-slow">⏳</div>
+          <h3 id="student-waiting-title" class="text-2xl font-bold text-slate-900">¡Ya estás dentro!</h3>
+          <p id="student-waiting-desc" class="text-sm text-slate-500 max-w-md mx-auto">
+            Atento a la Pizarra Digital. En cuanto el profe pulse <strong>Empezar</strong> aparecerá el primer sustantivo.
+          </p>
+        </div>
+
+        <!-- SUBESTADO 2: CLASIFICANDO EL SUSTANTIVO ACTUAL -->
+        <div id="student-question-screen" class="hidden space-y-4">
+          <!-- Palabra a analizar -->
+          <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm text-center">
+            <span id="student-round-badge" class="inline-block px-3 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold mb-1">
+              Palabra 1
+            </span>
+            <h2 id="student-target-word" class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+              ---
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Marca una opción en cada una de las 4 filas (usa <strong>No procede</strong> si no se aplica)</p>
+          </div>
+
+          <!-- 4 Filas de Botones Tipo Píldora -->
+          <div id="student-pill-rows" class="space-y-3">
+            <!-- Se generan dinámicamente las 4 filas de píldoras -->
+          </div>
+
+          <!-- Botón de Envío -->
+          <button onclick="studentSubmitAnswer()" id="btn-student-submit" disabled
+            class="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:text-slate-500 text-white font-display font-bold text-lg shadow-lg shadow-emerald-200 disabled:shadow-none transition active:scale-[0.99]">
+            Selecciona las 4 filas para enviar
+          </button>
+        </div>
+
+        <!-- SUBESTADO 3: RESPUESTA ENVIADA (ESPERANDO REVELACIÓN) -->
+        <div id="student-submitted-screen" class="hidden bg-white rounded-3xl p-7 border border-slate-200 shadow-sm text-center space-y-4">
+          <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto animate-pop">
+            📨
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900">¡Respuesta enviada!</h3>
+          <p class="text-sm text-slate-500">Esperando a que el profesor revele la solución en la pizarra...</p>
+          <div id="student-submitted-summary" class="flex flex-wrap justify-center gap-2 pt-2">
+            <!-- Resumen de lo que marcó el alumno -->
+          </div>
+        </div>
+
+        <!-- SUBESTADO 4: FEEDBACK AL REVELAR -->
+        <div id="student-feedback-screen" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5 animate-pop">
+          <div id="student-feedback-banner" class="p-4 rounded-2xl text-center">
+            <div id="student-feedback-icon" class="text-4xl mb-1">🎉</div>
+            <h3 id="student-feedback-title" class="text-xl font-bold">¡Buen trabajo!</h3>
+            <p id="student-feedback-points" class="text-sm font-bold mt-0.5">+750 puntos para tu equipo</p>
+          </div>
+
+          <div id="student-feedback-breakdown" class="space-y-2.5">
+            <!-- Comparativa fila por fila -->
+          </div>
+
+          <p class="text-center text-xs text-slate-400">Prepárate para la siguiente palabra...</p>
+        </div>
+
+        <!-- SUBESTADO 5: FIN DE PARTIDA -->
+        <div id="student-finished-screen" class="hidden bg-white rounded-3xl p-7 border border-slate-200 shadow-sm text-center space-y-4">
+          <div class="text-5xl">🏅</div>
+          <h3 class="text-2xl font-bold text-slate-900">¡Partida terminada!</h3>
+          <p class="text-sm text-slate-600">Has conseguido un total de <strong id="student-final-score" class="text-indigo-600 text-lg">0 pts</strong> para el equipo <strong id="student-final-team">Equipo</strong>.</p>
+          <p class="text-xs text-slate-500">Mira la Pizarra Digital para ver el podio y las palabras repasadas.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VISTA 3: EDITOR DEL PROFESOR (SIN CÓDIGO, CON REGLAS GRAMATICALES)    -->
+    <!-- ===================================================================== -->
+    <section id="view-editor" class="hidden space-y-5">
+      <!-- Cabecera del Editor -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">✏️ Editor de Desafíos y Contenidos</h2>
+          <p class="text-xs sm:text-sm text-slate-500">Crea tus propios bancos de sustantivos. El sistema aplica automáticamente <strong>"No procede"</strong> en abstractos y propios, pero tú tienes siempre la última palabra.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="exportChallengesJSON()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition">
+            <span>⬇️</span>
+            <span>Exportar JSON</span>
+          </button>
+          <label class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition">
+            <span>⬆️</span>
+            <span>Importar JSON</span>
+            <input type="file" id="import-json-input" accept=".json" onchange="importChallengesJSON(event)" class="hidden" />
+          </label>
+          <button onclick="confirmRestoreDefaults()" class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition">
+            Restaurar ejemplos
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Columna Izquierda: Lista de Desafíos (4 cols) -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-base font-bold text-slate-900">📚 Mis Desafíos (<span id="editor-challenges-count">0</span>)</h3>
+
+            <!-- Formulario Nuevo Desafío -->
+            <div class="flex gap-2">
+              <input type="text" id="new-challenge-title" placeholder="Ej. Desafío 5: Repaso Tema 3"
+                class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+              <button onclick="createNewChallenge()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shrink-0 transition">
+                + Crear
+              </button>
+            </div>
+
+            <!-- Listado de Desafíos -->
+            <div id="editor-challenge-list" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+              <!-- Tarjetas de desafíos -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Formulario de Palabra y Listado (8 cols) -->
+        <div class="lg:col-span-8 space-y-5">
+          <!-- Caja Formulario Añadir / Editar Palabra -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">Desafío:</span>
+                <input type="text" id="editor-active-challenge-title" onchange="renameActiveChallenge(this.value)"
+                  class="font-display font-bold text-lg text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none flex-1 px-1" />
+              </div>
+              <button onclick="confirmDeleteChallenge()" id="btn-delete-challenge" class="text-xs text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-xl font-semibold transition">
+                🗑️ Eliminar desafío
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <h4 id="editor-form-mode-title" class="text-sm font-bold text-slate-800">➕ Añadir nuevo sustantivo al desafío</h4>
+              <button onclick="resetWordForm()" id="btn-cancel-edit-word" class="hidden text-xs text-slate-500 hover:text-slate-800 underline">
+                Cancelar edición
+              </button>
+            </div>
+
+            <input type="hidden" id="editor-edit-word-index" value="-1" />
+
+            <!-- Input Palabra + 4 Desplegables -->
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+              <div class="sm:col-span-1">
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Sustantivo</label>
+                <input type="text" id="editor-word-input" oninput="updateEditorPreview()" placeholder="ej. arena"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">1. Común / Propio</label>
+                <select id="editor-cat-0" onchange="handleEditorCategoryChange(0)"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                  <option value="Común">Común</option>
+                  <option value="Propio">Propio</option>
+                  <option value="No procede">No procede</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">2. Concreto / Abstracto</label>
+                <select id="editor-cat-1" onchange="handleEditorCategoryChange(1)"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                  <option value="Concreto">Concreto</option>
+                  <option value="Abstracto">Abstracto</option>
+                  <option value="No procede">No procede</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">3. Contable / No cont.</label>
+                <select id="editor-cat-2" onchange="updateEditorPreview()"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                  <option value="Contable">Contable</option>
+                  <option value="No contable">No contable</option>
+                  <option value="No procede">No procede</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">4. Indiv. / Colectivo</label>
+                <select id="editor-cat-3" onchange="updateEditorPreview()"
+                  class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                  <option value="Individual">Individual</option>
+                  <option value="Colectivo">Colectivo</option>
+                  <option value="No procede">No procede</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Aviso de Sugerencia Automática + Vista Previa -->
+            <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div class="space-y-1">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Vista previa de la solución</div>
+                <div id="editor-solution-preview" class="text-sm font-semibold text-slate-800">
+                  <span class="text-indigo-700 font-bold">palabra</span>: Común · Concreto · Contable · Individual
+                </div>
+                <div id="editor-auto-hint" class="hidden text-xs text-amber-700 font-medium">
+                  ✨ Regla aplicada automáticamente (puedes cambiar cualquier desplegable manualmente).
+                </div>
+              </div>
+
+              <button onclick="saveWordToChallenge()" id="btn-save-word" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition">
+                Guardar palabra
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla / Lista de Palabras del Desafío Seleccionado -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-base font-bold text-slate-900">Palabras en este desafío (<span id="editor-words-count">0</span>)</h4>
+              <span class="text-xs text-slate-400">Los cambios se guardan automáticamente</span>
+            </div>
+
+            <div id="editor-words-list" class="space-y-2">
+              <!-- Filas de palabras -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== TOASTS Y MODALES PERSONALIZADOS ==================== -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Modal de Confirmación (Reemplaza a confirm() nativo) -->
+  <div id="custom-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-pop">
+      <h3 id="modal-title" class="text-xl font-bold text-slate-900">Confirmar acción</h3>
+      <p id="modal-message" class="text-sm text-slate-600">¿Estás seguro?</p>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeCustomModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold">
+          Cancelar
+        </button>
+        <button id="modal-confirm-btn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LÓGICA DE LA APLICACIÓN ==================== -->
+  <script>
+    /**
+     * =========================================================================
+     * 1. CONFIGURACIÓN Y CONSTANTES GRAMATICALES
+     * =========================================================================
+     */
+    const STORAGE_KEY_CHALLENGES = 'sustantivo_quest_challenges_v1';
+    const STORAGE_KEY_BOARD_PIN = 'sustantivo_quest_board_pin_v1';
+    const MQTT_BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
+    const MQTT_TOPIC_PREFIX = 'sustantivo-quest/6primaria/v1';
+
+    // Definición de los 4 equipos con sus animales y paleta cromática
+    const TEAMS = [
+      {
+        id: 'zorro',
+        name: 'Zorro Rojo',
+        shortName: 'Zorro',
+        emoji: '🦊',
+        bgClass: 'bg-rose-500',
+        lightBg: 'bg-rose-50',
+        borderClass: 'border-rose-300',
+        textClass: 'text-rose-700',
+        ringClass: 'ring-rose-500'
+      },
+      {
+        id: 'tortuga',
+        name: 'Tortuga Verde',
+        shortName: 'Tortuga',
+        emoji: '🐢',
+        bgClass: 'bg-emerald-500',
+        lightBg: 'bg-emerald-50',
+        borderClass: 'border-emerald-300',
+        textClass: 'text-emerald-700',
+        ringClass: 'ring-emerald-500'
+      },
+      {
+        id: 'buho',
+        name: 'Búho Azul',
+        shortName: 'Búho',
+        emoji: '🦉',
+        bgClass: 'bg-blue-500',
+        lightBg: 'bg-blue-50',
+        borderClass: 'border-blue-300',
+        textClass: 'text-blue-700',
+        ringClass: 'ring-blue-500'
+      },
+      {
+        id: 'leon',
+        name: 'León Amarillo',
+        shortName: 'León',
+        emoji: '🦁',
+        bgClass: 'bg-amber-500',
+        lightBg: 'bg-amber-50',
+        borderClass: 'border-amber-300',
+        textClass: 'text-amber-800',
+        ringClass: 'ring-amber-500'
+      }
+    ];
+
+    // Definición de las 4 filas de categorías gramaticales
+    const CATEGORIES = [
+      { index: 0, label: 'Común / Propio', options: ['Común', 'Propio', 'No procede'] },
+      { index: 1, label: 'Concreto / Abstracto', options: ['Concreto', 'Abstracto', 'No procede'] },
+      { index: 2, label: 'Contable / No contable', options: ['Contable', 'No contable', 'No procede'] },
+      { index: 3, label: 'Individual / Colectivo', options: ['Individual', 'Colectivo', 'No procede'] }
+    ];
+
+    // 4 Desafíos precargados y corregidos según los criterios de 6.º de Primaria
+    const DEFAULT_CHALLENGES = [
+      {
+        id: 'desafio-1',
+        title: 'Desafío 1 · Primeros pasos (Sustantivos clave)',
+        words: [
+          { word: 'lápiz', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
+          { word: 'arena', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'alegría', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
+          { word: 'Madrid', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
+          { word: 'rebaño', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
+          { word: 'libro', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
+          { word: 'agua', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'miedo', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
+          { word: 'Ebro', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
+          { word: 'jauría', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] }
+        ]
+      },
+      {
+        id: 'desafio-2',
+        title: 'Desafío 2 · Naturaleza y Geografía',
+        words: [
+          { word: 'montaña', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
+          { word: 'bosque', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
+          { word: 'nieve', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'Teide', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
+          { word: 'libertad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
+          { word: 'enjambre', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
+          { word: 'aire', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'Guadalquivir', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
+          { word: 'árbol', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
+          { word: 'paz', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] }
+        ]
+      },
+      {
+        id: 'desafio-3',
+        title: 'Desafío 3 · En la cocina y la vida diaria',
+        words: [
+          { word: 'azúcar', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'manzana', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
+          { word: 'vajilla', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
+          { word: 'sal', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'honestidad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
+          { word: 'leche', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'cuchara', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
+          { word: 'Barcelona', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
+          { word: 'harina', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'paciencia', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] }
+        ]
+      },
+      {
+        id: 'desafio-4',
+        title: 'Desafío 4 · Nivel Experto (Retos de 6.º)',
+        words: [
+          { word: 'archipiélago', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
+          { word: 'felicidad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
+          { word: 'oro', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
+          { word: 'orquesta', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
+          { word: 'amistad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
+          { word: 'constelación', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
+          { word: 'Atlántico', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
+          { word: 'flota', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
+          { word: 'justicia', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
+          { word: 'alameda', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] }
+        ]
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * 2. ESTADO GLOBAL DE LA APLICACIÓN
+     * =========================================================================
+     */
+    let challenges = [];
+    let currentView = 'board';
+    let soundEnabled = true;
+
+    // Estado de la Pizarra Digital (Host)
+    let boardState = {
+      pin: '',
+      challengeId: 'desafio-1',
+      phase: 'LOBBY', // 'LOBBY' | 'QUESTION' | 'REVEAL' | 'FINISHED'
+      wordIndex: 0,
+      questionStartTime: 0,
+      players: {}, // { playerId: { id, name, teamId, score, isBot } }
+      roundAnswers: {}, // { playerId: { cats: [4 strings], timestamp, pointsEarned, rowResults: [4 bools] } }
+      categoryStats: [
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 }
+      ],
+      wordHistoryStats: [] // [{ word, cats, totalAttempts, totalErrors, categoryErrors: [0,0,0,0] }]
+    };
+    let boardTimerInterval = null;
+
+    // Estado del Mando del Alumno (Client)
+    let studentState = {
+      playerId: 'stu_' + Math.random().toString(36).substring(2, 10),
+      joined: false,
+      pin: '',
+      name: '',
+      teamId: 'zorro',
+      score: 0,
+      selectedCats: [null, null, null, null],
+      submittedWordIndex: -1,
+      lastFeedback: null
+    };
+
+    // Estado del Editor del Profesor
+    let editorState = {
+      selectedChallengeId: 'desafio-1'
+    };
+
+    // Motores de sincronización en tiempo real
+    let broadcastChannel = null;
+    let mqttClient = null;
+    let mqttConnected = false;
+    let subscribedPins = new Set();
+
+    /**
+     * =========================================================================
+     * 3. EFECTOS DE SONIDO SINTETIZADOS (TONE.JS)
+     * =========================================================================
+     */
+    function playTone(type) {
+      if (!soundEnabled || typeof Tone === 'undefined') return;
+      try {
+        if (Tone.context.state !== 'running') {
+          Tone.start();
+        }
+        const synth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: 'triangle' },
+          envelope: { attack: 0.02, decay: 0.15, sustain: 0.1, release: 0.4 }
+        }).toDestination();
+        synth.volume.value = -10;
+
+        const now = Tone.now();
+        if (type === 'join') {
+          synth.triggerAttackRelease('C5', '16n', now);
+          synth.triggerAttackRelease('E5', '16n', now + 0.08);
+        } else if (type === 'start') {
+          synth.triggerAttackRelease(['C4', 'E4', 'G4'], '8n', now);
+          synth.triggerAttackRelease(['C5', 'E5', 'G5'], '4n', now + 0.16);
+        } else if (type === 'submit') {
+          synth.triggerAttackRelease('G5', '16n', now);
+        } else if (type === 'reveal') {
+          synth.triggerAttackRelease('E4', '16n', now);
+          synth.triggerAttackRelease('G4', '16n', now + 0.1);
+          synth.triggerAttackRelease('C5', '8n', now + 0.2);
+        } else if (type === 'finish') {
+          synth.triggerAttackRelease(['C4', 'E4', 'G4', 'C5'], '4n', now);
+          synth.triggerAttackRelease(['D4', 'F4', 'A4', 'D5'], '4n', now + 0.25);
+          synth.triggerAttackRelease(['E4', 'G4', 'B4', 'E5'], '2n', now + 0.5);
+        }
+      } catch (e) {
+        // Ignorar errores de audio si el navegador bloquea autoplay
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('btn-sound').textContent = soundEnabled ? '🔊' : '🔇';
+      showToast(soundEnabled ? 'Sonido activado' : 'Sonido silenciado', 'info');
+    }
+
+    /**
+     * =========================================================================
+     * 4. PERSISTENCIA DE CONTENIDOS (LOCALSTORAGE)
+     * =========================================================================
+     */
+    function loadChallengesFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_CHALLENGES);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            challenges = parsed;
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Error leyendo desafíos de localStorage, cargando predeterminados.', e);
+      }
+      challenges = JSON.parse(JSON.stringify(DEFAULT_CHALLENGES));
+      saveChallengesToStorage();
+    }
+
+    function saveChallengesToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY_CHALLENGES, JSON.stringify(challenges));
+      } catch (e) {
+        showToast('No se pudo guardar en el navegador (espacio lleno)', 'error');
+      }
+    }
+
+    function getChallengeById(id) {
+      return challenges.find(c => c.id === id) || challenges[0];
+    }
+
+    /**
+     * =========================================================================
+     * 5. SINCRONIZACIÓN EN TIEMPO REAL (MQTT + BROADCASTCHANNEL)
+     * =========================================================================
+     */
+    function initSyncEngine() {
+      // 1. Canal local entre pestañas del mismo navegador (latencia 0ms, funciona offline)
+      if ('BroadcastChannel' in window) {
+        broadcastChannel = new BroadcastChannel('sustantivo_quest_classroom_bus');
+        broadcastChannel.onmessage = (event) => {
+          handleIncomingSyncMessage(event.data);
+        };
+      }
+
+      // 2. Cliente MQTT sobre WebSockets seguros para ordenadores distintos en el aula
+      if (typeof mqtt !== 'undefined') {
+        try {
+          const clientId = 'sq_web_' + Math.random().toString(16).substring(2, 10);
+          mqttClient = mqtt.connect(MQTT_BROKER_URL, {
+            clientId,
+            clean: true,
+            connectTimeout: 8000,
+            reconnectPeriod: 3000
+          });
+
+          mqttClient.on('connect', () => {
+            mqttConnected = true;
+            updateSyncStatusUI(true);
+            // Suscribir al PIN de la pizarra y, si el alumno tiene uno, al suyo
+            subscribeToPinTopic(boardState.pin);
+            if (studentState.pin) {
+              subscribeToPinTopic(studentState.pin);
+            }
+          });
+
+          mqttClient.on('message', (topic, payload) => {
+            try {
+              const msg = JSON.parse(payload.toString());
+              handleIncomingSyncMessage(msg);
+            } catch (err) {
+              // Ignorar paquetes malformados
+            }
+          });
+
+          mqttClient.on('offline', () => {
+            mqttConnected = false;
+            updateSyncStatusUI(false);
+          });
+
+          mqttClient.on('error', () => {
+            mqttConnected = false;
+            updateSyncStatusUI(false);
+          });
+        } catch (e) {
+          updateSyncStatusUI(false);
+        }
+      } else {
+        updateSyncStatusUI(false);
+      }
+    }
+
+    function subscribeToPinTopic(pin) {
+      if (!pin || !mqttClient || !mqttConnected) return;
+      if (subscribedPins.has(pin)) return;
+      mqttClient.subscribe(`${MQTT_TOPIC_PREFIX}/${pin}`, { qos: 0 });
+      subscribedPins.add(pin);
+    }
+
+    function updateSyncStatusUI(isOnline) {
+      const badge = document.getElementById('sync-status-badge');
+      const dot = document.getElementById('sync-dot');
+      const label = document.getElementById('sync-label');
+      if (isOnline) {
+        badge.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        label.textContent = 'En línea (Aula)';
+      } else {
+        badge.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500';
+        label.textContent = 'Modo Local';
+      }
+    }
+
+    function publishSyncMessage(pin, type, payload) {
+      const envelope = {
+        pin: String(pin),
+        type,
+        payload,
+        senderId: studentState.playerId,
+        ts: Date.now()
+      };
+
+      // Enviar por BroadcastChannel (otras pestañas del mismo navegador)
+      if (broadcastChannel) {
+        broadcastChannel.postMessage(envelope);
+      }
+
+      // Enviar por MQTT (otros ordenadores de clase)
+      if (mqttClient && mqttConnected && pin) {
+        subscribeToPinTopic(pin);
+        mqttClient.publish(`${MQTT_TOPIC_PREFIX}/${pin}`, JSON.stringify(envelope), { qos: 0 });
+      }
+    }
+
+    function handleIncomingSyncMessage(msg) {
+      if (!msg || !msg.pin || !msg.type) return;
+
+      // A) Mensajes dirigidos a la Pizarra Digital (Host de ese PIN)
+      if (msg.pin === boardState.pin) {
+        if (msg.type === 'STUDENT_JOIN') {
+          const p = msg.payload;
+          const isNew = !boardState.players[p.id];
+          boardState.players[p.id] = {
+            id: p.id,
+            name: p.name,
+            teamId: p.teamId,
+            score: boardState.players[p.id] ? boardState.players[p.id].score : 0,
+            isBot: false
+          };
+          if (isNew) {
+            playTone('join');
+            showToast(`${p.name} se unió al equipo ${getTeamById(p.teamId).shortName}`, 'success');
+          }
+          renderBoard();
+          broadcastBoardState();
+        } else if (msg.type === 'STUDENT_LEAVE') {
+          delete boardState.players[msg.payload.id];
+          delete boardState.roundAnswers[msg.payload.id];
+          renderBoard();
+          broadcastBoardState();
+        } else if (msg.type === 'STUDENT_ANSWER') {
+          if (boardState.phase === 'QUESTION' && msg.payload.wordIndex === boardState.wordIndex) {
+            const pId = msg.payload.playerId;
+            // Si el alumno no estaba registrado (ej. reconexión), lo registramos
+            if (!boardState.players[pId] && msg.payload.playerMeta) {
+              boardState.players[pId] = {
+                id: pId,
+                name: msg.payload.playerMeta.name,
+                teamId: msg.payload.playerMeta.teamId,
+                score: 0,
+                isBot: false
+              };
+            }
+            if (!boardState.roundAnswers[pId]) {
+              boardState.roundAnswers[pId] = {
+                cats: msg.payload.cats,
+                timestamp: Date.now()
+              };
+              playTone('submit');
+              renderBoard();
+              // Si todos los jugadores conectados han respondido, avisar al profe
+              const totalPlayers = Object.keys(boardState.players).length;
+              const totalAnswered = Object.keys(boardState.roundAnswers).length;
+              if (totalPlayers > 0 && totalAnswered >= totalPlayers) {
+                showToast('¡Toda la clase ha respondido! Ya puedes pulsar Revelar.', 'info');
+              }
+            }
+          }
+        } else if (msg.type === 'REQUEST_BOARD_STATE') {
+          broadcastBoardState();
+        }
+      }
+
+      // B) Mensajes emitidos por la Pizarra hacia los Alumnos conectados a ese PIN
+      if (studentState.joined && msg.pin === studentState.pin && msg.type === 'BOARD_STATE') {
+        applyBoardStateToStudent(msg.payload);
+      }
+    }
+
+    function broadcastBoardState() {
+      const challenge = getChallengeById(boardState.challengeId);
+      const currentWordObj = challenge && challenge.words[boardState.wordIndex] ? challenge.words[boardState.wordIndex] : null;
+
+      // Construimos una vista segura del estado (sin enviar la solución hasta que phase === 'REVEAL')
+      const publicState = {
+        pin: boardState.pin,
+        challengeTitle: challenge ? challenge.title : '',
+        phase: boardState.phase,
+        wordIndex: boardState.wordIndex,
+        totalWords: challenge ? challenge.words.length : 0,
+        currentWord: currentWordObj ? currentWordObj.word : '',
+        revealedSolution: boardState.phase === 'REVEAL' && currentWordObj ? currentWordObj.cats : null,
+        players: boardState.players,
+        roundAnswers: boardState.phase === 'REVEAL' ? boardState.roundAnswers : {}
+      };
+
+      publishSyncMessage(boardState.pin, 'BOARD_STATE', publicState);
+    }
+
+    /**
+     * =========================================================================
+     * 6. NAVEGACIÓN ENTRE VISTAS
+     * =========================================================================
+     */
+    function switchView(viewName) {
+      currentView = viewName;
+      ['board', 'play', 'editor'].forEach(v => {
+        const section = document.getElementById(`view-${v}`);
+        const tab = document.getElementById(`nav-${v}`);
+        if (v === viewName) {
+          section.classList.remove('hidden');
+          tab.className = 'nav-tab flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-indigo-700 shadow-xs transition-all';
+        } else {
+          section.classList.add('hidden');
+          tab.className = 'nav-tab flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all';
+        }
+      });
+
+      if (viewName === 'board') {
+        renderBoard();
+      } else if (viewName === 'play') {
+        renderStudentView();
+      } else if (viewName === 'editor') {
+        renderEditor();
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 7. LÓGICA DE LA PIZARRA DIGITAL (HOST)
+     * =========================================================================
+     */
+    function initBoard() {
+      let savedPin = localStorage.getItem(STORAGE_KEY_BOARD_PIN);
+      if (!savedPin || !/^\d{4}$/.test(savedPin)) {
+        savedPin = generateRandomPin();
+        localStorage.setItem(STORAGE_KEY_BOARD_PIN, savedPin);
+      }
+      boardState.pin = savedPin;
+      boardState.challengeId = challenges[0].id;
+      populateBoardChallengeSelect();
+      renderBoardQRCodes();
+      renderBoard();
+    }
+
+    function generateRandomPin() {
+      return String(Math.floor(1000 + Math.random() * 9000));
+    }
+
+    function regeneratePin() {
+      const newPin = generateRandomPin();
+      boardState.pin = newPin;
+      localStorage.setItem(STORAGE_KEY_BOARD_PIN, newPin);
+      subscribeToPinTopic(newPin);
+      resetMatchState(false);
+      renderBoardQRCodes();
+      renderBoard();
+      showToast(`Nuevo PIN de sala generado: ${newPin}`, 'info');
+    }
+
+    function getJoinUrl() {
+      const url = new URL(window.location.href);
+      url.searchParams.set('pin', boardState.pin);
+      url.searchParams.set('view', 'play');
+      return url.toString();
+    }
+
+    function renderBoardQRCodes() {
+      const joinUrl = getJoinUrl();
+      const largeEl = document.getElementById('board-qr-large');
+      const smallEl = document.getElementById('board-qr-small');
+
+      if (window.location.protocol === 'file:') {
+        document.getElementById('local-file-warning').classList.remove('hidden');
+      }
+
+      [ { el: largeEl, size: 148 }, { el: smallEl, size: 74 } ].forEach(item => {
+        item.el.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+          try {
+            new QRCode(item.el, {
+              text: joinUrl,
+              width: item.size,
+              height: item.size,
+              colorDark: '#1e1b4b',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.M
+            });
+          } catch (e) {
+            item.el.innerHTML = `<span class="text-xs font-mono font-bold text-indigo-700 p-2 text-center">PIN ${boardState.pin}</span>`;
+          }
+        } else {
+          item.el.innerHTML = `<span class="text-xs font-mono font-bold text-indigo-700 p-2 text-center">PIN ${boardState.pin}</span>`;
+        }
+      });
+    }
+
+    function copyJoinLink() {
+      const joinUrl = getJoinUrl();
+      // Uso compatible con iFrames mediante textarea temporal y execCommand('copy')
+      const tempInput = document.createElement('textarea');
+      tempInput.value = joinUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        showToast('Enlace con PIN copiado al portapapeles', 'success');
+      } catch (err) {
+        showToast(`Comparte el PIN ${boardState.pin} con tus alumnos`, 'info');
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    function populateBoardChallengeSelect() {
+      const select = document.getElementById('board-challenge-select');
+      select.innerHTML = challenges.map(c =>
+        `<option value="${c.id}" ${c.id === boardState.challengeId ? 'selected' : ''}>${escapeHtml(c.title)} (${c.words.length} palabras)</option>`
+      ).join('');
+    }
+
+    function selectBoardChallenge(challengeId) {
+      boardState.challengeId = challengeId;
+      resetMatchState(true);
+      showToast('Desafío seleccionado', 'info');
+    }
+
+    function addDemoBots() {
+      const bots = [
+        { id: 'bot_1', name: 'Sofía (Bot)', teamId: 'zorro', score: 0, isBot: true },
+        { id: 'bot_2', name: 'Mateo (Bot)', teamId: 'tortuga', score: 0, isBot: true },
+        { id: 'bot_3', name: 'Valeria (Bot)', teamId: 'buho', score: 0, isBot: true },
+        { id: 'bot_4', name: 'Hugo (Bot)', teamId: 'leon', score: 0, isBot: true }
+      ];
+      bots.forEach(b => {
+        boardState.players[b.id] = b;
+      });
+      playTone('join');
+      renderBoard();
+      broadcastBoardState();
+      showToast('4 alumnos de prueba añadidos a los equipos', 'success');
+    }
+
+    function simulateBotAnswersForCurrentWord() {
+      const challenge = getChallengeById(boardState.challengeId);
+      const wordObj = challenge.words[boardState.wordIndex];
+      if (!wordObj) return;
+
+      Object.values(boardState.players).forEach(p => {
+        if (p.isBot && !boardState.roundAnswers[p.id]) {
+          // Los bots aciertan ~75% de cada categoría para generar estadísticas realistas
+          const botCats = wordObj.cats.map((correctOpt, idx) => {
+            if (Math.random() < 0.78) return correctOpt;
+            const others = CATEGORIES[idx].options.filter(o => o !== correctOpt);
+            return others[Math.floor(Math.random() * others.length)];
+          });
+          boardState.roundAnswers[p.id] = {
+            cats: botCats,
+            timestamp: Date.now() + Math.floor(Math.random() * 4000)
+          };
+        }
+      });
+    }
+
+    function boardStartGame() {
+      const challenge = getChallengeById(boardState.challengeId);
+      if (!challenge || challenge.words.length === 0) {
+        showToast('Este desafío no tiene palabras. Añade alguna en el Editor.', 'error');
+        return;
+      }
+
+      boardState.phase = 'QUESTION';
+      boardState.wordIndex = 0;
+      boardState.roundAnswers = {};
+      boardState.questionStartTime = Date.now();
+      boardState.categoryStats = [
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 }
+      ];
+      boardState.wordHistoryStats = [];
+
+      // Reiniciar puntos de los jugadores conectados
+      Object.values(boardState.players).forEach(p => { p.score = 0; });
+
+      simulateBotAnswersForCurrentWord();
+      startBoardTimer();
+      playTone('start');
+      renderBoard();
+      broadcastBoardState();
+    }
+
+    function boardRevealAnswer() {
+      if (boardState.phase !== 'QUESTION') return;
+      stopBoardTimer();
+
+      const challenge = getChallengeById(boardState.challengeId);
+      const wordObj = challenge.words[boardState.wordIndex];
+      const correctCats = wordObj.cats;
+
+      let wordAttempts = 0;
+      let wordTotalErrors = 0;
+      const wordCatErrors = [0, 0, 0, 0];
+
+      // Evaluar respuestas de cada alumno en esta ronda
+      Object.entries(boardState.roundAnswers).forEach(([playerId, ans]) => {
+        wordAttempts++;
+        let correctCount = 0;
+        const rowResults = [false, false, false, false];
+
+        for (let i = 0; i < 4; i++) {
+          boardState.categoryStats[i].total++;
+          if (ans.cats[i] === correctCats[i]) {
+            correctCount++;
+            rowResults[i] = true;
+            boardState.categoryStats[i].correct++;
+          } else {
+            wordTotalErrors++;
+            wordCatErrors[i]++;
+          }
+        }
+
+        // 250 puntos por casilla acertada + hasta 200 puntos de rapidez si hace pleno (4/4)
+        let pointsEarned = correctCount * 250;
+        if (correctCount === 4) {
+          const elapsedSec = Math.max(0, (ans.timestamp - boardState.questionStartTime) / 1000);
+          const speedBonus = Math.max(20, Math.round(200 - elapsedSec * 8));
+          pointsEarned += speedBonus;
+        }
+
+        ans.pointsEarned = pointsEarned;
+        ans.rowResults = rowResults;
+
+        if (boardState.players[playerId]) {
+          boardState.players[playerId].score += pointsEarned;
+        }
+      });
+
+      // Guardar métricas de esta palabra para el informe final
+      boardState.wordHistoryStats.push({
+        word: wordObj.word,
+        cats: [...correctCats],
+        totalAttempts: wordAttempts,
+        totalErrors: wordTotalErrors,
+        categoryErrors: wordCatErrors
+      });
+
+      boardState.phase = 'REVEAL';
+      playTone('reveal');
+      renderBoard();
+      broadcastBoardState();
+    }
+
+    function boardNextWord() {
+      const challenge = getChallengeById(boardState.challengeId);
+      if (boardState.wordIndex + 1 < challenge.words.length) {
+        boardState.wordIndex++;
+        boardState.phase = 'QUESTION';
+        boardState.roundAnswers = {};
+        boardState.questionStartTime = Date.now();
+        simulateBotAnswersForCurrentWord();
+        startBoardTimer();
+        playTone('start');
+      } else {
+        boardState.phase = 'FINISHED';
+        stopBoardTimer();
+        playTone('finish');
+      }
+      renderBoard();
+      broadcastBoardState();
+    }
+
+    function confirmResetMatch() {
+      openCustomModal(
+        'Reiniciar partida',
+        '¿Quieres volver a la sala de espera y poner los marcadores a cero? Los alumnos conectados seguirán dentro.',
+        () => resetMatchState(true)
+      );
+    }
+
+    function resetMatchState(keepPlayers) {
+      stopBoardTimer();
+      boardState.phase = 'LOBBY';
+      boardState.wordIndex = 0;
+      boardState.roundAnswers = {};
+      boardState.categoryStats = [
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 },
+        { correct: 0, total: 0 }
+      ];
+      boardState.wordHistoryStats = [];
+
+      if (keepPlayers) {
+        Object.values(boardState.players).forEach(p => { p.score = 0; });
+      } else {
+        boardState.players = {};
+      }
+      renderBoard();
+      broadcastBoardState();
+    }
+
+    function startBoardTimer() {
+      stopBoardTimer();
+      const badge = document.getElementById('board-timer-badge');
+      badge.textContent = '⏱️ 00s';
+      boardTimerInterval = setInterval(() => {
+        const sec = Math.floor((Date.now() - boardState.questionStartTime) / 1000);
+        badge.textContent = `⏱️ ${String(sec).padStart(2, '0')}s`;
+      }, 1000);
+    }
+
+    function stopBoardTimer() {
+      if (boardTimerInterval) {
+        clearInterval(boardTimerInterval);
+        boardTimerInterval = null;
+      }
+    }
+
+    /**
+     * Calcula la puntuación normalizada por equipo (media de puntos por miembro)
+     * para que un equipo de 5 compita en igualdad justa con un equipo de 4.
+     */
+    function computeTeamStandings() {
+      const challenge = getChallengeById(boardState.challengeId);
+      const totalWords = challenge ? challenge.words.length : 10;
+      const maxPossibleScore = Math.max(1000, totalWords * 1150);
+
+      return TEAMS.map(team => {
+        const members = Object.values(boardState.players).filter(p => p.teamId === team.id);
+        const rawSum = members.reduce((acc, m) => acc + (m.score || 0), 0);
+        const normalizedScore = members.length > 0 ? Math.round(rawSum / members.length) : 0;
+        const climbPercent = Math.min(92, Math.max(4, Math.round((normalizedScore / maxPossibleScore) * 90) + 4));
+
+        return {
+          ...team,
+          members,
+          memberCount: members.length,
+          score: normalizedScore,
+          climbPercent
+        };
+      });
+    }
+
+    function renderBoard() {
+      document.getElementById('board-pin-display').textContent = boardState.pin;
+      document.getElementById('lobby-pin-inline').textContent = boardState.pin;
+      document.getElementById('mini-pin-text').textContent = boardState.pin;
+
+      const btnStart = document.getElementById('btn-board-start');
+      const btnReveal = document.getElementById('btn-board-reveal');
+      const btnNext = document.getElementById('btn-board-next');
+
+      const lobbyPanel = document.getElementById('board-lobby-panel');
+      const activePanel = document.getElementById('board-active-panel');
+      const finishedPanel = document.getElementById('board-finished-panel');
+      const miniQrCard = document.getElementById('board-mini-qr-card');
+
+      // Gestión de visibilidad según fase
+      lobbyPanel.classList.toggle('hidden', boardState.phase !== 'LOBBY');
+      activePanel.classList.toggle('hidden', boardState.phase !== 'QUESTION' && boardState.phase !== 'REVEAL');
+      finishedPanel.classList.toggle('hidden', boardState.phase !== 'FINISHED');
+      miniQrCard.classList.toggle('hidden', boardState.phase === 'LOBBY');
+
+      btnStart.disabled = boardState.phase !== 'LOBBY';
+      btnReveal.disabled = boardState.phase !== 'QUESTION';
+      btnNext.disabled = boardState.phase !== 'REVEAL';
+
+      const challenge = getChallengeById(boardState.challengeId);
+      if (boardState.phase === 'REVEAL') {
+        const isLast = boardState.wordIndex + 1 >= challenge.words.length;
+        btnNext.innerHTML = isLast ? '<span>🏆</span><span>Ver Informe</span>' : '<span>⏭️</span><span>Siguiente</span>';
+      } else {
+        btnNext.innerHTML = '<span>⏭️</span><span>Siguiente</span>';
+      }
+
+      const standings = computeTeamStandings();
+
+      // 1. Renderizar Lobby
+      if (boardState.phase === 'LOBBY') {
+        const totalPlayers = Object.keys(boardState.players).length;
+        document.getElementById('lobby-total-players').textContent = totalPlayers;
+
+        const grid = document.getElementById('lobby-teams-grid');
+        grid.innerHTML = standings.map(t => `
+          <div class="rounded-2xl p-3.5 border ${t.borderClass} ${t.lightBg}">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">${t.emoji}</span>
+                <span class="font-bold text-sm ${t.textClass}">${t.shortName}</span>
+              </div>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-white ${t.textClass}">${t.memberCount}</span>
+            </div>
+            <div class="space-y-1 max-h-32 overflow-y-auto">
+              ${t.members.length === 0
+                ? '<p class="text-xs text-slate-400 italic">Sin jugadores aún</p>'
+                : t.members.map(m => `<div class="text-xs font-semibold bg-white/80 px-2.5 py-1 rounded-lg text-slate-700 truncate">• ${escapeHtml(m.name)}</div>`).join('')
+              }
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 2. Renderizar Pregunta / Revelar + Carrera Vertical
+      if (boardState.phase === 'QUESTION' || boardState.phase === 'REVEAL') {
+        const wordObj = challenge.words[boardState.wordIndex];
+        const totalPlayers = Object.keys(boardState.players).length;
+        const answeredCount = Object.keys(boardState.roundAnswers).length;
+
+        document.getElementById('board-word-counter').textContent = `Palabra ${boardState.wordIndex + 1} de ${challenge.words.length}`;
+        document.getElementById('board-answers-count').textContent = `✍️ ${answeredCount} / ${totalPlayers} respuestas`;
+        document.getElementById('board-current-word').textContent = wordObj ? wordObj.word : '---';
+
+        const revealBox = document.getElementById('board-reveal-solution');
+        if (boardState.phase === 'REVEAL' && wordObj) {
+          revealBox.classList.remove('hidden');
+          document.getElementById('board-solution-pills').innerHTML = wordObj.cats.map((val, idx) => {
+            const isNoProcede = val === 'No procede';
+            return `
+              <div class="p-2.5 rounded-2xl border text-center ${isNoProcede ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-emerald-50 border-emerald-200 text-emerald-900'}">
+                <div class="text-[10px] uppercase font-bold opacity-70">${CATEGORIES[idx].label.split('/')[0]}</div>
+                <div class="text-sm font-bold mt-0.5">${val}</div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          revealBox.classList.add('hidden');
+        }
+
+        // Renderizar Carriles Verticales de la Torre
+        const lanesEl = document.getElementById('board-race-lanes');
+        lanesEl.innerHTML = standings.map(t => `
+          <div class="flex flex-col items-center">
+            <!-- Torre vertical -->
+            <div class="w-full h-64 sm:h-72 rounded-2xl ${t.lightBg} border-2 ${t.borderClass} relative overflow-hidden flex flex-col justify-between p-2">
+              <!-- Peldaños decorativos -->
+              <div class="w-full border-b border-dashed border-slate-300/70 text-[10px] text-slate-400 text-right pr-1">🏁 Cima</div>
+              <div class="w-full border-b border-dashed border-slate-300/50"></div>
+              <div class="w-full border-b border-dashed border-slate-300/50"></div>
+              <div class="w-full border-b border-dashed border-slate-300/50"></div>
+              <div class="w-full"></div>
+
+              <!-- Mascota Escaladora -->
+              <div class="tower-climber absolute left-1/2 -translate-x-1/2 flex flex-col items-center" style="bottom: ${t.climbPercent}%">
+                <div class="px-2 py-0.5 rounded-full bg-white shadow-sm border border-slate-200 text-[11px] font-bold text-slate-800 mb-1 whitespace-nowrap">
+                  ${t.score} pts
+                </div>
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${t.bgClass} text-white flex items-center justify-center text-2xl sm:text-3xl shadow-md ring-4 ring-white">
+                  ${t.emoji}
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie del Carril -->
+            <div class="mt-2 text-center">
+              <div class="font-bold text-xs sm:text-sm ${t.textClass}">${t.shortName}</div>
+              <div class="text-[11px] text-slate-400">${t.memberCount} jug.</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 3. Renderizar Pantalla Final (Podio + Palabras Más Falladas)
+      if (boardState.phase === 'FINISHED') {
+        const sortedTeams = [...standings].sort((a, b) => b.score - a.score);
+        const medals = ['🥇 1.º', '🥈 2.º', '🥉 3.º', '4.º'];
+        document.getElementById('board-podium').innerHTML = sortedTeams.map((t, idx) => `
+          <div class="bg-white/15 backdrop-blur-xs rounded-2xl p-4 border border-white/20 flex flex-col items-center ${idx === 0 ? 'ring-2 ring-amber-300 bg-white/20' : ''}">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-200 mb-1">${medals[idx]}</span>
+            <div class="text-4xl my-1">${t.emoji}</div>
+            <div class="font-bold text-base">${t.shortName}</div>
+            <div class="font-display text-2xl font-bold text-amber-300 mt-1">${t.score} pts</div>
+            <div class="text-[11px] text-indigo-200 mt-0.5">${t.memberCount} participantes</div>
+          </div>
+        `).join('');
+
+        // Ordenar palabras por tasa de error descendente
+        const rankedWords = [...boardState.wordHistoryStats]
+          .map(w => {
+            const totalChecks = w.totalAttempts * 4;
+            const errorRate = totalChecks > 0 ? Math.round((w.totalErrors / totalChecks) * 100) : 0;
+            // Encontrar la categoría más fallada en esta palabra
+            let worstCatIdx = 0;
+            w.categoryErrors.forEach((err, i) => {
+              if (err > w.categoryErrors[worstCatIdx]) worstCatIdx = i;
+            });
+            return { ...w, errorRate, worstCatLabel: CATEGORIES[worstCatIdx].label, worstCatCount: w.categoryErrors[worstCatIdx] };
+          })
+          .sort((a, b) => b.errorRate - a.errorRate);
+
+        const reportEl = document.getElementById('board-missed-words-report');
+        if (rankedWords.length === 0 || rankedWords.every(w => w.totalAttempts === 0)) {
+          reportEl.innerHTML = '<p class="text-sm text-slate-500 italic">No se registraron respuestas de alumnos en esta partida.</p>';
+        } else {
+          reportEl.innerHTML = rankedWords.map(w => `
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-base text-slate-900">${escapeHtml(w.word)}</span>
+                  <span class="text-xs text-slate-500">(${w.cats.join(' · ')})</span>
+                </div>
+                ${w.worstCatCount > 0
+                  ? `<div class="text-xs text-rose-600 font-medium mt-0.5">Mayor duda en: <strong>${w.worstCatLabel}</strong> (${w.worstCatCount} fallos)</div>`
+                  : `<div class="text-xs text-emerald-600 font-medium mt-0.5">¡Pleno de aciertos en toda la clase!</div>`
+                }
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${w.errorRate >= 40 ? 'bg-rose-100 text-rose-700' : w.errorRate >= 15 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">
+                  ${w.errorRate}% fallo
+                </span>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      // 4. Renderizar Termómetro de Acierto por Categoría (siempre visible en barra lateral)
+      renderBoardCategoryStats();
+    }
+
+    function renderBoardCategoryStats() {
+      const container = document.getElementById('board-category-stats');
+      let lowestCat = null;
+      let lowestPct = 101;
+
+      container.innerHTML = CATEGORIES.map((cat, idx) => {
+        const stat = boardState.categoryStats[idx];
+        const hasData = stat.total > 0;
+        const pct = hasData ? Math.round((stat.correct / stat.total) * 100) : 0;
+
+        if (hasData && pct < lowestPct) {
+          lowestPct = pct;
+          lowestCat = cat.label;
+        }
+
+        let barColor = 'bg-slate-300';
+        let badgeColor = 'text-slate-500 bg-slate-100';
+        if (hasData) {
+          if (pct >= 75) {
+            barColor = 'bg-emerald-500';
+            badgeColor = 'text-emerald-700 bg-emerald-50';
+          } else if (pct >= 50) {
+            barColor = 'bg-amber-500';
+            badgeColor = 'text-amber-700 bg-amber-50';
+          } else {
+            barColor = 'bg-rose-500';
+            badgeColor = 'text-rose-700 bg-rose-50';
+          }
+        }
+
+        return `
+          <div>
+            <div class="flex items-center justify-between text-xs font-bold mb-1">
+              <span class="text-slate-700">${cat.label}</span>
+              <span class="px-2 py-0.5 rounded-full ${badgeColor}">${hasData ? pct + '%' : 'Sin datos'}</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full ${barColor} transition-all duration-500 rounded-full" style="width: ${hasData ? pct : 0}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const tipEl = document.getElementById('board-pedagogical-tip');
+      if (lowestCat !== null) {
+        if (lowestPct < 70) {
+          tipEl.innerHTML = `📌 <strong>Recomendación para repasar:</strong> La categoría <strong>${lowestCat}</strong> tiene un <strong>${lowestPct}%</strong> de acierto. Conviene poner ejemplos extra en la pizarra.`;
+        } else {
+          tipEl.innerHTML = `🌟 <strong>¡Gran nivel!</strong> Todas las categorías superan el 70% de acierto. La más ajustada es <strong>${lowestCat}</strong> (${lowestPct}%).`;
+        }
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 8. LÓGICA DEL MANDO DEL ALUMNO (CLIENT)
+     * =========================================================================
+     */
+    function initStudentView() {
+      // Renderizar selector de equipos en el formulario de acceso
+      const teamSelector = document.getElementById('student-team-selector');
+      teamSelector.innerHTML = TEAMS.map(t => `
+        <button type="button" onclick="selectStudentTeam('${t.id}')" id="stu-team-btn-${t.id}"
+          class="p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${studentState.teamId === t.id ? `${t.borderClass} ${t.lightBg} ring-2 ${t.ringClass}` : 'border-slate-200 bg-slate-50 hover:bg-white'}">
+          <span class="text-3xl">${t.emoji}</span>
+          <div>
+            <div class="font-bold text-sm text-slate-900">${t.shortName}</div>
+            <div class="text-[11px] text-slate-500">${t.name.split(' ')[1]}</div>
+          </div>
+        </button>
+      `).join('');
+    }
+
+    function selectStudentTeam(teamId) {
+      studentState.teamId = teamId;
+      TEAMS.forEach(t => {
+        const btn = document.getElementById(`stu-team-btn-${t.id}`);
+        if (btn) {
+          btn.className = t.id === teamId
+            ? `p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${t.borderClass} ${t.lightBg} ring-2 ${t.ringClass}`
+            : 'p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all border-slate-200 bg-slate-50 hover:bg-white';
+        }
+      });
+    }
+
+    function studentJoinGame() {
+      const pin = document.getElementById('student-pin-input').value.trim();
+      const name = document.getElementById('student-name-input').value.trim();
+
+      if (!/^\d{4}$/.test(pin)) {
+        showToast('Introduce el PIN de 4 números que sale en la pizarra', 'error');
+        return;
+      }
+      if (!name) {
+        showToast('Escribe tu nombre antes de entrar', 'error');
+        return;
+      }
+
+      studentState.joined = true;
+      studentState.pin = pin;
+      studentState.name = name;
+      studentState.score = 0;
+      studentState.submittedWordIndex = -1;
+      studentState.selectedCats = [null, null, null, null];
+
+      subscribeToPinTopic(pin);
+      publishSyncMessage(pin, 'STUDENT_JOIN', {
+        id: studentState.playerId,
+        name: studentState.name,
+        teamId: studentState.teamId
+      });
+
+      // Solicitar estado inmediato por si la partida ya está empezada
+      publishSyncMessage(pin, 'REQUEST_BOARD_STATE', {});
+
+      // Si el profesor está probando en la misma ventana/pestaña, sincronizar directo
+      if (pin === boardState.pin) {
+        handleIncomingSyncMessage({
+          pin,
+          type: 'STUDENT_JOIN',
+          payload: { id: studentState.playerId, name: studentState.name, teamId: studentState.teamId }
+        });
+      }
+
+      playTone('join');
+      renderStudentView();
+    }
+
+    function studentLeaveGame() {
+      if (studentState.joined) {
+        publishSyncMessage(studentState.pin, 'STUDENT_LEAVE', { id: studentState.playerId });
+      }
+      studentState.joined = false;
+      renderStudentView();
+    }
+
+    function applyBoardStateToStudent(state) {
+      if (!studentState.joined || state.pin !== studentState.pin) return;
+
+      // Actualizar puntuación personal si el servidor tiene el dato
+      if (state.players && state.players[studentState.playerId]) {
+        studentState.score = state.players[studentState.playerId].score || 0;
+      }
+
+      const joinCard = document.getElementById('student-join-card');
+      const gameArea = document.getElementById('student-game-area');
+      joinCard.classList.add('hidden');
+      gameArea.classList.remove('hidden');
+
+      document.getElementById('student-personal-score').textContent = `${studentState.score} pts`;
+
+      const waitingScr = document.getElementById('student-waiting-screen');
+      const questionScr = document.getElementById('student-question-screen');
+      const submittedScr = document.getElementById('student-submitted-screen');
+      const feedbackScr = document.getElementById('student-feedback-screen');
+      const finishedScr = document.getElementById('student-finished-screen');
+
+      [waitingScr, questionScr, submittedScr, feedbackScr, finishedScr].forEach(el => el.classList.add('hidden'));
+
+      if (state.phase === 'LOBBY') {
+        studentState.submittedWordIndex = -1;
+        studentState.selectedCats = [null, null, null, null];
+        waitingScr.classList.remove('hidden');
+      } else if (state.phase === 'QUESTION') {
+        if (studentState.submittedWordIndex === state.wordIndex) {
+          submittedScr.classList.remove('hidden');
+        } else {
+          // Nueva palabra: si cambió el índice, limpiar selección
+          if (studentState.currentQuestionIndex !== state.wordIndex) {
+            studentState.currentQuestionIndex = state.wordIndex;
+            studentState.selectedCats = [null, null, null, null];
+          }
+          questionScr.classList.remove('hidden');
+          document.getElementById('student-round-badge').textContent = `Palabra ${state.wordIndex + 1} de ${state.totalWords}`;
+          document.getElementById('student-target-word').textContent = state.currentWord;
+          renderStudentPillRows();
+        }
+      } else if (state.phase === 'REVEAL') {
+        feedbackScr.classList.remove('hidden');
+        renderStudentFeedback(state);
+      } else if (state.phase === 'FINISHED') {
+        finishedScr.classList.remove('hidden');
+        document.getElementById('student-final-score').textContent = `${studentState.score} pts`;
+        document.getElementById('student-final-team').textContent = getTeamById(studentState.teamId).name;
+      }
+    }
+
+    function renderStudentView() {
+      const joinCard = document.getElementById('student-join-card');
+      const gameArea = document.getElementById('student-game-area');
+
+      if (!studentState.joined) {
+        joinCard.classList.remove('hidden');
+        gameArea.classList.add('hidden');
+        return;
+      }
+
+      joinCard.classList.add('hidden');
+      gameArea.classList.remove('hidden');
+
+      const team = getTeamById(studentState.teamId);
+      document.getElementById('student-avatar-badge').textContent = team.emoji;
+      document.getElementById('student-avatar-badge').className = `w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-sm ${team.lightBg} border ${team.borderClass}`;
+      document.getElementById('student-display-name').textContent = studentState.name;
+      document.getElementById('student-team-pill').textContent = team.shortName;
+      document.getElementById('student-team-pill').className = `text-[11px] font-bold px-2 py-0.5 rounded-full ${team.lightBg} ${team.textClass}`;
+      document.getElementById('student-connected-pin').textContent = studentState.pin;
+      document.getElementById('student-personal-score').textContent = `${studentState.score} pts`;
+
+      // Si está en el mismo navegador que la pizarra, sincronizamos su vista directamente
+      if (studentState.pin === boardState.pin) {
+        const challenge = getChallengeById(boardState.challengeId);
+        const wordObj = challenge && challenge.words[boardState.wordIndex];
+        applyBoardStateToStudent({
+          pin: boardState.pin,
+          phase: boardState.phase,
+          wordIndex: boardState.wordIndex,
+          totalWords: challenge ? challenge.words.length : 0,
+          currentWord: wordObj ? wordObj.word : '',
+          revealedSolution: boardState.phase === 'REVEAL' && wordObj ? wordObj.cats : null,
+          players: boardState.players,
+          roundAnswers: boardState.phase === 'REVEAL' ? boardState.roundAnswers : {}
+        });
+      }
+    }
+
+    function renderStudentPillRows() {
+      const container = document.getElementById('student-pill-rows');
+      container.innerHTML = CATEGORIES.map((cat, rowIdx) => {
+        const selectedVal = studentState.selectedCats[rowIdx];
+        return `
+          <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-2xs">
+            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">${rowIdx + 1}. ${cat.label}</div>
+            <div class="grid grid-cols-3 gap-2">
+              ${cat.options.map(opt => {
+                const isSelected = selectedVal === opt;
+                const isNoProcede = opt === 'No procede';
+                let btnClasses = 'min-h-[44px] px-2.5 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all active:scale-95 ';
+                if (isSelected) {
+                  btnClasses += isNoProcede
+                    ? 'bg-slate-700 border-slate-700 text-white shadow-sm'
+                    : 'bg-indigo-600 border-indigo-600 text-white shadow-sm';
+                } else {
+                  btnClasses += isNoProcede
+                    ? 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                    : 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300 hover:bg-indigo-50/40';
+                }
+                return `
+                  <button type="button" onclick="selectStudentPill(${rowIdx}, '${opt}')" class="${btnClasses}">
+                    ${isSelected ? '✓ ' : ''}${opt}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const allSelected = studentState.selectedCats.every(v => v !== null);
+      const submitBtn = document.getElementById('btn-student-submit');
+      submitBtn.disabled = !allSelected;
+      submitBtn.textContent = allSelected ? '🚀 ¡Enviar mi respuesta!' : 'Marca las 4 filas para enviar';
+    }
+
+    function selectStudentPill(rowIdx, optionValue) {
+      studentState.selectedCats[rowIdx] = optionValue;
+      renderStudentPillRows();
+    }
+
+    function studentSubmitAnswer() {
+      if (studentState.selectedCats.some(v => v === null)) return;
+
+      const wordIdx = studentState.currentQuestionIndex || 0;
+      studentState.submittedWordIndex = wordIdx;
+
+      const payload = {
+        playerId: studentState.playerId,
+        wordIndex: wordIdx,
+        cats: [...studentState.selectedCats],
+        playerMeta: {
+          name: studentState.name,
+          teamId: studentState.teamId
+        }
+      };
+
+      publishSyncMessage(studentState.pin, 'STUDENT_ANSWER', payload);
+
+      // Si comparte pestaña con el host, notificar localmente
+      if (studentState.pin === boardState.pin) {
+        handleIncomingSyncMessage({
+          pin: studentState.pin,
+          type: 'STUDENT_ANSWER',
+          payload
+        });
+      }
+
+      playTone('submit');
+      document.getElementById('student-question-screen').classList.add('hidden');
+      document.getElementById('student-submitted-screen').classList.remove('hidden');
+      document.getElementById('student-submitted-summary').innerHTML = studentState.selectedCats.map(c =>
+        `<span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 text-xs font-bold border border-indigo-200">${c}</span>`
+      ).join('');
+    }
+
+    function renderStudentFeedback(state) {
+      const myAns = state.roundAnswers ? state.roundAnswers[studentState.playerId] : null;
+      const correctCats = state.revealedSolution || ['-', '-', '-', '-'];
+      const banner = document.getElementById('student-feedback-banner');
+      const icon = document.getElementById('student-feedback-icon');
+      const title = document.getElementById('student-feedback-title');
+      const ptsText = document.getElementById('student-feedback-points');
+      const breakdown = document.getElementById('student-feedback-breakdown');
+
+      if (!myAns) {
+        banner.className = 'p-4 rounded-2xl text-center bg-slate-100 text-slate-700';
+        icon.textContent = '⏱️';
+        title.textContent = 'No enviaste respuesta a tiempo';
+        ptsText.textContent = '+0 puntos en esta ronda';
+        breakdown.innerHTML = correctCats.map((c, idx) => `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+            <span class="font-semibold text-slate-500">${CATEGORIES[idx].label}</span>
+            <span class="font-bold text-slate-800">Correcta: ${c}</span>
+          </div>
+        `).join('');
+        return;
+      }
+
+      const earned = myAns.pointsEarned || 0;
+      const hits = (myAns.rowResults || []).filter(Boolean).length;
+
+      if (hits === 4) {
+        banner.className = 'p-4 rounded-2xl text-center bg-emerald-50 border border-emerald-200 text-emerald-900';
+        icon.textContent = '🏆';
+        title.textContent = '¡PLENO! 4 de 4 aciertos';
+        ptsText.textContent = `+${earned} puntos (incluye bonus de rapidez)`;
+      } else if (hits >= 2) {
+        banner.className = 'p-4 rounded-2xl text-center bg-amber-50 border border-amber-200 text-amber-900';
+        icon.textContent = '👏';
+        title.textContent = `¡Buen intento! ${hits} de 4 aciertos`;
+        ptsText.textContent = `+${earned} puntos para tu equipo`;
+      } else {
+        banner.className = 'p-4 rounded-2xl text-center bg-rose-50 border border-rose-200 text-rose-900';
+        icon.textContent = '💪';
+        title.textContent = `${hits} de 4 aciertos — ¡Sigue así!`;
+        ptsText.textContent = `+${earned} puntos`;
+      }
+
+      breakdown.innerHTML = correctCats.map((correctVal, idx) => {
+        const userVal = myAns.cats[idx];
+        const isOk = userVal === correctVal;
+        return `
+          <div class="flex items-center justify-between p-3 rounded-xl border text-xs ${isOk ? 'bg-emerald-50/70 border-emerald-200' : 'bg-rose-50/70 border-rose-200'}">
+            <div>
+              <div class="font-bold text-slate-700">${CATEGORIES[idx].label}</div>
+              <div class="text-slate-600 mt-0.5">Marcaste: <strong>${userVal}</strong></div>
+            </div>
+            <div class="text-right">
+              ${isOk
+                ? '<span class="px-2.5 py-1 rounded-full bg-emerald-600 text-white font-bold">✓ Correcto</span>'
+                : `<span class="px-2.5 py-1 rounded-full bg-rose-600 text-white font-bold">✗ Era: ${correctVal}</span>`
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * =========================================================================
+     * 9. LÓGICA DEL EDITOR DEL PROFESOR
+     * =========================================================================
+     */
+    function renderEditor() {
+      if (!challenges.some(c => c.id === editorState.selectedChallengeId)) {
+        editorState.selectedChallengeId = challenges[0].id;
+      }
+
+      document.getElementById('editor-challenges-count').textContent = challenges.length;
+      const listEl = document.getElementById('editor-challenge-list');
+      listEl.innerHTML = challenges.map(c => {
+        const isSelected = c.id === editorState.selectedChallengeId;
+        return `
+          <button type="button" onclick="selectEditorChallenge('${c.id}')"
+            class="w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-2 ${isSelected ? 'bg-indigo-50 border-indigo-400 text-indigo-950 shadow-2xs' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'}">
+            <div class="truncate">
+              <div class="font-bold text-sm truncate">${escapeHtml(c.title)}</div>
+              <div class="text-xs text-slate-500 mt-0.5">${c.words.length} sustantivos</div>
+            </div>
+            <span class="text-xs font-bold px-2 py-1 rounded-lg ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}">
+              Editar
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      const activeChallenge = getChallengeById(editorState.selectedChallengeId);
+      document.getElementById('editor-active-challenge-title').value = activeChallenge.title;
+      document.getElementById('btn-delete-challenge').disabled = challenges.length <= 1;
+      document.getElementById('btn-delete-challenge').classList.toggle('opacity-40', challenges.length <= 1);
+
+      document.getElementById('editor-words-count').textContent = activeChallenge.words.length;
+      const wordsListEl = document.getElementById('editor-words-list');
+
+      if (activeChallenge.words.length === 0) {
+        wordsListEl.innerHTML = '<p class="text-sm text-slate-400 italic py-4 text-center">Este desafío todavía no tiene palabras. Añade la primera arriba.</p>';
+      } else {
+        wordsListEl.innerHTML = activeChallenge.words.map((w, idx) => `
+          <div class="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 flex flex-wrap items-center justify-between gap-3 transition">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-sm text-slate-900 min-w-[100px]">${idx + 1}. ${escapeHtml(w.word)}</span>
+              <div class="flex flex-wrap gap-1.5">
+                ${w.cats.map(catVal => `
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${catVal === 'No procede' ? 'bg-slate-200/80 text-slate-500' : 'bg-indigo-100 text-indigo-800'}">
+                    ${catVal}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="editWordInChallenge(${idx})" class="px-2.5 py-1 rounded-lg bg-white border border-slate-300 hover:border-indigo-400 text-xs font-semibold text-slate-700 transition">
+                ✏️ Editar
+              </button>
+              <button onclick="deleteWordFromChallenge(${idx})" class="px-2.5 py-1 rounded-lg bg-white border border-slate-300 hover:border-rose-400 hover:text-rose-600 text-xs font-semibold text-slate-600 transition">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      updateEditorPreview();
+    }
+
+    function selectEditorChallenge(id) {
+      editorState.selectedChallengeId = id;
+      resetWordForm();
+      renderEditor();
+    }
+
+    function createNewChallenge() {
+      const input = document.getElementById('new-challenge-title');
+      const title = input.value.trim();
+      if (!title) {
+        showToast('Escribe un nombre para el nuevo desafío', 'error');
+        return;
+      }
+      const newId = 'desafio-' + Date.now();
+      challenges.push({
+        id: newId,
+        title,
+        words: []
+      });
+      input.value = '';
+      editorState.selectedChallengeId = newId;
+      saveChallengesToStorage();
+      populateBoardChallengeSelect();
+      renderEditor();
+      showToast('Nuevo desafío creado', 'success');
+    }
+
+    function renameActiveChallenge(newTitle) {
+      const trimmed = newTitle.trim();
+      if (!trimmed) return;
+      const ch = getChallengeById(editorState.selectedChallengeId);
+      ch.title = trimmed;
+      saveChallengesToStorage();
+      populateBoardChallengeSelect();
+      renderEditor();
+      showToast('Nombre del desafío actualizado', 'success');
+    }
+
+    function confirmDeleteChallenge() {
+      if (challenges.length <= 1) return;
+      const ch = getChallengeById(editorState.selectedChallengeId);
+      openCustomModal(
+        'Eliminar desafío',
+        `¿Seguro que quieres borrar "${ch.title}" y todas sus palabras?`,
+        () => {
+          challenges = challenges.filter(c => c.id !== ch.id);
+          editorState.selectedChallengeId = challenges[0].id;
+          if (boardState.challengeId === ch.id) {
+            boardState.challengeId = challenges[0].id;
+          }
+          saveChallengesToStorage();
+          populateBoardChallengeSelect();
+          renderEditor();
+          showToast('Desafío eliminado', 'info');
+        }
+      );
+    }
+
+    /**
+     * Regla pedagógica inteligente en el Editor del Profesor:
+     * - Si el profesor selecciona "Propio" en la fila 1 -> sugiere "No procede" en filas 2, 3 y 4.
+     * - Si el profesor selecciona "Abstracto" en la fila 2 -> sugiere "No procede" en filas 3 y 4.
+     * - Si cambia de Abstracto a Concreto -> restaura valores por defecto útiles (Contable / Individual).
+     */
+    function handleEditorCategoryChange(changedIndex) {
+      const c0 = document.getElementById('editor-cat-0');
+      const c1 = document.getElementById('editor-cat-1');
+      const c2 = document.getElementById('editor-cat-2');
+      const c3 = document.getElementById('editor-cat-3');
+      const hintEl = document.getElementById('editor-auto-hint');
+      let appliedRule = false;
+
+      if (changedIndex === 0) {
+        if (c0.value === 'Propio') {
+          c1.value = 'No procede';
+          c2.value = 'No procede';
+          c3.value = 'No procede';
+          appliedRule = true;
+        } else if (c0.value === 'Común' && c1.value === 'No procede') {
+          c1.value = 'Concreto';
+          c2.value = 'Contable';
+          c3.value = 'Individual';
+        }
+      } else if (changedIndex === 1) {
+        if (c1.value === 'Abstracto') {
+          c2.value = 'No procede';
+          c3.value = 'No procede';
+          appliedRule = true;
+        } else if (c1.value === 'Concreto') {
+          if (c2.value === 'No procede') c2.value = 'Contable';
+          if (c3.value === 'No procede') c3.value = 'Individual';
+        }
+      }
+
+      hintEl.classList.toggle('hidden', !appliedRule);
+      updateEditorPreview();
+    }
+
+    function updateEditorPreview() {
+      const wordVal = document.getElementById('editor-word-input').value.trim() || 'palabra';
+      const vals = [0, 1, 2, 3].map(i => document.getElementById(`editor-cat-${i}`).value);
+      document.getElementById('editor-solution-preview').innerHTML =
+        `<span class="text-indigo-700 font-bold">${escapeHtml(wordVal)}</span>: ${vals.join(' · ')}`;
+    }
+
+    function saveWordToChallenge() {
+      const wordInput = document.getElementById('editor-word-input');
+      const word = wordInput.value.trim();
+      if (!word) {
+        showToast('Escribe el sustantivo antes de guardar', 'error');
+        wordInput.focus();
+        return;
+      }
+
+      const cats = [0, 1, 2, 3].map(i => document.getElementById(`editor-cat-${i}`).value);
+      const editIdx = parseInt(document.getElementById('editor-edit-word-index').value, 10);
+      const activeChallenge = getChallengeById(editorState.selectedChallengeId);
+
+      if (editIdx >= 0 && editIdx < activeChallenge.words.length) {
+        activeChallenge.words[editIdx] = { word, cats };
+        showToast(`Palabra "${word}" actualizada`, 'success');
+      } else {
+        activeChallenge.words.push({ word, cats });
+        showToast(`Palabra "${word}" añadida al desafío`, 'success');
+      }
+
+      saveChallengesToStorage();
+      populateBoardChallengeSelect();
+      resetWordForm();
+      renderEditor();
+    }
+
+    function editWordInChallenge(index) {
+      const activeChallenge = getChallengeById(editorState.selectedChallengeId);
+      const item = activeChallenge.words[index];
+      if (!item) return;
+
+      document.getElementById('editor-edit-word-index').value = index;
+      document.getElementById('editor-word-input').value = item.word;
+      item.cats.forEach((val, i) => {
+        document.getElementById(`editor-cat-${i}`).value = val;
+      });
+
+      document.getElementById('editor-form-mode-title').textContent = `✏️ Editando sustantivo #${index + 1}: "${item.word}"`;
+      document.getElementById('btn-save-word').textContent = 'Actualizar palabra';
+      document.getElementById('btn-cancel-edit-word').classList.remove('hidden');
+      document.getElementById('editor-auto-hint').classList.add('hidden');
+      updateEditorPreview();
+      document.getElementById('editor-word-input').focus();
+    }
+
+    function deleteWordFromChallenge(index) {
+      const activeChallenge = getChallengeById(editorState.selectedChallengeId);
+      const removed = activeChallenge.words.splice(index, 1);
+      saveChallengesToStorage();
+      populateBoardChallengeSelect();
+      resetWordForm();
+      renderEditor();
+      if (removed[0]) {
+        showToast(`Eliminada "${removed[0].word}"`, 'info');
+      }
+    }
+
+    function resetWordForm() {
+      document.getElementById('editor-edit-word-index').value = '-1';
+      document.getElementById('editor-word-input').value = '';
+      document.getElementById('editor-cat-0').value = 'Común';
+      document.getElementById('editor-cat-1').value = 'Concreto';
+      document.getElementById('editor-cat-2').value = 'Contable';
+      document.getElementById('editor-cat-3').value = 'Individual';
+      document.getElementById('editor-form-mode-title').textContent = '➕ Añadir nuevo sustantivo al desafío';
+      document.getElementById('btn-save-word').textContent = 'Guardar palabra';
+      document.getElementById('btn-cancel-edit-word').classList.add('hidden');
+      document.getElementById('editor-auto-hint').classList.add('hidden');
+      updateEditorPreview();
+    }
+
+    function exportChallengesJSON() {
+      const dataStr = JSON.stringify(challenges, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sustantivo-quest-desafios-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Copia de seguridad descargada en JSON', 'success');
+    }
+
+    function importChallengesJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported) || imported.length === 0 || !imported[0].words) {
+            throw new Error('Formato inválido');
+          }
+          challenges = imported;
+          editorState.selectedChallengeId = challenges[0].id;
+          boardState.challengeId = challenges[0].id;
+          saveChallengesToStorage();
+          populateBoardChallengeSelect();
+          renderEditor();
+          showToast(`Se importaron ${challenges.length} desafíos correctamente`, 'success');
+        } catch (err) {
+          showToast('El archivo JSON no tiene un formato válido de Sustantivo Quest', 'error');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function confirmRestoreDefaults() {
+      openCustomModal(
+        'Restaurar ejemplos de fábrica',
+        'Se volverán a cargar los 4 desafíos originales corregidos (reemplazando los cambios actuales). ¿Continuar?',
+        () => {
+          challenges = JSON.parse(JSON.stringify(DEFAULT_CHALLENGES));
+          editorState.selectedChallengeId = challenges[0].id;
+          boardState.challengeId = challenges[0].id;
+          saveChallengesToStorage();
+          populateBoardChallengeSelect();
+          resetWordForm();
+          renderEditor();
+          showToast('Desafíos originales restaurados', 'success');
+        }
+      );
+    }
+
+    /**
+     * =========================================================================
+     * 10. UTILIDADES DE INTERFAZ (TOASTS, MODALES, HELPERS)
+     * =========================================================================
+     */
+    function getTeamById(id) {
+      return TEAMS.find(t => t.id === id) || TEAMS[0];
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const styles = {
+        success: 'bg-emerald-900 text-white border-emerald-700',
+        error: 'bg-rose-900 text-white border-rose-700',
+        info: 'bg-slate-900 text-white border-slate-700'
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-2xl border shadow-lg text-xs sm:text-sm font-semibold animate-pop ${styles[type] || styles.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    let modalConfirmCallback = null;
+    function openCustomModal(title, message, onConfirm) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+      modalConfirmCallback = onConfirm;
+      document.getElementById('custom-modal').classList.remove('hidden');
+    }
+
+    function closeCustomModal() {
+      document.getElementById('custom-modal').classList.add('hidden');
+      modalConfirmCallback = null;
+    }
+
+    document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+      if (typeof modalConfirmCallback === 'function') {
+        modalConfirmCallback();
+      }
+      closeCustomModal();
+    });
+
+    /**
+     * =========================================================================
+     * 11. INICIALIZACIÓN AL CARGAR LA PÁGINA
+     * =========================================================================
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadChallengesFromStorage();
+      initBoard();
+      initStudentView();
+      initSyncEngine();
+
+      // Comprobar parámetros en la URL (ej. cuando el alumno escanea el QR: ?pin=4829&view=play)
+      const params = new URLSearchParams(window.location.search);
+      const urlPin = params.get('pin');
+      const urlView = params.get('view');
+
+      if (urlPin && /^\d{4}$/.test(urlPin)) {
+        document.getElementById('student-pin-input').value = urlPin;
+      }
+
+      if (urlView === 'play' || urlView === 'editor' || urlView === 'board') {
+        switchView(urlView);
+      } else {
+        switchView('board');
+      }
+    });
+  </script>
+</body>
+</html>
