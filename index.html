@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sustantivo Quest · Plataforma de Aula 6.º Primaria</title>
+  <title>Lengua Quest · Plataforma Educativa 6.º Primaria</title>
   <!-- MQTT.js over Secure WebSockets (works across school Wi-Fi client isolation without server install) -->
   <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
   <!-- QRCode.js for instant classroom QR generation -->
@@ -20,10 +20,10 @@
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
-      --team-0: #ef4444; /* Zorro - Rojo */
-      --team-1: #10b981; /* Tortuga - Verde */
-      --team-2: #3b82f6; /* Búho - Azul */
-      --team-3: #f59e0b; /* León - Amarillo */
+      --team-0: #ef4444; /* Mono - Rojo Coral */
+      --team-1: #10b981; /* Gorila - Verde Esmeralda */
+      --team-2: #3b82f6; /* Koala - Azul Brillante */
+      --team-3: #f59e0b; /* Ardilla - Ámbar Dorado */
       --radius: 16px;
     }
 
@@ -34,13 +34,21 @@
       color: var(--text);
       min-height: 100vh;
       line-height: 1.45;
+      overflow-x: hidden;
     }
 
-    button, input, select {
-      font-family: inherit;
-    }
-
+    button, input, select, textarea { font-family: inherit; }
     .hidden { display: none !important; }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
 
     /* Top Navigation Bar */
     .topbar {
@@ -96,6 +104,29 @@
       box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
     }
 
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .sound-toggle {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .sound-toggle:hover { border-color: var(--primary); }
+    .sound-toggle.muted { opacity: 0.6; }
+
     .conn-pill {
       display: inline-flex;
       align-items: center;
@@ -117,9 +148,9 @@
 
     /* Container */
     .container {
-      max-width: 1320px;
+      max-width: 1380px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 22px;
     }
 
     /* Landing / Role Selector */
@@ -144,29 +175,20 @@
       transform: translateY(-4px);
       border-color: var(--primary);
     }
-    .role-icon {
-      font-size: 2.8rem;
-      margin-bottom: 14px;
-    }
-    .role-card h2 {
-      font-size: 1.4rem;
-      margin-bottom: 8px;
-    }
-    .role-card p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-    }
+    .role-icon { font-size: 2.8rem; margin-bottom: 14px; }
+    .role-card h2 { font-size: 1.4rem; margin-bottom: 8px; }
+    .role-card p { color: var(--muted); font-size: 0.95rem; margin-bottom: 20px; }
+
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 12px 20px;
+      padding: 11px 18px;
       border-radius: 12px;
       border: none;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
       transition: all 0.15s;
     }
@@ -178,66 +200,156 @@
     .btn-warning:hover { filter: brightness(1.08); }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-danger:hover { filter: brightness(1.08); }
-    .btn-ghost {
-      background: rgba(255,255,255,0.08);
-      color: var(--text);
-    }
+    .btn-ghost { background: rgba(255,255,255,0.08); color: var(--text); }
     .btn-ghost:hover { background: rgba(255,255,255,0.15); }
-    .btn:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
     /* ==================== BOARD (PIZARRA DIGITAL) ==================== */
     .board-layout {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr 345px;
       gap: 20px;
       align-items: start;
     }
-    @media (max-width: 1024px) {
+    @media (max-width: 1080px) {
       .board-layout { grid-template-columns: 1fr; }
     }
 
     .board-header-card {
       background: var(--surface);
       border-radius: var(--radius);
-      padding: 18px 22px;
+      padding: 16px 20px;
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      flex-direction: column;
+      gap: 14px;
       border: 1px solid rgba(255,255,255,0.08);
       margin-bottom: 18px;
     }
-    .controls-row {
+    .board-config-bar {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
+    .board-actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .cfg-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.55);
+      padding: 5px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .cfg-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); }
     select.dark-select, input.dark-input {
       background: var(--bg);
       color: var(--text);
       border: 1px solid rgba(255,255,255,0.18);
-      padding: 10px 14px;
+      padding: 8px 12px;
       border-radius: 10px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
     }
 
-    /* Word Spotlight Banner */
+    /* Word Spotlight Banner + Context + Explanation + Timer */
     .word-stage {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       border: 2px solid rgba(59, 130, 246, 0.35);
       border-radius: 20px;
-      padding: 24px;
+      padding: 20px 24px;
       text-align: center;
       margin-bottom: 20px;
       position: relative;
       box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      overflow: hidden;
     }
+    .context-quote {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.06);
+      border-left: 3px solid #60a5fa;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      color: #e2e8f0;
+      margin: 6px auto 8px;
+      font-style: italic;
+    }
+    .explanation-box {
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #a7f3d0;
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-size: 0.92rem;
+      margin: 12px auto 0;
+      max-width: 680px;
+    }
+
+    .timer-banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 8px auto 6px;
+      max-width: 480px;
+    }
+    .timer-pill {
+      font-size: 1.5rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      padding: 4px 16px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 2px solid var(--success);
+      color: #6ee7b7;
+      min-width: 92px;
+      transition: all 0.2s;
+    }
+    .timer-pill.warn {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--warning);
+      color: #fcd34d;
+    }
+    .timer-pill.danger {
+      background: rgba(239, 68, 68, 0.28);
+      border-color: var(--danger);
+      color: #fca5a5;
+      animation: pulseUrgent 0.6s infinite alternate;
+    }
+    @keyframes pulseUrgent {
+      from { transform: scale(1); }
+      to { transform: scale(1.08); }
+    }
+    .timer-track {
+      flex: 1;
+      height: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background: var(--success);
+      transition: width 0.25s linear, background-color 0.3s;
+    }
+
     .round-badge {
       display: inline-block;
       background: rgba(59, 130, 246, 0.2);
@@ -246,28 +358,28 @@
       border-radius: 999px;
       font-size: 0.85rem;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .active-word {
-      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
       font-weight: 900;
       letter-spacing: -0.02em;
       color: #fff;
       text-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
-      margin: 6px 0;
+      margin: 4px 0;
     }
     .reveal-chips {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 12px;
     }
     .rev-chip {
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 12px;
       font-weight: 800;
-      font-size: 1rem;
+      font-size: 0.95rem;
       background: rgba(16, 185, 129, 0.2);
       border: 1px solid var(--success);
       color: #6ee7b7;
@@ -278,81 +390,388 @@
       color: #cbd5e1;
     }
 
-    /* 4-Team Tower Race */
+    /* ==================== KAHOOT-STYLE CLIMBING TOWERS ==================== */
     .towers-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
-      background: var(--surface);
+      background: linear-gradient(180deg, #172033 0%, #1e293b 100%);
       padding: 20px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: inset 0 2px 20px rgba(0,0,0,0.25);
     }
+    @media (max-width: 760px) {
+      .towers-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
     .tower-lane {
-      background: rgba(15, 23, 42, 0.65);
-      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.72);
+      border-radius: 18px;
       padding: 14px 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
       border: 2px solid transparent;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      position: relative;
     }
-    .tower-lane[data-team="0"] { border-color: rgba(239, 68, 68, 0.4); }
-    .tower-lane[data-team="1"] { border-color: rgba(16, 185, 129, 0.4); }
-    .tower-lane[data-team="2"] { border-color: rgba(59, 130, 246, 0.4); }
-    .tower-lane[data-team="3"] { border-color: rgba(245, 158, 11, 0.4); }
+    .tower-lane[data-team="0"] { border-color: rgba(239, 68, 68, 0.45); }
+    .tower-lane[data-team="1"] { border-color: rgba(16, 185, 129, 0.45); }
+    .tower-lane[data-team="2"] { border-color: rgba(59, 130, 246, 0.45); }
+    .tower-lane[data-team="3"] { border-color: rgba(245, 158, 11, 0.45); }
+
+    .tower-lane.is-leader {
+      border-color: #fbbf24 !important;
+      box-shadow: 0 0 24px rgba(251, 191, 36, 0.25);
+      transform: translateY(-3px);
+    }
+
+    .tower-title {
+      font-weight: 900;
+      font-size: 1.02rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
     .tower-track {
       width: 100%;
-      height: 310px;
+      height: 335px;
       position: relative;
-      background: repeating-linear-gradient(
-        to top,
-        rgba(255,255,255,0.04) 0px,
-        rgba(255,255,255,0.04) 2px,
-        transparent 2px,
-        transparent 31px
-      );
-      border-radius: 12px;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,0.06) 0 18px, transparent 19px),
+        radial-gradient(circle at 75% 32%, rgba(255,255,255,0.05) 0 22px, transparent 23px),
+        linear-gradient(180deg, #0b132b 0%, #162447 55%, #1f3461 100%);
+      border-radius: 14px;
       margin: 10px 0;
       overflow: hidden;
       display: flex;
       justify-content: center;
+      border: 1px solid rgba(255,255,255,0.08);
     }
-    .tower-fill {
+
+    .tower-summit-line {
+      position: absolute;
+      top: 14px;
+      left: 0;
+      right: 0;
+      border-top: 2px dashed rgba(251, 191, 36, 0.45);
+      text-align: right;
+      padding-right: 8px;
+      font-size: 0.66rem;
+      font-weight: 800;
+      color: rgba(251, 191, 36, 0.75);
+      letter-spacing: 0.06em;
+      pointer-events: none;
+    }
+
+    .tower-ground {
       position: absolute;
       bottom: 0;
-      left: 18%;
-      right: 18%;
-      height: 8%;
-      border-radius: 10px 10px 0 0;
-      transition: height 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-      opacity: 0.35;
+      left: 0;
+      right: 0;
+      height: 12px;
+      background: linear-gradient(180deg, #15803d 0%, #14532d 100%);
+      border-top: 2px solid #22c55e;
+      z-index: 1;
     }
-    .climber {
+
+    .tower-vine {
       position: absolute;
-      bottom: 4%;
-      font-size: 2.5rem;
-      transition: bottom 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+      bottom: 12px;
+      top: 16px;
+      width: 6px;
+      background: repeating-linear-gradient(
+        to top,
+        rgba(255,255,255,0.16) 0px,
+        rgba(255,255,255,0.16) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+      border-radius: 999px;
+      z-index: 1;
+    }
+
+    .tower-blocks-stack {
+      position: absolute;
+      bottom: 12px;
+      width: 64%;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 2px;
       z-index: 2;
+      transition: all 0.5s ease;
     }
-    .team-score {
-      font-size: 1.5rem;
+
+    .tower-block {
+      width: 100%;
+      height: 22px;
+      border-radius: 5px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 10px;
+      box-shadow:
+        inset 0 3px 0 rgba(255,255,255,0.35),
+        inset 0 -3px 0 rgba(0,0,0,0.32),
+        0 2px 5px rgba(0,0,0,0.35);
+      animation: blockPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    .tower-block.top-cap { border-radius: 7px 7px 4px 4px; }
+    .tower-block.top-cap::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 6%;
+      right: 6%;
+      height: 5px;
+      background: repeating-linear-gradient(
+        to right,
+        currentColor 0px,
+        currentColor 14px,
+        transparent 14px,
+        transparent 22px
+      );
+      opacity: 0.95;
+    }
+
+    .block-win {
+      width: 9px;
+      height: 10px;
+      background: rgba(254, 249, 195, 0.85);
+      border-radius: 2px;
+      box-shadow: 0 0 4px rgba(254, 240, 138, 0.6);
+    }
+
+    .tower-lane[data-team="0"] .tower-block { background: linear-gradient(180deg, #f87171, #dc2626); color: #f87171; }
+    .tower-lane[data-team="1"] .tower-block { background: linear-gradient(180deg, #34d399, #059669); color: #34d399; }
+    .tower-lane[data-team="2"] .tower-block { background: linear-gradient(180deg, #60a5fa, #2563eb); color: #60a5fa; }
+    .tower-lane[data-team="3"] .tower-block { background: linear-gradient(180deg, #fbbf24, #d97706); color: #fbbf24; }
+
+    @keyframes blockPopIn {
+      0% { transform: scaleY(0.2) scaleX(0.75); opacity: 0; }
+      70% { transform: scaleY(1.12) scaleX(1.04); opacity: 1; }
+      100% { transform: scaleY(1) scaleX(1); opacity: 1; }
+    }
+
+    .climber-wrapper {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 4;
+      transition: bottom 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+    .climber-crown {
+      font-size: 1.25rem;
+      margin-bottom: -6px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+      animation: floatCrown 1.6s ease-in-out infinite alternate;
+    }
+    @keyframes floatCrown {
+      from { transform: translateY(0px) rotate(-6deg); }
+      to { transform: translateY(-4px) rotate(6deg); }
+    }
+    .climber-mascot {
+      font-size: 2.75rem;
+      line-height: 1;
+      filter: drop-shadow(0 5px 8px rgba(0,0,0,0.65));
+      transform-origin: bottom center;
+    }
+    .climber-wrapper.climbing .climber-mascot {
+      animation: climberClimb 0.75s ease-in-out;
+    }
+    @keyframes climberClimb {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.22, 0.88) rotate(-14deg) translateY(-6px); }
+      55% { transform: scale(0.92, 1.18) rotate(14deg) translateY(-14px); }
+      80% { transform: scale(1.08) rotate(-6deg) translateY(-4px); }
+      100% { transform: scale(1) rotate(0deg) translateY(0); }
+    }
+
+    .gain-popup {
+      position: absolute;
+      top: -22px;
+      background: #fef08a;
+      color: #422006;
       font-weight: 900;
-    }
-    .team-avg-note {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #cbd5e1;
-      margin-top: 2px;
-    }
-    .team-members {
       font-size: 0.78rem;
-      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 999px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+      white-space: nowrap;
+      animation: popUpFade 1.5s ease-out forwards;
+    }
+    @keyframes popUpFade {
+      0% { opacity: 0; transform: translateY(6px) scale(0.8); }
+      20% { opacity: 1; transform: translateY(-4px) scale(1.05); }
+      80% { opacity: 1; transform: translateY(-12px) scale(1); }
+      100% { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    }
+
+    .team-score { font-size: 1.5rem; font-weight: 900; }
+    .team-avg-note { font-size: 0.76rem; font-weight: 700; color: #cbd5e1; margin-top: 2px; }
+    .team-members {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 8px;
+      min-height: 34px;
+    }
+    .member-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.07);
+      padding: 2px 7px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      color: #e2e8f0;
+    }
+    .kick-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .kick-btn:hover { color: var(--danger); }
+
+    /* Individual Mode Arena */
+    .indiv-arena {
+      background: var(--surface);
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .indiv-podium-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .indiv-tower-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 10px 8px;
       text-align: center;
-      margin-top: 6px;
-      min-height: 32px;
+    }
+    .indiv-tower-card.rank-1 { border-color: #fbbf24; box-shadow: 0 0 16px rgba(251, 191, 36, 0.2); }
+    .indiv-tower-card.rank-2 { border-color: #cbd5e1; }
+    .indiv-tower-card.rank-3 { border-color: #d97706; }
+
+    .indiv-track {
+      height: 195px;
+      position: relative;
+      background: linear-gradient(180deg, #0b132b 0%, #1e293b 100%);
+      border-radius: 10px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+    .indiv-fill {
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      right: 20%;
+      background: repeating-linear-gradient(
+        to top,
+        #3b82f6 0px,
+        #3b82f6 16px,
+        #2563eb 16px,
+        #2563eb 18px
+      );
+      border-radius: 6px 6px 0 0;
+      transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.3);
+    }
+    .indiv-runner {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2.1rem;
+      transition: bottom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 2;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+    }
+    .indiv-roster {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .roster-chip {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+    }
+    .roster-chip.answered { border-color: rgba(16, 185, 129, 0.5); }
+
+    /* Final Animated Podium */
+    .final-podium-banner {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+      border: 2px solid #fbbf24;
+      border-radius: 20px;
+      padding: 22px;
+      margin-top: 18px;
+      text-align: center;
+      box-shadow: 0 12px 35px rgba(251, 191, 36, 0.18);
+    }
+    .podium-stage {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 14px;
+      margin: 20px auto 12px;
+      max-width: 620px;
+    }
+    .podium-step {
+      flex: 1;
+      border-radius: 14px 14px 4px 4px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      animation: podiumRise 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes podiumRise {
+      from { transform: translateY(30px) scaleY(0.4); opacity: 0; }
+      to { transform: translateY(0) scaleY(1); opacity: 1; }
+    }
+    .podium-1 {
+      min-height: 165px;
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.35), rgba(217, 119, 6, 0.25));
+      border: 2px solid #fbbf24;
+      order: 2;
+    }
+    .podium-2 {
+      min-height: 130px;
+      background: linear-gradient(180deg, rgba(203, 213, 225, 0.28), rgba(100, 116, 139, 0.2));
+      border: 2px solid #cbd5e1;
+      order: 1;
+    }
+    .podium-3 {
+      min-height: 105px;
+      background: linear-gradient(180deg, rgba(217, 119, 6, 0.28), rgba(146, 64, 14, 0.2));
+      border: 2px solid #d97706;
+      order: 3;
     }
 
     /* Sidebar: PIN, QR & Category Analytics */
@@ -387,14 +806,9 @@
       margin: 10px auto;
       transition: transform 0.3s;
     }
-    #qrcode.compact {
-      transform: scale(0.65);
-      margin: -18px auto;
-    }
+    #qrcode.compact { transform: scale(0.65); margin: -18px auto; }
 
-    .stat-row {
-      margin-bottom: 12px;
-    }
+    .stat-row { margin-bottom: 12px; }
     .stat-label {
       display: flex;
       justify-content: space-between;
@@ -417,7 +831,7 @@
 
     /* ==================== STUDENT CONTROLLER (/PLAY) ==================== */
     .student-box {
-      max-width: 620px;
+      max-width: 640px;
       margin: 0 auto;
       background: var(--surface);
       border-radius: 22px;
@@ -429,19 +843,24 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
-      margin: 14px 0 20px;
+      margin: 12px 0 20px;
     }
     .team-choice {
       background: var(--bg);
       border: 2px solid rgba(255,255,255,0.12);
       border-radius: 14px;
-      padding: 14px;
+      padding: 12px;
       text-align: center;
       cursor: pointer;
       font-weight: 800;
       color: var(--text);
       transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
+    .team-choice small { font-size: 0.74rem; font-weight: 600; color: var(--muted); }
+    .team-choice.full { opacity: 0.42; cursor: not-allowed; border-style: dashed; }
     .team-choice.selected[data-team="0"] { border-color: var(--team-0); background: rgba(239, 68, 68, 0.2); }
     .team-choice.selected[data-team="1"] { border-color: var(--team-1); background: rgba(16, 185, 129, 0.2); }
     .team-choice.selected[data-team="2"] { border-color: var(--team-2); background: rgba(59, 130, 246, 0.2); }
@@ -464,17 +883,17 @@
     }
     .pill-options {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
       gap: 8px;
     }
     .pill-btn {
       background: var(--surface);
       color: var(--text);
       border: 2px solid transparent;
-      padding: 10px 6px;
+      padding: 10px 8px;
       border-radius: 10px;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       cursor: pointer;
       transition: all 0.12s;
     }
@@ -503,11 +922,11 @@
     /* ==================== TEACHER EDITOR (/ADMIN) ==================== */
     .admin-grid {
       display: grid;
-      grid-template-columns: 380px 1fr;
+      grid-template-columns: 410px 1fr;
       gap: 22px;
       align-items: start;
     }
-    @media (max-width: 960px) {
+    @media (max-width: 980px) {
       .admin-grid { grid-template-columns: 1fr; }
     }
     .card-panel {
@@ -520,23 +939,24 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 12px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
     .word-table th, .word-table td {
-      padding: 10px 12px;
+      padding: 10px 10px;
       text-align: left;
       border-bottom: 1px solid rgba(255,255,255,0.08);
+      vertical-align: top;
     }
     .word-table th {
       color: var(--muted);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
     }
     .tag {
       display: inline-block;
-      padding: 3px 9px;
+      padding: 3px 8px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       background: rgba(59, 130, 246, 0.18);
       color: #93c5fd;
@@ -551,12 +971,19 @@
       border-radius: 12px;
       padding: 12px;
       margin: 14px 0;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
+    }
+    .custom-schema-box {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
     }
 
-    /* Modal / Final Report */
+    /* Final Report */
     .report-box {
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.92);
       border: 2px solid var(--warning);
       border-radius: 18px;
       padding: 20px;
@@ -566,10 +993,12 @@
 </head>
 <body>
 
+  <canvas id="confetti-canvas"></canvas>
+
   <!-- TOP BAR -->
   <header class="topbar">
     <div class="brand">
-      <span>🏰 Sustantivo Quest</span>
+      <span>🏰 Lengua Quest</span>
       <span class="brand-badge">6.º Primaria</span>
     </div>
     <nav class="nav-tabs">
@@ -578,9 +1007,14 @@
       <button class="nav-btn" onclick="switchView('play')" id="tab-play">💻 Mando Alumno</button>
       <button class="nav-btn" onclick="switchView('admin')" id="tab-admin">✏️ Editor del Profesor</button>
     </nav>
-    <div class="conn-pill" title="Estado de sincronización en tiempo real en el aula">
-      <span class="dot" id="conn-dot"></span>
-      <span id="conn-text">Conectando aula...</span>
+    <div class="topbar-right">
+      <button class="sound-toggle" id="sound-toggle-btn" onclick="toggleSound()" title="Activar o silenciar efectos de sonido">
+        🔊 Sonido ON
+      </button>
+      <div class="conn-pill" title="Estado de sincronización en tiempo real en el aula">
+        <span class="dot" id="conn-dot"></span>
+        <span id="conn-text">Conectando aula...</span>
+      </div>
     </div>
   </header>
 
@@ -588,10 +1022,10 @@
 
     <!-- ==================== 1. HOME / ROLE SELECTOR ==================== -->
     <section id="view-home">
-      <div style="text-align:center; max-width:740px; margin: 12px auto 28px;">
-        <h1 style="font-size:2.2rem; font-weight:900; margin-bottom:10px;">Juego de Lengua en Directo para el Aula</h1>
+      <div style="text-align:center; max-width:780px; margin: 12px auto 28px;">
+        <h1 style="font-size:2.2rem; font-weight:900; margin-bottom:10px;">Plataforma Multitemática de Lengua para el Aula</h1>
         <p style="color:var(--muted); font-size:1.05rem;">
-          Proyecta la carrera de equipos en la pizarra digital, deja que cada alumno responda desde su ordenador y edita tus propios desafíos con la regla gramatical de <strong>«No procede»</strong>.
+          Escalada de torres con <strong>🐒 Mono, 🦍 Gorila, 🐨 Koala y 🐿️ Ardilla</strong>, modos <strong>Individual</strong> o <strong>Grupos equilibrados</strong>, temporizador, rachas, exportación a Excel y plantillas para <strong>Sustantivos, Verbos, Adjetivos, Ortografía o temas libres</strong>.
         </p>
       </div>
 
@@ -600,7 +1034,7 @@
           <div>
             <div class="role-icon">📺</div>
             <h2>1. Pizarra Digital (Proyector)</h2>
-            <p>Abre esta pantalla en el ordenador del profesor. Genera un código PIN de sala, muestra las 4 torres de equipos (puntuación media equitativa) y analiza en qué categoría falla más la clase.</p>
+            <p>Proyecta la carrera de torres, activa el temporizador, modera jugadores, observa las rachas en directo y exporta las notas de la clase en CSV al terminar.</p>
           </div>
           <button class="btn btn-primary">Abrir Pizarra Digital →</button>
         </div>
@@ -609,7 +1043,7 @@
           <div>
             <div class="role-icon">💻</div>
             <h2>2. Ordenador del Alumno</h2>
-            <p>Cada alumno entra aquí, escribe el PIN de la pizarra, elige su equipo y clasifica cada sustantivo (incluyendo cuándo una categoría «No procede»).</p>
+            <p>Entra con el PIN de la pizarra (con reconexión automática si recargan la página), lee la oración de contexto y responde antes de que acabe el reloj.</p>
           </div>
           <button class="btn btn-success">Entrar como Alumno →</button>
         </div>
@@ -617,10 +1051,10 @@
         <div class="role-card" onclick="switchView('admin')">
           <div>
             <div class="role-icon">✏️</div>
-            <h2>3. Editor de Desafíos (Profesor)</h2>
-            <p>Crea nuevos desafíos o añade palabras trabajadas en clase con desplegables visuales. Ya incluye los 4 desafíos corregidos (concretos, colectivos y abstractos).</p>
+            <h2>3. Editor Multitemático (Profesor)</h2>
+            <p>Crea desafíos nuevos eligiendo plantilla de <strong>Sustantivos, Verbos, Adjetivos, Acentuación o Libre</strong>, añade oraciones de ejemplo y guarda copias en JSON.</p>
           </div>
-          <button class="btn btn-warning">Editar Palabras y Desafíos →</button>
+          <button class="btn btn-warning">Crear y Editar Contenidos →</button>
         </div>
       </div>
     </section>
@@ -628,15 +1062,65 @@
     <!-- ==================== 2. PIZARRA DIGITAL (/BOARD) ==================== -->
     <section id="view-board" class="hidden">
       <div class="board-header-card">
-        <div class="controls-row">
-          <label style="font-weight:700; color:var(--muted);">Desafío:</label>
-          <select id="board-challenge-select" class="dark-select" onchange="onSelectChallenge()"></select>
+        <!-- Row 1: Pedagogical & Match Configuration -->
+        <div class="board-config-bar">
+          <div class="controls-row">
+            <div class="cfg-group">
+              <span class="cfg-label">📚 Desafío:</span>
+              <select id="board-challenge-select" class="dark-select" onchange="onSelectChallenge()"></select>
+            </div>
+
+            <div class="cfg-group">
+              <span class="cfg-label">🎮 Modo:</span>
+              <select id="board-mode-select" class="dark-select" onchange="onChangeGameMode()">
+                <option value="teams">👥 En Grupos (4 torres)</option>
+                <option value="individual">👤 Individual (Todos contra todos)</option>
+              </select>
+            </div>
+
+            <div class="cfg-group" id="team-assign-group">
+              <span class="cfg-label">⚖️ Reparto:</span>
+              <select id="board-team-assign" class="dark-select" onchange="onChangeTeamAssignMode()">
+                <option value="random">🎲 Aleatorio equilibrado</option>
+                <option value="balanced_choice">✋ Elección equilibrada (±1)</option>
+              </select>
+              <button class="btn btn-ghost" style="padding:7px 11px; font-size:0.82rem;" onclick="shuffleTeamsBalanced()" title="Mezclar aleatoriamente a todos los alumnos en 4 grupos iguales">
+                🔀 Mezclar
+              </button>
+            </div>
+
+            <div class="cfg-group">
+              <span class="cfg-label">⏱️ Tiempo:</span>
+              <select id="board-timer-select" class="dark-select" onchange="onChangeTimerSetting()">
+                <option value="15">15 segundos</option>
+                <option value="30" selected>30 segundos</option>
+                <option value="60">1 minuto (60 s)</option>
+                <option value="0">Sin límite</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div class="controls-row">
-          <button class="btn btn-success" id="btn-start" onclick="boardStartRound()">▶️ Empezar</button>
-          <button class="btn btn-warning" id="btn-reveal" onclick="boardReveal()" disabled>👁️ Revelar</button>
-          <button class="btn btn-primary" id="btn-next" onclick="boardNext()" disabled>⏭️ Siguiente</button>
-          <button class="btn btn-danger" id="btn-reset" onclick="boardReset()">🔄 Reiniciar</button>
+
+        <!-- Row 2: Live Round Controls -->
+        <div class="board-actions-bar">
+          <div class="controls-row">
+            <button class="btn btn-success" id="btn-start" onclick="boardStartRound()">▶️ Empezar</button>
+            <button class="btn btn-warning" id="btn-reveal" onclick="boardReveal()" disabled>👁️ Revelar ahora</button>
+            <button class="btn btn-primary" id="btn-next" onclick="boardNext()" disabled>⏭️ Siguiente</button>
+            <button class="btn btn-danger" id="btn-reset" onclick="boardReset()">🔄 Reiniciar</button>
+          </div>
+          <div class="controls-row">
+            <label style="font-size:0.82rem; color:var(--muted); display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="chk-auto-reveal" checked />
+              Auto-revelar si responden todos
+            </label>
+            <button class="btn btn-ghost" style="padding:7px 12px; font-size:0.82rem;" onclick="simulateClassroomAction()" title="Simular alumnos entrando o respondiendo para probar las torres">
+              🤖 Simular clase
+            </button>
+            <button class="btn btn-ghost" style="padding:7px 12px; font-size:0.82rem;" onclick="SoundEngine.playTestFanfare()">
+              🔔 Sonido
+            </button>
+          </div>
         </div>
       </div>
 
@@ -646,64 +1130,114 @@
           <div class="word-stage">
             <div class="round-badge" id="board-round-info">Sala lista · Esperando alumnos</div>
             <div class="active-word" id="board-word">¿Preparados?</div>
+            <div class="context-quote hidden" id="board-context"></div>
+
+            <!-- Live Countdown Timer -->
+            <div class="timer-banner hidden" id="board-timer-banner">
+              <div class="timer-pill" id="board-timer-text">00:30</div>
+              <div class="timer-track">
+                <div class="timer-fill" id="board-timer-bar"></div>
+              </div>
+            </div>
+
             <div style="color:var(--muted); font-size:0.95rem;" id="board-subinfo">
-              Pulsa <strong>Empezar</strong> cuando los alumnos estén conectados en sus equipos.
+              Pulsa <strong>Empezar</strong> cuando los alumnos estén conectados (o usa <strong>🤖 Simular clase</strong> para probarlo ahora).
             </div>
             <div class="reveal-chips hidden" id="board-reveal-chips"></div>
+            <div class="explanation-box hidden" id="board-explanation"></div>
           </div>
 
-          <!-- 4 Team Towers (Normalized Average Score per Team Member) -->
-          <div class="towers-grid">
-            <div class="tower-lane" data-team="0">
-              <div style="font-weight:800; color:var(--team-0);">🦊 Equipo Zorro</div>
+          <!-- A) Kahoot-Style 4 Climbing Towers Arena (Visible in 'teams' mode) -->
+          <div class="towers-grid" id="board-teams-arena">
+            <!-- Tower 0: Mono -->
+            <div class="tower-lane" data-team="0" id="lane-0">
+              <div class="tower-title" style="color:var(--team-0);">🐒 Equipo Mono</div>
               <div class="tower-track">
-                <div class="tower-fill" id="fill-0" style="background:var(--team-0);"></div>
-                <div class="climber" id="climber-0">🦊</div>
+                <div class="tower-summit-line">CIMA 🏁</div>
+                <div class="tower-vine"></div>
+                <div class="tower-blocks-stack" id="stack-0"></div>
+                <div class="climber-wrapper" id="climber-wrap-0">
+                  <div class="climber-crown hidden" id="crown-0">👑</div>
+                  <div class="climber-mascot">🐒</div>
+                </div>
+                <div class="tower-ground"></div>
               </div>
               <div class="team-score" id="score-0" style="color:var(--team-0);">0 pts</div>
-              <div class="team-avg-note" id="avg-note-0">Media de 0 jug.</div>
-              <div class="team-members" id="members-0">Sin jugadores</div>
+              <div class="team-avg-note" id="avg-note-0">0 pisos · 0 jug.</div>
+              <div class="team-members" id="members-0"></div>
             </div>
 
-            <div class="tower-lane" data-team="1">
-              <div style="font-weight:800; color:var(--team-1);">🐢 Equipo Tortuga</div>
+            <!-- Tower 1: Gorila -->
+            <div class="tower-lane" data-team="1" id="lane-1">
+              <div class="tower-title" style="color:var(--team-1);">🦍 Equipo Gorila</div>
               <div class="tower-track">
-                <div class="tower-fill" id="fill-1" style="background:var(--team-1);"></div>
-                <div class="climber" id="climber-1">🐢</div>
+                <div class="tower-summit-line">CIMA 🏁</div>
+                <div class="tower-vine"></div>
+                <div class="tower-blocks-stack" id="stack-1"></div>
+                <div class="climber-wrapper" id="climber-wrap-1">
+                  <div class="climber-crown hidden" id="crown-1">👑</div>
+                  <div class="climber-mascot">🦍</div>
+                </div>
+                <div class="tower-ground"></div>
               </div>
               <div class="team-score" id="score-1" style="color:var(--team-1);">0 pts</div>
-              <div class="team-avg-note" id="avg-note-1">Media de 0 jug.</div>
-              <div class="team-members" id="members-1">Sin jugadores</div>
+              <div class="team-avg-note" id="avg-note-1">0 pisos · 0 jug.</div>
+              <div class="team-members" id="members-1"></div>
             </div>
 
-            <div class="tower-lane" data-team="2">
-              <div style="font-weight:800; color:var(--team-2);">🦉 Equipo Búho</div>
+            <!-- Tower 2: Koala -->
+            <div class="tower-lane" data-team="2" id="lane-2">
+              <div class="tower-title" style="color:var(--team-2);">🐨 Equipo Koala</div>
               <div class="tower-track">
-                <div class="tower-fill" id="fill-2" style="background:var(--team-2);"></div>
-                <div class="climber" id="climber-2">🦉</div>
+                <div class="tower-summit-line">CIMA 🏁</div>
+                <div class="tower-vine"></div>
+                <div class="tower-blocks-stack" id="stack-2"></div>
+                <div class="climber-wrapper" id="climber-wrap-2">
+                  <div class="climber-crown hidden" id="crown-2">👑</div>
+                  <div class="climber-mascot">🐨</div>
+                </div>
+                <div class="tower-ground"></div>
               </div>
               <div class="team-score" id="score-2" style="color:var(--team-2);">0 pts</div>
-              <div class="team-avg-note" id="avg-note-2">Media de 0 jug.</div>
-              <div class="team-members" id="members-2">Sin jugadores</div>
+              <div class="team-avg-note" id="avg-note-2">0 pisos · 0 jug.</div>
+              <div class="team-members" id="members-2"></div>
             </div>
 
-            <div class="tower-lane" data-team="3">
-              <div style="font-weight:800; color:var(--team-3);">🦁 Equipo León</div>
+            <!-- Tower 3: Ardilla -->
+            <div class="tower-lane" data-team="3" id="lane-3">
+              <div class="tower-title" style="color:var(--team-3);">🐿️ Equipo Ardilla</div>
               <div class="tower-track">
-                <div class="tower-fill" id="fill-3" style="background:var(--team-3);"></div>
-                <div class="climber" id="climber-3">🦁</div>
+                <div class="tower-summit-line">CIMA 🏁</div>
+                <div class="tower-vine"></div>
+                <div class="tower-blocks-stack" id="stack-3"></div>
+                <div class="climber-wrapper" id="climber-wrap-3">
+                  <div class="climber-crown hidden" id="crown-3">👑</div>
+                  <div class="climber-mascot">🐿️</div>
+                </div>
+                <div class="tower-ground"></div>
               </div>
               <div class="team-score" id="score-3" style="color:var(--team-3);">0 pts</div>
-              <div class="team-avg-note" id="avg-note-3">Media de 0 jug.</div>
-              <div class="team-members" id="members-3">Sin jugadores</div>
+              <div class="team-avg-note" id="avg-note-3">0 pisos · 0 jug.</div>
+              <div class="team-members" id="members-3"></div>
             </div>
           </div>
 
-          <!-- End of Challenge Pedagogical Report -->
+          <!-- B) Individual Race Arena (Visible in 'individual' mode) -->
+          <div class="indiv-arena hidden" id="board-indiv-arena">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h3 style="font-size:1.05rem;">🏆 Escalada Individual · Podio en directo</h3>
+              <span style="font-size:0.82rem; color:var(--muted);">✅ = respondió · 🔥 = racha de plenos</span>
+            </div>
+            <div class="indiv-podium-grid" id="indiv-podium-grid"></div>
+            <div class="indiv-roster" id="indiv-roster"></div>
+          </div>
+
+          <!-- Animated Final Podium + Pedagogical Report + CSV Export -->
+          <div id="board-final-podium" class="final-podium-banner hidden"></div>
           <div id="board-final-report" class="report-box hidden"></div>
         </div>
 
-        <!-- Right Sidebar: Join PIN + QR + Live Class Analytics -->
+        <!-- Right Sidebar: Join PIN + QR + Dynamic Category Analytics -->
         <div>
           <div class="side-card">
             <div style="font-size:0.85rem; color:var(--muted); text-align:center; font-weight:700;">CÓDIGO DE SALA PARA ALUMNOS</div>
@@ -716,29 +1250,14 @@
               Conectados: <strong id="board-player-count" style="color:#fff;">0</strong> alumnos ·
               Respuestas ronda: <strong id="board-answer-count" style="color:#6ee7b7;">0</strong>
             </div>
-            <p style="font-size:0.76rem; color:var(--muted); text-align:center; margin-top:8px;">
-              ⚖️ Puntuación normalizada (media por jugador): los equipos compiten en igualdad aunque tengan distinto número de miembros.
+            <p id="sidebar-mode-note" style="font-size:0.76rem; color:var(--muted); text-align:center; margin-top:8px;">
+              ⚖️ Grupos equilibrados (±1 jugador máx.) y altura de torre por media de equipo.
             </p>
           </div>
 
           <div class="side-card">
             <h3 style="font-size:1rem; margin-bottom:12px;">📊 Acierto de la clase por categoría</h3>
-            <div class="stat-row">
-              <div class="stat-label"><span>1. Común / Propio</span><span id="pct-c0">—</span></div>
-              <div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-c0"></div></div>
-            </div>
-            <div class="stat-row">
-              <div class="stat-label"><span>2. Concreto / Abstracto</span><span id="pct-c1">—</span></div>
-              <div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-c1"></div></div>
-            </div>
-            <div class="stat-row">
-              <div class="stat-label"><span>3. Contable / No contable</span><span id="pct-c2">—</span></div>
-              <div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-c2"></div></div>
-            </div>
-            <div class="stat-row">
-              <div class="stat-label"><span>4. Individual / Colectivo</span><span id="pct-c3">—</span></div>
-              <div class="stat-bar-bg"><div class="stat-bar-fill" id="bar-c3"></div></div>
-            </div>
+            <div id="board-dynamic-stats"></div>
             <p style="font-size:0.78rem; color:var(--muted); margin-top:8px;">
               Si una barra baja del 60 % (en rojo), ya sabes qué concepto repasar mañana en clase.
             </p>
@@ -756,20 +1275,42 @@
 
         <div style="margin-bottom:14px;">
           <label style="display:block; font-weight:700; margin-bottom:6px;">Código PIN de la pizarra</label>
-          <input type="text" id="join-pin" class="dark-input" placeholder="Ej. 4821" maxlength="6" style="width:100%; font-size:1.3rem; text-align:center; letter-spacing:0.15em;" />
+          <input type="text" id="join-pin" class="dark-input" placeholder="Ej. 4821" maxlength="6" style="width:100%; font-size:1.3rem; text-align:center; letter-spacing:0.15em;" oninput="onStudentPinTyped()" />
         </div>
 
-        <div style="margin-bottom:14px;">
+        <div style="margin-bottom:16px;">
           <label style="display:block; font-weight:700; margin-bottom:6px;">Tu nombre</label>
           <input type="text" id="join-name" class="dark-input" placeholder="Escribe tu nombre..." maxlength="22" style="width:100%;" />
         </div>
 
-        <label style="display:block; font-weight:700;">Elige tu equipo</label>
-        <div class="team-picker">
-          <div class="team-choice selected" data-team="0" onclick="selectStudentTeam(0)">🦊 Equipo Zorro</div>
-          <div class="team-choice" data-team="1" onclick="selectStudentTeam(1)">🐢 Equipo Tortuga</div>
-          <div class="team-choice" data-team="2" onclick="selectStudentTeam(2)">🦉 Equipo Búho</div>
-          <div class="team-choice" data-team="3" onclick="selectStudentTeam(3)">🦁 Equipo León</div>
+        <!-- Team selection section (adapts automatically to board mode!) -->
+        <div id="student-team-section">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label style="font-weight:700;">Equipo escalador</label>
+            <span id="student-assign-hint" style="font-size:0.78rem; color:#93c5fd;">Reparto equilibrado en aula</span>
+          </div>
+          <div class="team-picker" id="student-team-picker">
+            <div class="team-choice selected" data-team="0" onclick="selectStudentTeam(0)">
+              <span>🐒 Equipo Mono</span>
+              <small id="team-slot-0">Disponible</small>
+            </div>
+            <div class="team-choice" data-team="1" onclick="selectStudentTeam(1)">
+              <span>🦍 Equipo Gorila</span>
+              <small id="team-slot-1">Disponible</small>
+            </div>
+            <div class="team-choice" data-team="2" onclick="selectStudentTeam(2)">
+              <span>🐨 Equipo Koala</span>
+              <small id="team-slot-2">Disponible</small>
+            </div>
+            <div class="team-choice" data-team="3" onclick="selectStudentTeam(3)">
+              <span>🐿️ Equipo Ardilla</span>
+              <small id="team-slot-3">Disponible</small>
+            </div>
+          </div>
+        </div>
+
+        <div id="student-mode-banner" class="preview-banner hidden" style="text-align:center;">
+          El profesor ha activado el modo <strong>Individual</strong> o <strong>Reparto Aleatorio</strong>: ¡entra directo con tu nombre!
         </div>
 
         <button class="btn btn-success" style="width:100%; font-size:1.1rem; padding:14px;" onclick="studentJoinRoom()">
@@ -779,69 +1320,44 @@
 
       <!-- Active Controller Screen -->
       <div id="student-game-card" class="student-box hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); flex-wrap:wrap; gap:8px;">
           <div>
-            <span id="stu-badge-team" style="font-weight:800;">🦊 Equipo Zorro</span> ·
+            <span id="stu-badge-team" style="font-weight:800;">👤 Modo Individual</span> ·
             <strong id="stu-badge-name">Alumno</strong>
+            <span id="stu-streak-badge" class="hidden" style="margin-left:6px; background:rgba(245,158,11,0.22); color:#fcd34d; padding:2px 8px; border-radius:999px; font-size:0.78rem; font-weight:800;">🔥 x2</span>
           </div>
-          <div style="font-weight:800; color:#93c5fd;" id="stu-points-label">Mis puntos: 0</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-weight:800; color:#93c5fd;" id="stu-points-label">Mis puntos: 0</span>
+            <button class="btn btn-ghost" style="padding:4px 9px; font-size:0.75rem;" onclick="leaveStudentRoom()" title="Cambiar de sala o nombre">Salir</button>
+          </div>
         </div>
 
         <!-- Waiting State -->
         <div id="stu-wait-box" style="text-align:center; padding:32px 12px;">
           <div style="font-size:3rem; margin-bottom:10px;">⏳</div>
           <h3 id="stu-wait-title" style="font-size:1.35rem; margin-bottom:6px;">¡Ya estás dentro!</h3>
-          <p id="stu-wait-desc" style="color:var(--muted);">Mira la pizarra digital. Cuando el profe pulse Empezar aparecerá aquí la palabra.</p>
+          <p id="stu-wait-desc" style="color:var(--muted);">Mira la pizarra digital. Cuando el profe pulse Empezar aparecerá aquí la pregunta.</p>
         </div>
 
-        <!-- Question Form -->
+        <!-- Dynamic Question Form -->
         <div id="stu-question-box" class="hidden">
-          <div style="text-align:center; margin-bottom:16px;">
-            <span class="round-badge" id="stu-round-badge">Palabra 1</span>
-            <div style="font-size:2.4rem; font-weight:900; color:#fff;" id="stu-current-word">arena</div>
-            <p style="font-size:0.85rem; color:var(--muted);">Marca las 4 filas (elige «No procede» si esa categoría no se aplica).</p>
+          <div style="text-align:center; margin-bottom:14px;">
+            <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:6px;">
+              <span class="round-badge" id="stu-round-badge" style="margin:0;">Pregunta 1</span>
+              <span class="timer-pill hidden" id="stu-timer-pill" style="font-size:1rem; min-width:72px; padding:3px 10px;">00:30</span>
+            </div>
+            <div style="font-size:2.3rem; font-weight:900; color:#fff;" id="stu-current-word">arena</div>
+            <div class="context-quote hidden" id="stu-current-context" style="font-size:0.95rem;"></div>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:4px;">Marca todas las filas antes de enviar.</p>
           </div>
 
-          <div class="cat-group">
-            <div class="cat-title">1. Según su extensión</div>
-            <div class="pill-options" data-cat="0">
-              <button type="button" class="pill-btn" onclick="pickOption(0, 'Común', this)">Común</button>
-              <button type="button" class="pill-btn" onclick="pickOption(0, 'Propio', this)">Propio</button>
-              <button type="button" class="pill-btn na-opt" onclick="pickOption(0, 'No procede', this)">No procede</button>
-            </div>
-          </div>
-
-          <div class="cat-group">
-            <div class="cat-title">2. Según cómo se percibe</div>
-            <div class="pill-options" data-cat="1">
-              <button type="button" class="pill-btn" onclick="pickOption(1, 'Concreto', this)">Concreto</button>
-              <button type="button" class="pill-btn" onclick="pickOption(1, 'Abstracto', this)">Abstracto</button>
-              <button type="button" class="pill-btn na-opt" onclick="pickOption(1, 'No procede', this)">No procede</button>
-            </div>
-          </div>
-
-          <div class="cat-group">
-            <div class="cat-title">3. Según si se puede contar</div>
-            <div class="pill-options" data-cat="2">
-              <button type="button" class="pill-btn" onclick="pickOption(2, 'Contable', this)">Contable</button>
-              <button type="button" class="pill-btn" onclick="pickOption(2, 'No contable', this)">No contable</button>
-              <button type="button" class="pill-btn na-opt" onclick="pickOption(2, 'No procede', this)">No procede</button>
-            </div>
-          </div>
-
-          <div class="cat-group">
-            <div class="cat-title">4. Según la cantidad en singular</div>
-            <div class="pill-options" data-cat="3">
-              <button type="button" class="pill-btn" onclick="pickOption(3, 'Individual', this)">Individual</button>
-              <button type="button" class="pill-btn" onclick="pickOption(3, 'Colectivo', this)">Colectivo</button>
-              <button type="button" class="pill-btn na-opt" onclick="pickOption(3, 'No procede', this)">No procede</button>
-            </div>
-          </div>
+          <div id="stu-dynamic-categories"></div>
 
           <button id="stu-submit-btn" class="btn btn-primary" style="width:100%; font-size:1.1rem; padding:14px; margin-top:8px;" onclick="submitStudentAnswer()">
             ✅ Enviar respuesta
           </button>
           <div id="stu-feedback-msg" style="text-align:center; margin-top:12px; font-weight:700;"></div>
+          <div id="stu-explanation-box" class="explanation-box hidden" style="text-align:left;"></div>
         </div>
       </div>
     </section>
@@ -850,8 +1366,8 @@
     <section id="view-admin" class="hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
         <div>
-          <h2 style="font-size:1.6rem; font-weight:900;">✏️ Editor de Contenidos y Desafíos</h2>
-          <p style="color:var(--muted);">Añade o corrige palabras sin tocar código. Marca <strong>«No procede»</strong> en las categorías que no se pregunten (como en los abstractos o propios).</p>
+          <h2 style="font-size:1.6rem; font-weight:900;">✏️ Editor Multitemático de Contenidos</h2>
+          <p style="color:var(--muted);">Crea desafíos de <strong>Sustantivos, Verbos, Adjetivos, Ortografía o temas personalizados</strong>, añade oraciones de contexto y guarda copias.</p>
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn btn-ghost" onclick="exportChallengesJSON()">💾 Guardar copia (.json)</button>
@@ -864,60 +1380,79 @@
       </div>
 
       <div class="admin-grid">
-        <!-- Left Form: Create Challenge + Add/Edit Word -->
+        <!-- Left Column: Challenge Selector, Multi-Topic Creator & Item Editor -->
         <div>
           <div class="card-panel" style="margin-bottom:18px;">
-            <h3 style="margin-bottom:10px;">📁 Desafío activo</h3>
-            <select id="admin-challenge-select" class="dark-select" style="width:100%; margin-bottom:12px;" onchange="renderAdminTable()"></select>
+            <h3 style="margin-bottom:10px;">📁 Seleccionar desafío</h3>
+            <select id="admin-challenge-select" class="dark-select" style="width:100%; margin-bottom:10px;" onchange="onAdminChallengeChanged()"></select>
             <div style="display:flex; gap:8px;">
-              <input type="text" id="new-challenge-name" class="dark-input" placeholder="Nuevo desafío (ej. Tema 3: Verbos)" style="flex:1;" />
-              <button class="btn btn-primary" onclick="createNewChallenge()">+ Crear</button>
+              <button class="btn btn-ghost" style="flex:1; padding:7px 10px; font-size:0.82rem;" onclick="duplicateCurrentChallenge()">📋 Duplicar</button>
+              <button class="btn btn-danger" style="padding:7px 10px; font-size:0.82rem;" onclick="deleteCurrentChallenge()">🗑️ Borrar</button>
             </div>
           </div>
 
+          <div class="card-panel" style="margin-bottom:18px;">
+            <h3 style="margin-bottom:10px;">🆕 Crear nuevo desafío (cualquier tema)</h3>
+            <div style="margin-bottom:8px;">
+              <input type="text" id="new-challenge-name" class="dark-input" placeholder="Título (ej. Tema 5: Los Verbos)" style="width:100%;" />
+            </div>
+            <div style="margin-bottom:8px;">
+              <label style="display:block; font-size:0.8rem; color:var(--muted); font-weight:700; margin-bottom:4px;">Tipo de contenido / plantilla:</label>
+              <select id="new-challenge-template" class="dark-select" style="width:100%;" onchange="toggleCustomSchemaEditor()">
+                <option value="sustantivos">📘 Sustantivos (4 categorías)</option>
+                <option value="verbos">📗 Verbos (Persona, Número, Tiempo, Conjugación)</option>
+                <option value="adjetivos">📙 Adjetivos (Género, Número, Grado, Tipo)</option>
+                <option value="acentuacion">📕 Acentuación (Sílaba tónica y tilde)</option>
+                <option value="custom">🛠️ Plantilla personalizada a medida</option>
+              </select>
+            </div>
+
+            <!-- Custom Schema Builder (shown when 'custom' is chosen) -->
+            <div id="custom-schema-builder" class="custom-schema-box hidden">
+              <p style="font-size:0.78rem; color:#93c5fd; margin-bottom:8px;">
+                Define de 2 a 4 filas. Escribe las opciones de cada fila separadas por comas:
+              </p>
+              <div style="margin-bottom:6px;">
+                <input type="text" id="cust-lbl-0" class="dark-input" placeholder="Fila 1 (ej. Función sintáctica)" style="width:100%; margin-bottom:4px; padding:6px 10px; font-size:0.82rem;" />
+                <input type="text" id="cust-opt-0" class="dark-input" placeholder="Opciones (ej. Sujeto, Predicado)" style="width:100%; padding:6px 10px; font-size:0.82rem;" />
+              </div>
+              <div style="margin-bottom:6px;">
+                <input type="text" id="cust-lbl-1" class="dark-input" placeholder="Fila 2 (ej. Tipo de predicado)" style="width:100%; margin-bottom:4px; padding:6px 10px; font-size:0.82rem;" />
+                <input type="text" id="cust-opt-1" class="dark-input" placeholder="Opciones (ej. Nominal, Verbal)" style="width:100%; padding:6px 10px; font-size:0.82rem;" />
+              </div>
+              <div style="margin-bottom:6px;">
+                <input type="text" id="cust-lbl-2" class="dark-input" placeholder="Fila 3 (opcional)" style="width:100%; margin-bottom:4px; padding:6px 10px; font-size:0.82rem;" />
+                <input type="text" id="cust-opt-2" class="dark-input" placeholder="Opciones fila 3 (separadas por comas)" style="width:100%; padding:6px 10px; font-size:0.82rem;" />
+              </div>
+              <div>
+                <input type="text" id="cust-lbl-3" class="dark-input" placeholder="Fila 4 (opcional)" style="width:100%; margin-bottom:4px; padding:6px 10px; font-size:0.82rem;" />
+                <input type="text" id="cust-opt-3" class="dark-input" placeholder="Opciones fila 4 (separadas por comas)" style="width:100%; padding:6px 10px; font-size:0.82rem;" />
+              </div>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="createNewChallenge()">+ Crear desafío</button>
+          </div>
+
+          <!-- Dynamic Word / Item Form -->
           <div class="card-panel">
-            <h3 id="editor-form-title" style="margin-bottom:12px;">➕ Añadir palabra al desafío</h3>
+            <h3 id="editor-form-title" style="margin-bottom:12px;">➕ Añadir elemento al desafío</h3>
             <input type="hidden" id="edit-word-index" value="-1" />
 
-            <div style="margin-bottom:12px;">
-              <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:4px;">Palabra que verán los alumnos</label>
-              <input type="text" id="ed-word" class="dark-input" placeholder="Ej. alegría, arena, lápiz..." style="width:100%;" oninput="updateEditorPreview()" />
+            <div style="margin-bottom:10px;">
+              <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:4px;">Palabra o expresión principal</label>
+              <input type="text" id="ed-word" class="dark-input" placeholder="Ej. banco, cantábamos, veloz..." style="width:100%;" oninput="updateEditorPreview()" />
             </div>
 
             <div style="margin-bottom:10px;">
-              <label style="display:block; font-size:0.82rem; color:var(--muted); font-weight:700;">1. Común / Propio</label>
-              <select id="ed-c0" class="dark-select" style="width:100%;" onchange="autoSuggestGrammaticalRule()">
-                <option value="Común">Común</option>
-                <option value="Propio">Propio</option>
-                <option value="No procede">No procede</option>
-              </select>
+              <label style="display:block; font-size:0.82rem; color:var(--muted); font-weight:700; margin-bottom:4px;">Oración de contexto (opcional)</label>
+              <input type="text" id="ed-context" class="dark-input" placeholder="Ej. Un banco de peces nadaba cerca." style="width:100%;" />
             </div>
 
-            <div style="margin-bottom:10px;">
-              <label style="display:block; font-size:0.82rem; color:var(--muted); font-weight:700;">2. Concreto / Abstracto</label>
-              <select id="ed-c1" class="dark-select" style="width:100%;" onchange="autoSuggestGrammaticalRule()">
-                <option value="Concreto">Concreto</option>
-                <option value="Abstracto">Abstracto</option>
-                <option value="No procede">No procede</option>
-              </select>
-            </div>
+            <div id="ed-dynamic-dropdowns"></div>
 
             <div style="margin-bottom:10px;">
-              <label style="display:block; font-size:0.82rem; color:var(--muted); font-weight:700;">3. Contable / No contable</label>
-              <select id="ed-c2" class="dark-select" style="width:100%;" onchange="updateEditorPreview()">
-                <option value="Contable">Contable</option>
-                <option value="No contable">No contable</option>
-                <option value="No procede">No procede</option>
-              </select>
-            </div>
-
-            <div style="margin-bottom:10px;">
-              <label style="display:block; font-size:0.82rem; color:var(--muted); font-weight:700;">4. Individual / Colectivo</label>
-              <select id="ed-c3" class="dark-select" style="width:100%;" onchange="updateEditorPreview()">
-                <option value="Individual">Individual</option>
-                <option value="Colectivo">Colectivo</option>
-                <option value="No procede">No procede</option>
-              </select>
+              <label style="display:block; font-size:0.82rem; color:var(--muted); font-weight:700; margin-bottom:4px;">Explicación breve al revelar (opcional)</label>
+              <input type="text" id="ed-explanation" class="dark-input" placeholder="Ej. Es colectivo porque nombra un conjunto en singular." style="width:100%;" />
             </div>
 
             <div class="preview-banner" id="editor-preview">
@@ -925,7 +1460,7 @@
             </div>
 
             <div style="display:flex; gap:8px;">
-              <button class="btn btn-success" style="flex:1;" onclick="saveWordFromEditor()">💾 Guardar palabra</button>
+              <button class="btn btn-success" style="flex:1;" onclick="saveWordFromEditor()">💾 Guardar elemento</button>
               <button class="btn btn-ghost hidden" id="btn-cancel-edit" onclick="cancelEditWord()">Cancelar</button>
             </div>
           </div>
@@ -934,20 +1469,14 @@
         <!-- Right Table: Word List -->
         <div class="card-panel" style="overflow-x:auto;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 id="admin-list-heading">Palabras del desafío</h3>
-            <span id="admin-word-count" class="brand-badge">0 palabras</span>
+            <div>
+              <h3 id="admin-list-heading">Elementos del desafío</h3>
+              <p id="admin-schema-summary" style="font-size:0.82rem; color:var(--muted);"></p>
+            </div>
+            <span id="admin-word-count" class="brand-badge">0 elementos</span>
           </div>
           <table class="word-table">
-            <thead>
-              <tr>
-                <th>Palabra</th>
-                <th>Común / Propio</th>
-                <th>Concreto / Abstr.</th>
-                <th>Contable</th>
-                <th>Indiv. / Colect.</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
+            <thead id="admin-words-thead"></thead>
             <tbody id="admin-words-tbody"></tbody>
           </table>
         </div>
@@ -957,87 +1486,259 @@
   </main>
 
   <script>
-    /* ==================== 1. DEFAULT GRAMMATICALLY CORRECTED BANK ==================== */
+    /* ==================== 0. WEB AUDIO SOUND SYNTHESIZER ==================== */
+    const SoundEngine = (() => {
+      let ctx = null;
+      let enabled = true;
+
+      function ensureCtx() {
+        if (!enabled) return null;
+        if (!ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) ctx = new AudioCtx();
+        }
+        if (ctx && ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+        return ctx;
+      }
+
+      function tone(freq, type, startOffset, duration, vol = 0.16, slideTo = null) {
+        const c = ensureCtx();
+        if (!c) return;
+        const now = c.currentTime + startOffset;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (slideTo) {
+          osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+        }
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      }
+
+      return {
+        isEnabled: () => enabled,
+        setEnabled: (val) => {
+          enabled = val;
+          if (enabled) ensureCtx();
+        },
+        unlock: () => { ensureCtx(); },
+        playClick: () => tone(520, 'sine', 0, 0.07, 0.10, 680),
+        playJoin: () => {
+          tone(440, 'triangle', 0, 0.11, 0.14);
+          tone(659.25, 'triangle', 0.09, 0.16, 0.14);
+        },
+        playShuffle: () => {
+          [330, 392, 494, 587, 659].forEach((f, i) => tone(f, 'sine', i * 0.055, 0.12, 0.13));
+        },
+        playRoundStart: () => {
+          tone(392.00, 'triangle', 0.00, 0.12, 0.16);
+          tone(493.88, 'triangle', 0.10, 0.12, 0.16);
+          tone(587.33, 'triangle', 0.20, 0.14, 0.16);
+          tone(783.99, 'triangle', 0.30, 0.28, 0.18);
+        },
+        playTick: (urgent = false) => {
+          tone(urgent ? 980 : 660, urgent ? 'square' : 'sine', 0, 0.055, urgent ? 0.09 : 0.07);
+        },
+        playTimeUp: () => {
+          tone(440, 'sawtooth', 0.00, 0.22, 0.14, 392);
+          tone(349.23, 'sawtooth', 0.22, 0.38, 0.14, 293.66);
+        },
+        playSubmit: () => {
+          tone(587.33, 'sine', 0.00, 0.10, 0.13);
+          tone(880.00, 'sine', 0.08, 0.18, 0.13);
+        },
+        playRevealPoints: () => {
+          [440, 523.25, 659.25, 783.99, 1046.50].forEach((n, idx) => tone(n, 'triangle', idx * 0.07, 0.22, 0.16));
+        },
+        playStudentResult: (isFullHit, ratio) => {
+          if (isFullHit) {
+            [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((n, i) => tone(n, 'triangle', i * 0.07, 0.24, 0.17));
+          } else if (ratio >= 0.5) {
+            tone(523.25, 'sine', 0, 0.14, 0.15);
+            tone(659.25, 'sine', 0.12, 0.22, 0.15);
+          } else {
+            tone(330, 'sine', 0, 0.18, 0.11, 277.18);
+          }
+        },
+        playVictoryFanfare: () => {
+          const seq = [
+            { f: 523.25, t: 0.00, d: 0.14 },
+            { f: 523.25, t: 0.15, d: 0.14 },
+            { f: 523.25, t: 0.30, d: 0.14 },
+            { f: 659.25, t: 0.45, d: 0.32 },
+            { f: 587.33, t: 0.80, d: 0.18 },
+            { f: 659.25, t: 1.00, d: 0.18 },
+            { f: 783.99, t: 1.20, d: 0.55 }
+          ];
+          seq.forEach(s => tone(s.f, 'triangle', s.t, s.d, 0.18));
+        },
+        playTestFanfare: () => SoundEngine.playRevealPoints()
+      };
+    })();
+
+    function toggleSound() {
+      const next = !SoundEngine.isEnabled();
+      SoundEngine.setEnabled(next);
+      const btn = document.getElementById('sound-toggle-btn');
+      btn.textContent = next ? '🔊 Sonido ON' : '🔇 Silencio';
+      btn.classList.toggle('muted', !next);
+      if (next) SoundEngine.playClick();
+    }
+
+    document.addEventListener('pointerdown', () => SoundEngine.unlock(), { once: true });
+
+    /* ==================== 1. MULTI-TOPIC TEMPLATES & DEFAULT BANK ==================== */
+    const CHALLENGE_TEMPLATES = {
+      sustantivos: {
+        name: 'Sustantivos (6.º Primaria)',
+        schema: [
+          { label: '1. Según su extensión', options: ['Común', 'Propio', 'No procede'] },
+          { label: '2. Según cómo se percibe', options: ['Concreto', 'Abstracto', 'No procede'] },
+          { label: '3. Según si se puede contar', options: ['Contable', 'No contable', 'No procede'] },
+          { label: '4. Según la cantidad en singular', options: ['Individual', 'Colectivo', 'No procede'] }
+        ]
+      },
+      verbos: {
+        name: 'Verbos (Morfología verbal)',
+        schema: [
+          { label: '1. Persona', options: ['1.ª persona', '2.ª persona', '3.ª persona', 'No personal'] },
+          { label: '2. Número', options: ['Singular', 'Plural', 'No procede'] },
+          { label: '3. Tiempo', options: ['Presente', 'Pasado (Pretérito)', 'Futuro', 'Condicional'] },
+          { label: '4. Conjugación', options: ['1.ª (-ar)', '2.ª (-er)', '3.ª (-ir)'] }
+        ]
+      },
+      adjetivos: {
+        name: 'Adjetivos (Género, número y grado)',
+        schema: [
+          { label: '1. Género', options: ['Masculino', 'Femenino', 'Invariable (1 term.)'] },
+          { label: '2. Número', options: ['Singular', 'Plural', 'Invariable'] },
+          { label: '3. Grado', options: ['Positivo', 'Comparativo', 'Superlativo'] },
+          { label: '4. Significado', options: ['Especificativo', 'Explicativo', 'No procede'] }
+        ]
+      },
+      acentuacion: {
+        name: 'Acentuación y Ortografía',
+        schema: [
+          { label: '1. Según su sílaba tónica', options: ['Aguda', 'Llana', 'Esdrújula / Sobresdr.'] },
+          { label: '2. ¿Debe llevar tilde?', options: ['Sí, lleva tilde', 'No lleva tilde'] }
+        ]
+      }
+    };
+
     const DEFAULT_CHALLENGES = [
       {
         id: 'desafio-1',
         title: 'Desafío 1 · Sustantivos (Concretos y Propios)',
+        templateKey: 'sustantivos',
+        schema: CHALLENGE_TEMPLATES.sustantivos.schema,
         words: [
-          { word: 'lápiz', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
-          { word: 'arena', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'perro', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
-          { word: 'agua', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'Madrid', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
-          { word: 'mesa', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
-          { word: 'pan', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'Guadalquivir', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
-          { word: 'árbol', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
-          { word: 'Barcelona', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
-          { word: 'libro', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
-          { word: 'Ebro', cats: ['Propio', 'No procede', 'No procede', 'No procede'] }
+          { word: 'lápiz', context: 'Guarda el lápiz dentro del estuche.', cats: ['Común', 'Concreto', 'Contable', 'Individual'], explanation: 'Designa un objeto físico contable en singular.' },
+          { word: 'arena', context: 'La arena de la playa estaba muy caliente.', cats: ['Común', 'Concreto', 'No contable', 'No procede'], explanation: 'Es materia continua: no se cuenta por unidades.' },
+          { word: 'Madrid', context: 'El tren llega a Madrid a las cinco.', cats: ['Propio', 'No procede', 'No procede', 'No procede'], explanation: 'Al ser nombre propio, no se clasifica en las demás categorías.' },
+          { word: 'agua', context: 'Bebe un poco de agua fresca.', cats: ['Común', 'Concreto', 'No contable', 'No procede'], explanation: 'Sustancia percibida por los sentidos, no contable.' },
+          { word: 'perro', context: 'El perro ladra en el jardín.', cats: ['Común', 'Concreto', 'Contable', 'Individual'], explanation: '' },
+          { word: 'Guadalquivir', context: 'El río Guadalquivir pasa por Sevilla.', cats: ['Propio', 'No procede', 'No procede', 'No procede'], explanation: 'Topónimo (nombre propio de río).' },
+          { word: 'pan', context: 'Compramos pan recién horneado.', cats: ['Común', 'Concreto', 'No contable', 'No procede'], explanation: '' },
+          { word: 'árbol', context: 'Ese árbol da mucha sombra.', cats: ['Común', 'Concreto', 'Contable', 'Individual'], explanation: '' }
         ]
       },
       {
         id: 'desafio-2',
-        title: 'Desafío 2 · Colectivos y No Contables',
+        title: 'Desafío 2 · Sustantivos Colectivos y Contexto',
+        templateKey: 'sustantivos',
+        schema: CHALLENGE_TEMPLATES.sustantivos.schema,
         words: [
-          { word: 'rebaño', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
-          { word: 'azúcar', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'jauría', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
-          { word: 'harina', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'enjambre', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
-          { word: 'leche', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'bosque', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
-          { word: 'sal', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'archipiélago', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
-          { word: 'oro', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'gente', cats: ['Común', 'Concreto', 'No contable', 'Colectivo'] },
-          { word: 'tijeras', cats: ['Común', 'Concreto', 'Contable', 'Individual'] }
+          { word: 'banco', context: 'Un banco de peces nadaba cerca del arrecife.', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'], explanation: 'En este contexto nombra en singular un conjunto de peces.' },
+          { word: 'rebaño', context: 'El pastor guía el rebaño por la cañada.', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'], explanation: 'En singular designa un grupo de ovejas.' },
+          { word: 'azúcar', context: 'Añade una cucharada de azúcar.', cats: ['Común', 'Concreto', 'No contable', 'No procede'], explanation: '' },
+          { word: 'jauría', context: 'La jauría corría por el monte.', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'], explanation: 'Conjunto de perros.' },
+          { word: 'enjambre', context: 'Un enjambre salió de la colmena.', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'], explanation: 'Conjunto de abejas.' },
+          { word: 'harina', context: 'Necesitamos harina para el bizcocho.', cats: ['Común', 'Concreto', 'No contable', 'No procede'], explanation: '' },
+          { word: 'archipiélago', context: 'Canarias es un archipiélago volcánico.', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'], explanation: 'Conjunto de islas.' },
+          { word: 'gente', context: 'Había mucha gente en la plaza.', cats: ['Común', 'Concreto', 'No contable', 'Colectivo'], explanation: 'Designa un conjunto de personas y no admite plural numeral (*tres gentes).' }
         ]
       },
       {
         id: 'desafio-3',
-        title: 'Desafío 3 · Abstractos (Regla de «No procede»)',
+        title: 'Desafío 3 · Sustantivos Abstractos («No procede»)',
+        templateKey: 'sustantivos',
+        schema: CHALLENGE_TEMPLATES.sustantivos.schema,
         words: [
-          { word: 'alegría', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'libertad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'miedo', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'bondad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'honestidad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'tristeza', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'amor', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'felicidad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'música', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'paciencia', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] }
+          { word: 'alegría', context: 'Saltaba de alegría al ver la nota.', cats: ['Común', 'Abstracto', 'No procede', 'No procede'], explanation: 'Los sustantivos abstractos no se clasifican en contables ni individuales/colectivos.' },
+          { word: 'libertad', context: 'Defendemos la libertad de expresión.', cats: ['Común', 'Abstracto', 'No procede', 'No procede'], explanation: 'Concepto inmaterial: solo responde a Común y Abstracto.' },
+          { word: 'miedo', context: 'Sintió miedo durante la tormenta.', cats: ['Común', 'Abstracto', 'No procede', 'No procede'], explanation: '' },
+          { word: 'honestidad', context: 'Valoramos mucho tu honestidad.', cats: ['Común', 'Abstracto', 'No procede', 'No procede'], explanation: '' },
+          { word: 'paciencia', context: 'Hay que tener paciencia para aprender.', cats: ['Común', 'Abstracto', 'No procede', 'No procede'], explanation: '' },
+          { word: 'tristeza', context: 'La despedida nos dejó tristeza.', cats: ['Común', 'Abstracto', 'No procede', 'No procede'], explanation: '' }
         ]
       },
       {
         id: 'desafio-4',
-        title: 'Desafío 4 · Repaso General 6.º Primaria',
+        title: 'Desafío 4 · Verbos (Morfología 6.º Primaria)',
+        templateKey: 'verbos',
+        schema: CHALLENGE_TEMPLATES.verbos.schema,
         words: [
-          { word: 'arena', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'alegría', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'flota', cats: ['Común', 'Concreto', 'Contable', 'Colectivo'] },
-          { word: 'Sagunto', cats: ['Propio', 'No procede', 'No procede', 'No procede'] },
-          { word: 'lápiz', cats: ['Común', 'Concreto', 'Contable', 'Individual'] },
-          { word: 'arroz', cats: ['Común', 'Concreto', 'No contable', 'No procede'] },
-          { word: 'libertad', cats: ['Común', 'Abstracto', 'No procede', 'No procede'] },
-          { word: 'alumnado', cats: ['Común', 'Concreto', 'No contable', 'Colectivo'] }
+          { word: 'cantábamos', context: 'Nosotros cantábamos en el coro del colegio.', cats: ['1.ª persona', 'Plural', 'Pasado (Pretérito)', '1.ª (-ar)'], explanation: 'Pretérito imperfecto de indicativo del verbo cantar (1.ª conjugación).' },
+          { word: 'escribirán', context: 'Ellos escribirán una carta mañana.', cats: ['3.ª persona', 'Plural', 'Futuro', '3.ª (-ir)'], explanation: 'Futuro simple del verbo escribir (3.ª conjugación).' },
+          { word: 'comiste', context: 'Tú comiste muy rápido ayer.', cats: ['2.ª persona', 'Singular', 'Pasado (Pretérito)', '2.ª (-er)'], explanation: 'Pretérito perfecto simple del verbo comer (2.ª conjugación).' },
+          { word: 'saltando', context: 'Los niños estaban saltando a la comba.', cats: ['No personal', 'No procede', 'Presente', '1.ª (-ar)'], explanation: 'El gerundio es una forma no personal: no tiene persona ni número.' }
+        ]
+      },
+      {
+        id: 'desafio-5',
+        title: 'Desafío 5 · Adjetivos (Género, Número y Grado)',
+        templateKey: 'adjetivos',
+        schema: CHALLENGE_TEMPLATES.adjetivos.schema,
+        words: [
+          { word: 'veloz', context: 'El guepardo es un animal muy veloz.', cats: ['Invariable (1 term.)', 'Singular', 'Positivo', 'Especificativo'], explanation: 'Tiene la misma forma para masculino y femenino (el guepardo veloz / la gacela veloz).' },
+          { word: 'altísimas', context: 'Vimos unas montañas altísimas.', cats: ['Femenino', 'Plural', 'Superlativo', 'Especificativo'], explanation: 'El sufijo -ísimas indica grado superlativo absoluto.' },
+          { word: 'blanca', context: 'La blanca nieve cubría los tejados.', cats: ['Femenino', 'Singular', 'Positivo', 'Explicativo'], explanation: 'Destaca una cualidad propia de la nieve (epíteto explicativo).' }
         ]
       }
     ];
 
-    const TEAM_NAMES = ['🦊 Equipo Zorro', '🐢 Equipo Tortuga', '🦉 Equipo Búho', '🦁 Equipo León'];
-    const STORAGE_KEY = 'sustantivo_quest_challenges_v1';
+    const TEAM_NAMES = ['🐒 Equipo Mono', '🦍 Equipo Gorila', '🐨 Equipo Koala', '🐿️ Equipo Ardilla'];
+    const CLIMBER_ICONS = ['🐒', '🦍', '🐨', '🐿️', '🦥', '🐼', '🦝', '🐆', '🦎', '🦜'];
+    const STORAGE_KEY = 'lengua_quest_challenges_v3';
+    const LEGACY_KEYS = ['sustantivo_quest_challenges_v2', 'sustantivo_quest_challenges_v1'];
 
     let challenges = loadChallenges();
 
+    function getChallengeSchema(ch) {
+      if (ch && Array.isArray(ch.schema) && ch.schema.length > 0) {
+        return ch.schema;
+      }
+      return CHALLENGE_TEMPLATES.sustantivos.schema;
+    }
+
     function loadChallenges() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        let saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) {
+          for (const k of LEGACY_KEYS) {
+            if (localStorage.getItem(k)) {
+              saved = localStorage.getItem(k);
+              break;
+            }
+          }
+        }
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map(ch => ({
+              ...ch,
+              templateKey: ch.templateKey || 'sustantivos',
+              schema: getChallengeSchema(ch)
+            }));
+          }
         }
       } catch (e) {}
       return JSON.parse(JSON.stringify(DEFAULT_CHALLENGES));
@@ -1048,12 +1749,18 @@
       populateChallengeSelectors();
     }
 
-    /* ==================== 2. REAL-TIME CLASSROOM SYNC (MQTT WSS + BROADCASTCHANNEL) ==================== */
-    const ROOM_PREFIX = 'sq2026_aula_es';
+    /* ==================== 2. REAL-TIME CLASSROOM SYNC & SESSION PERSISTENCE ==================== */
+    const ROOM_PREFIX = 'lq2026_aula_es';
     let mqttClient = null;
     let mqttConnected = false;
-    const localChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('sustantivo_quest_local') : null;
-    const clientId = 'cli_' + Math.random().toString(36).slice(2, 9);
+    const localChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('lengua_quest_local') : null;
+
+    // Persistent clientId in sessionStorage so student F5 refresh reconnects seamlessly!
+    let clientId = sessionStorage.getItem('lq_client_id');
+    if (!clientId) {
+      clientId = 'cli_' + Math.random().toString(36).slice(2, 9);
+      sessionStorage.setItem('lq_client_id', clientId);
+    }
 
     function initRealtime() {
       const dot = document.getElementById('conn-dot');
@@ -1066,7 +1773,7 @@
       if (typeof mqtt !== 'undefined') {
         try {
           mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
-            clientId: 'sq_' + Math.random().toString(16).slice(2, 10),
+            clientId: 'lq_' + Math.random().toString(16).slice(2, 10),
             clean: true,
             connectTimeout: 8000,
             reconnectPeriod: 3000
@@ -1077,6 +1784,13 @@
             dot.className = 'dot online';
             txt.textContent = 'Aula conectada (Red en vivo)';
             subscribeCurrentPin();
+            if (currentView === 'play' && studentState.joined && studentState.pin) {
+              sendClassroomMsg(studentState.pin, 'PLAYER_JOIN', {
+                playerId: clientId,
+                name: studentState.name,
+                preferredTeam: studentState.team
+              });
+            }
           });
 
           mqttClient.on('reconnect', () => {
@@ -1142,29 +1856,129 @@
         renderBoardUI();
         broadcastBoardState();
       } else if (view === 'admin') {
-        renderAdminTable();
+        onAdminChallengeChanged();
       } else if (view === 'play') {
+        tryRestoreStudentSession();
         subscribeCurrentPin();
+        const pin = studentState.pin || document.getElementById('join-pin').value.trim();
+        if (pin.length >= 3) {
+          sendClassroomMsg(pin, 'HELLO_LOBBY', { playerId: clientId });
+        }
       }
     }
 
-    /* ==================== 4. BOARD STATE & LOGIC (/BOARD) ==================== */
+    /* ==================== 4. BOARD STATE, MODES, STREAKS & KAHOOT TOWERS ==================== */
     let boardState = {
       pin: String(Math.floor(1000 + Math.random() * 9000)),
       challengeId: challenges[0].id,
-      phase: 'lobby', // 'lobby' | 'question' | 'reveal' | 'finished'
+      gameMode: 'teams',
+      teamAssignMode: 'random',
+      timerDuration: 30,
+      roundEndTime: 0,
+      phase: 'lobby',
       wordIndex: 0,
       roundStartTime: 0,
-      players: {}, // { playerId: { name, team, score } }
+      players: {}, // { playerId: { name, team, score, streak, maxStreak, hits, totalAnswered, icon } }
       roundAnswers: {}, // { playerId: { cats: [...], ts } }
-      catStats: [
-        { ok: 0, total: 0 },
-        { ok: 0, total: 0 },
-        { ok: 0, total: 0 },
-        { ok: 0, total: 0 }
-      ],
-      wordStats: {} // { word: { ok: 0, total: 0 } }
+      prevTeamAverages: [0, 0, 0, 0],
+      catStats: [],
+      wordStats: {}
     };
+
+    let boardTimerInterval = null;
+    let lastTickSecond = -1;
+
+    function resetBoardStatsForChallenge() {
+      const schema = getChallengeSchema(getCurrentChallenge());
+      boardState.catStats = schema.map(() => ({ ok: 0, total: 0 }));
+      boardState.wordStats = {};
+    }
+    resetBoardStatsForChallenge();
+
+    function getTeamCounts() {
+      const counts = [0, 0, 0, 0];
+      Object.values(boardState.players).forEach(p => {
+        const t = Number(p.team);
+        if (t >= 0 && t < 4) counts[t]++;
+      });
+      return counts;
+    }
+
+    function pickBalancedTeam(preferredTeam = null) {
+      const counts = getTeamCounts();
+      const minCount = Math.min(...counts);
+      const eligible = [0, 1, 2, 3].filter(t => counts[t] === minCount);
+
+      if (
+        boardState.teamAssignMode === 'balanced_choice' &&
+        preferredTeam !== null &&
+        eligible.includes(preferredTeam)
+      ) {
+        return preferredTeam;
+      }
+      return eligible[Math.floor(Math.random() * eligible.length)];
+    }
+
+    function shuffleTeamsBalanced() {
+      const ids = Object.keys(boardState.players);
+      if (ids.length === 0) {
+        alert('Aún no hay alumnos conectados para mezclar.');
+        return;
+      }
+      for (let i = ids.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ids[i], ids[j]] = [ids[j], ids[i]];
+      }
+      ids.forEach((pid, idx) => {
+        boardState.players[pid].team = idx % 4;
+      });
+      SoundEngine.playShuffle();
+      renderBoardUI();
+      broadcastBoardState();
+    }
+
+    function kickPlayer(pid) {
+      const p = boardState.players[pid];
+      if (!p) return;
+      if (!confirm(`¿Expulsar de la sala a "${p.name}"?`)) return;
+      delete boardState.players[pid];
+      delete boardState.roundAnswers[pid];
+      SoundEngine.playClick();
+      renderBoardUI();
+      broadcastBoardState();
+    }
+
+    function onChangeGameMode() {
+      boardState.gameMode = document.getElementById('board-mode-select').value;
+      document.getElementById('team-assign-group').classList.toggle('hidden', boardState.gameMode !== 'teams');
+
+      const note = document.getElementById('sidebar-mode-note');
+      if (boardState.gameMode === 'teams') {
+        note.textContent = '⚖️ Grupos equilibrados (±1 jugador máx.) y altura de torre por media de equipo.';
+        const counts = getTeamCounts();
+        if (Math.max(...counts) - Math.min(...counts) > 1) {
+          shuffleTeamsBalanced();
+          return;
+        }
+      } else {
+        note.textContent = '🏆 Modo Individual: cada alumno compite por su propia posición en el podio.';
+      }
+      SoundEngine.playClick();
+      renderBoardUI();
+      broadcastBoardState();
+    }
+
+    function onChangeTeamAssignMode() {
+      boardState.teamAssignMode = document.getElementById('board-team-assign').value;
+      SoundEngine.playClick();
+      broadcastBoardState();
+    }
+
+    function onChangeTimerSetting() {
+      boardState.timerDuration = Number(document.getElementById('board-timer-select').value);
+      SoundEngine.playClick();
+      broadcastBoardState();
+    }
 
     function regeneratePin() {
       boardState.pin = String(Math.floor(1000 + Math.random() * 9000));
@@ -1201,10 +2015,141 @@
       boardReset();
     }
 
+    /* Demo Classroom Simulator (works dynamically with ANY challenge template!) */
+    function simulateClassroomAction() {
+      const demoNames = ['Lucía', 'Mateo', 'Sofía', 'Hugo', 'Valeria', 'Daniel', 'Paula', 'Álvaro'];
+      if (Object.keys(boardState.players).length === 0) {
+        demoNames.forEach((name, idx) => {
+          const pid = 'demo_' + idx;
+          boardState.players[pid] = {
+            name,
+            team: idx % 4,
+            score: 0,
+            streak: 0,
+            maxStreak: 0,
+            hits: 0,
+            totalAnswered: 0,
+            icon: CLIMBER_ICONS[idx % CLIMBER_ICONS.length]
+          };
+        });
+        SoundEngine.playJoin();
+        renderBoardUI();
+        broadcastBoardState();
+        return;
+      }
+
+      if (boardState.phase === 'question') {
+        const ch = getCurrentChallenge();
+        const schema = getChallengeSchema(ch);
+        const item = ch.words[boardState.wordIndex];
+        const playerIds = Object.keys(boardState.players);
+
+        playerIds.forEach((pid, idx) => {
+          if (boardState.roundAnswers[pid]) return;
+          setTimeout(() => {
+            if (boardState.phase !== 'question') return;
+            const cats = item.cats.map((correctVal, cIdx) => {
+              if (Math.random() < 0.85) return correctVal;
+              const opts = schema[cIdx] ? schema[cIdx].options : [correctVal];
+              return opts[Math.floor(Math.random() * opts.length)];
+            });
+            handleIncomingMessage({
+              pin: boardState.pin,
+              type: 'PLAYER_ANSWER',
+              data: { playerId: pid, cats }
+            });
+          }, 200 * (idx + 1));
+        });
+      } else {
+        boardStartRound();
+      }
+    }
+
+    function startBoardTimer() {
+      stopBoardTimer();
+      const dur = boardState.timerDuration;
+      const banner = document.getElementById('board-timer-banner');
+      if (!dur || dur <= 0) {
+        banner.classList.add('hidden');
+        boardState.roundEndTime = 0;
+        return;
+      }
+
+      boardState.roundEndTime = Date.now() + dur * 1000;
+      lastTickSecond = dur + 1;
+      banner.classList.remove('hidden');
+      updateBoardTimerVisual();
+
+      boardTimerInterval = setInterval(() => {
+        if (boardState.phase !== 'question') {
+          stopBoardTimer();
+          return;
+        }
+        const remMs = boardState.roundEndTime - Date.now();
+        const remSec = Math.max(0, Math.ceil(remMs / 1000));
+
+        if (remSec !== lastTickSecond) {
+          lastTickSecond = remSec;
+          if (remSec > 0 && remSec <= 5) {
+            SoundEngine.playTick(remSec <= 2);
+          }
+        }
+
+        updateBoardTimerVisual();
+
+        if (remMs <= 0) {
+          stopBoardTimer();
+          SoundEngine.playTimeUp();
+          setTimeout(() => {
+            if (boardState.phase === 'question') {
+              boardReveal(true);
+            }
+          }, 350);
+        }
+      }, 150);
+    }
+
+    function stopBoardTimer() {
+      if (boardTimerInterval) {
+        clearInterval(boardTimerInterval);
+        boardTimerInterval = null;
+      }
+    }
+
+    function formatSeconds(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function updateBoardTimerVisual() {
+      const dur = boardState.timerDuration;
+      if (!dur || dur <= 0) return;
+      const remMs = Math.max(0, boardState.roundEndTime - Date.now());
+      const remSec = Math.ceil(remMs / 1000);
+      const pct = Math.max(0, Math.min(100, (remMs / (dur * 1000)) * 100));
+
+      const pill = document.getElementById('board-timer-text');
+      const bar = document.getElementById('board-timer-bar');
+      pill.textContent = formatSeconds(remSec);
+      bar.style.width = pct + '%';
+
+      pill.classList.remove('warn', 'danger');
+      if (remSec <= 5) {
+        pill.classList.add('danger');
+        bar.style.background = 'var(--danger)';
+      } else if (remSec <= 10) {
+        pill.classList.add('warn');
+        bar.style.background = 'var(--warning)';
+      } else {
+        bar.style.background = 'var(--success)';
+      }
+    }
+
     function boardStartRound() {
       const ch = getCurrentChallenge();
       if (!ch || ch.words.length === 0) {
-        alert('Este desafío no tiene palabras. Añade algunas en el Editor del Profesor.');
+        alert('Este desafío no tiene elementos. Añade algunos en el Editor del Profesor.');
         return;
       }
       if (boardState.phase === 'finished') {
@@ -1213,24 +2158,40 @@
       boardState.phase = 'question';
       boardState.roundAnswers = {};
       boardState.roundStartTime = Date.now();
+      startBoardTimer();
+      SoundEngine.playRoundStart();
       renderBoardUI();
       broadcastBoardState();
     }
 
-    function boardReveal() {
+    function boardReveal(fromTimeout = false) {
       if (boardState.phase !== 'question') return;
+      stopBoardTimer();
+
       const ch = getCurrentChallenge();
+      const schema = getChallengeSchema(ch);
+      const numRows = schema.length;
       const item = ch.words[boardState.wordIndex];
       const targetCats = item.cats;
+      const durSec = boardState.timerDuration > 0 ? boardState.timerDuration : 30;
+      const ptsPerRow = Math.round(1000 / numRows);
 
-      // Grade each submitted answer
+      // Reset streak for anyone who didn't answer in time
+      Object.entries(boardState.players).forEach(([pid, player]) => {
+        if (!boardState.roundAnswers[pid]) {
+          player.streak = 0;
+        }
+      });
+
       Object.entries(boardState.roundAnswers).forEach(([pid, ans]) => {
         const player = boardState.players[pid];
         if (!player) return;
 
         let correctCount = 0;
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < numRows; i++) {
+          if (!boardState.catStats[i]) boardState.catStats[i] = { ok: 0, total: 0 };
           boardState.catStats[i].total += 1;
+
           if (!boardState.wordStats[item.word]) {
             boardState.wordStats[item.word] = { ok: 0, total: 0 };
           }
@@ -1243,18 +2204,35 @@
           }
         }
 
-        // 250 pts per category + up to 200 speed bonus if all 4 match
-        let earned = correctCount * 250;
-        if (correctCount === 4) {
-          const elapsedSec = Math.max(1, (ans.ts - boardState.roundStartTime) / 1000);
-          const speedBonus = Math.max(50, Math.round(200 - elapsedSec * 6));
-          earned += speedBonus;
+        player.hits = (player.hits || 0) + correctCount;
+        player.totalAnswered = (player.totalAnswered || 0) + numRows;
+
+        const isPerfect = (correctCount === numRows);
+        let earned = isPerfect ? 1000 : correctCount * ptsPerRow;
+
+        if (isPerfect) {
+          player.streak = (player.streak || 0) + 1;
+          player.maxStreak = Math.max(player.maxStreak || 0, player.streak);
+
+          const elapsedSec = Math.max(0.5, (ans.ts - boardState.roundStartTime) / 1000);
+          const ratioRemaining = Math.max(0, 1 - elapsedSec / durSec);
+          const speedBonus = Math.round(50 + ratioRemaining * 150);
+          const streakBonus = player.streak >= 2 ? 50 * Math.min(player.streak - 1, 4) : 0;
+          earned += speedBonus + streakBonus;
+        } else {
+          player.streak = 0;
         }
+
         player.score += earned;
       });
 
       boardState.phase = 'reveal';
-      renderBoardUI();
+      if (!fromTimeout) {
+        SoundEngine.playRevealPoints();
+      } else {
+        setTimeout(() => SoundEngine.playRevealPoints(), 250);
+      }
+      renderBoardUI(true);
       broadcastBoardState();
     }
 
@@ -1265,53 +2243,84 @@
         boardState.phase = 'question';
         boardState.roundAnswers = {};
         boardState.roundStartTime = Date.now();
+        startBoardTimer();
+        SoundEngine.playRoundStart();
       } else {
+        stopBoardTimer();
         boardState.phase = 'finished';
+        SoundEngine.playVictoryFanfare();
+        launchConfetti();
       }
       renderBoardUI();
       broadcastBoardState();
     }
 
     function boardReset() {
+      stopBoardTimer();
       boardState.phase = 'lobby';
       boardState.wordIndex = 0;
       boardState.roundAnswers = {};
-      boardState.catStats = [
-        { ok: 0, total: 0 },
-        { ok: 0, total: 0 },
-        { ok: 0, total: 0 },
-        { ok: 0, total: 0 }
-      ];
-      boardState.wordStats = {};
-      Object.values(boardState.players).forEach(p => { p.score = 0; });
+      boardState.roundEndTime = 0;
+      boardState.prevTeamAverages = [0, 0, 0, 0];
+      resetBoardStatsForChallenge();
+      Object.values(boardState.players).forEach(p => {
+        p.score = 0;
+        p.streak = 0;
+        p.maxStreak = 0;
+        p.hits = 0;
+        p.totalAnswered = 0;
+      });
       renderBoardUI();
       broadcastBoardState();
     }
 
     function broadcastBoardState() {
       const ch = getCurrentChallenge();
+      const schema = getChallengeSchema(ch);
       const currentWordObj = ch.words[boardState.wordIndex] || null;
+      const counts = getTeamCounts();
+      const minCount = Math.min(...counts);
+
       sendClassroomMsg(boardState.pin, 'BOARD_STATE', {
         phase: boardState.phase,
+        gameMode: boardState.gameMode,
+        teamAssignMode: boardState.teamAssignMode,
+        timerDuration: boardState.timerDuration,
+        roundEndTime: boardState.roundEndTime,
         wordIndex: boardState.wordIndex,
         totalWords: ch.words.length,
+        schema,
         word: currentWordObj ? currentWordObj.word : '',
+        context: currentWordObj ? (currentWordObj.context || '') : '',
         solution: (boardState.phase === 'reveal' || boardState.phase === 'finished') && currentWordObj
           ? currentWordObj.cats
           : null,
-        players: boardState.players
+        explanation: (boardState.phase === 'reveal' || boardState.phase === 'finished') && currentWordObj
+          ? (currentWordObj.explanation || '')
+          : '',
+        players: boardState.players,
+        teamCounts: counts,
+        maxAllowedPerTeam: minCount + 1
       });
     }
 
-    function renderBoardUI() {
+    function renderBoardUI(animateClimb = false) {
       document.getElementById('board-pin-display').textContent = boardState.pin;
       const ch = getCurrentChallenge();
+      const schema = getChallengeSchema(ch);
       const item = ch.words[boardState.wordIndex];
 
-      // QR shrinks during active game so it doesn't distract
       document.getElementById('qrcode').classList.toggle('compact', boardState.phase !== 'lobby');
 
-      // Buttons state
+      const isTeams = boardState.gameMode === 'teams';
+      document.getElementById('board-teams-arena').classList.toggle('hidden', !isTeams);
+      document.getElementById('board-indiv-arena').classList.toggle('hidden', isTeams);
+      document.getElementById('team-assign-group').classList.toggle('hidden', !isTeams);
+
+      if (boardState.phase !== 'question' || boardState.timerDuration <= 0) {
+        document.getElementById('board-timer-banner').classList.add('hidden');
+      }
+
       const btnStart = document.getElementById('btn-start');
       const btnReveal = document.getElementById('btn-reveal');
       const btnNext = document.getElementById('btn-next');
@@ -1322,85 +2331,271 @@
 
       const roundInfo = document.getElementById('board-round-info');
       const wordEl = document.getElementById('board-word');
+      const contextEl = document.getElementById('board-context');
       const subInfo = document.getElementById('board-subinfo');
       const chipsEl = document.getElementById('board-reveal-chips');
+      const explEl = document.getElementById('board-explanation');
+      const podiumEl = document.getElementById('board-final-podium');
       const reportEl = document.getElementById('board-final-report');
 
+      podiumEl.classList.add('hidden');
       reportEl.classList.add('hidden');
+      contextEl.classList.add('hidden');
+      explEl.classList.add('hidden');
+
+      const totalPlayers = Object.keys(boardState.players).length;
+      const ansCount = Object.keys(boardState.roundAnswers).length;
 
       if (boardState.phase === 'lobby') {
-        roundInfo.textContent = `${ch.title} · ${ch.words.length} palabras`;
+        const modeTag = isTeams
+          ? (boardState.teamAssignMode === 'random' ? 'Grupos aleatorios' : 'Grupos equilibrados')
+          : 'Modo Individual';
+        roundInfo.textContent = `${ch.title} · ${modeTag}`;
         wordEl.textContent = '¿Preparados?';
-        subInfo.innerHTML = 'Los alumnos entran con el PIN <strong>' + boardState.pin + '</strong> y eligen equipo.';
+        subInfo.innerHTML = 'Los alumnos entran con el PIN <strong>' + boardState.pin + '</strong> (o pulsa <strong>🤖 Simular clase</strong> para probarlo).';
         chipsEl.classList.add('hidden');
       } else if (boardState.phase === 'question' && item) {
-        roundInfo.textContent = `Palabra ${boardState.wordIndex + 1} de ${ch.words.length}`;
+        roundInfo.textContent = `Pregunta ${boardState.wordIndex + 1} de ${ch.words.length}`;
         wordEl.textContent = item.word;
-        const ansCount = Object.keys(boardState.roundAnswers).length;
-        const totalPlayers = Object.keys(boardState.players).length;
+        if (item.context) {
+          contextEl.textContent = `«${item.context}»`;
+          contextEl.classList.remove('hidden');
+        }
         subInfo.textContent = `Clasificando... (${ansCount} de ${totalPlayers} respuestas recibidas)`;
         chipsEl.classList.add('hidden');
       } else if (boardState.phase === 'reveal' && item) {
-        roundInfo.textContent = `Solución · Palabra ${boardState.wordIndex + 1} de ${ch.words.length}`;
+        roundInfo.textContent = `Solución · Pregunta ${boardState.wordIndex + 1} de ${ch.words.length}`;
         wordEl.textContent = item.word;
-        subInfo.textContent = 'Pulsa Siguiente para continuar la carrera.';
+        if (item.context) {
+          contextEl.textContent = `«${item.context}»`;
+          contextEl.classList.remove('hidden');
+        }
+        subInfo.textContent = '¡Mira cómo suben las torres! Pulsa Siguiente para continuar.';
         chipsEl.innerHTML = item.cats.map(c =>
           `<span class="rev-chip ${c === 'No procede' ? 'na' : ''}">${c}</span>`
         ).join('');
         chipsEl.classList.remove('hidden');
+        if (item.explanation) {
+          explEl.innerHTML = `💡 <strong>Nota gramatical:</strong> ${item.explanation}`;
+          explEl.classList.remove('hidden');
+        }
       } else if (boardState.phase === 'finished') {
         roundInfo.textContent = '🏁 ¡Desafío completado!';
-        wordEl.textContent = '¡Enhorabuena!';
-        subInfo.textContent = 'Revisa abajo las palabras que más ha fallado la clase.';
+        wordEl.textContent = '¡Podio Final!';
+        subInfo.textContent = 'Descarga las notas en Excel (.csv) o revisa las palabras más falladas abajo.';
         chipsEl.classList.add('hidden');
+        renderFinalPodium();
         renderFinalPedagogicalReport();
       }
 
-      // Compute normalized average score per team member (fair regardless of team size!)
-      const teamRawSums = [0, 0, 0, 0];
-      const teamMembers = [[], [], [], []];
-      Object.values(boardState.players).forEach(p => {
-        teamRawSums[p.team] += p.score;
-        teamMembers[p.team].push(`${p.name} (${p.score})`);
-      });
+      if (isTeams) {
+        const teamRawSums = [0, 0, 0, 0];
+        const teamMembers = [[], [], [], []];
+        Object.entries(boardState.players).forEach(([pid, p]) => {
+          teamRawSums[p.team] += p.score;
+          const doneMark = (boardState.phase === 'question' && boardState.roundAnswers[pid]) ? '✅' : '';
+          const streakMark = (p.streak >= 2) ? `🔥x${p.streak}` : '';
+          teamMembers[p.team].push(`
+            <span class="member-pill">
+              ${p.name}${doneMark}${streakMark} (${p.score})
+              <button class="kick-btn" onclick="kickPlayer('${pid}')" title="Eliminar jugador">×</button>
+            </span>
+          `);
+        });
 
-      const teamAverages = [0, 0, 0, 0];
-      for (let t = 0; t < 4; t++) {
-        const count = teamMembers[t].length;
-        teamAverages[t] = count > 0 ? Math.round(teamRawSums[t] / count) : 0;
-      }
-
-      const maxPossible = Math.max(1200, ...teamAverages);
-      for (let t = 0; t < 4; t++) {
-        const count = teamMembers[t].length;
-        const pct = Math.min(88, Math.max(6, Math.round((teamAverages[t] / maxPossible) * 85)));
-        document.getElementById(`fill-${t}`).style.height = pct + '%';
-        document.getElementById(`climber-${t}`).style.bottom = (pct - 2) + '%';
-        document.getElementById(`score-${t}`).textContent = `${teamAverages[t]} pts`;
-        document.getElementById(`avg-note-${t}`).textContent =
-          count === 1 ? 'Media de 1 jug.' : `Media de ${count} jug.`;
-        document.getElementById(`members-${t}`).textContent =
-          count ? teamMembers[t].join(', ') : 'Sin jugadores';
-      }
-
-      document.getElementById('board-player-count').textContent = Object.keys(boardState.players).length;
-      document.getElementById('board-answer-count').textContent = Object.keys(boardState.roundAnswers).length;
-
-      // Update 4 category accuracy bars
-      for (let i = 0; i < 4; i++) {
-        const st = boardState.catStats[i];
-        const pctEl = document.getElementById(`pct-c${i}`);
-        const barEl = document.getElementById(`bar-c${i}`);
-        if (st.total === 0) {
-          pctEl.textContent = '—';
-          barEl.style.width = '0%';
-        } else {
-          const pct = Math.round((st.ok / st.total) * 100);
-          pctEl.textContent = pct + '%';
-          barEl.style.width = pct + '%';
-          barEl.style.background = pct >= 75 ? 'var(--success)' : (pct >= 55 ? 'var(--warning)' : 'var(--danger)');
+        const teamAverages = [0, 0, 0, 0];
+        for (let t = 0; t < 4; t++) {
+          const count = teamMembers[t].length;
+          teamAverages[t] = count > 0 ? Math.round(teamRawSums[t] / count) : 0;
         }
+
+        const topScore = Math.max(...teamAverages);
+        const challengeMax = Math.max(1200, ch.words.length * 1050, topScore);
+
+        for (let t = 0; t < 4; t++) {
+          const count = teamMembers[t].length;
+          const avg = teamAverages[t];
+          const prevAvg = boardState.prevTeamAverages[t] || 0;
+          const delta = avg - prevAvg;
+
+          const numFloors = avg <= 0 ? 0 : Math.min(11, Math.max(1, Math.round((avg / challengeMax) * 11)));
+          const stackEl = document.getElementById(`stack-${t}`);
+          const climberWrap = document.getElementById(`climber-wrap-${t}`);
+          const laneEl = document.getElementById(`lane-${t}`);
+          const crownEl = document.getElementById(`crown-${t}`);
+
+          let blocksHtml = '';
+          for (let f = 0; f < numFloors; f++) {
+            const isTop = (f === numFloors - 1);
+            blocksHtml += `
+              <div class="tower-block ${isTop ? 'top-cap' : ''}">
+                <span class="block-win"></span>
+                <span class="block-win"></span>
+              </div>
+            `;
+          }
+          stackEl.innerHTML = blocksHtml;
+
+          const climberBottomPx = 14 + numFloors * 24;
+          climberWrap.style.bottom = climberBottomPx + 'px';
+
+          const isLeader = topScore > 0 && avg === topScore;
+          laneEl.classList.toggle('is-leader', isLeader);
+          crownEl.classList.toggle('hidden', !isLeader);
+
+          if (animateClimb && delta > 0) {
+            climberWrap.classList.remove('climbing');
+            void climberWrap.offsetWidth;
+            climberWrap.classList.add('climbing');
+
+            const oldPop = climberWrap.querySelector('.gain-popup');
+            if (oldPop) oldPop.remove();
+            const pop = document.createElement('div');
+            pop.className = 'gain-popup';
+            pop.textContent = `+${delta} pts`;
+            climberWrap.appendChild(pop);
+            setTimeout(() => pop.remove(), 1550);
+          }
+
+          document.getElementById(`score-${t}`).textContent = `${avg} pts`;
+          document.getElementById(`avg-note-${t}`).textContent =
+            `${numFloors} ${numFloors === 1 ? 'piso' : 'pisos'} · ${count} jug.`;
+          document.getElementById(`members-${t}`).innerHTML =
+            count ? teamMembers[t].join('') : '<span style="color:var(--muted); font-size:0.78rem;">Sin jugadores</span>';
+        }
+
+        if (animateClimb) {
+          boardState.prevTeamAverages = [...teamAverages];
+        }
+      } else {
+        renderIndividualArena();
       }
+
+      document.getElementById('board-player-count').textContent = totalPlayers;
+      document.getElementById('board-answer-count').textContent = ansCount;
+
+      // Render dynamic category accuracy bars for active schema
+      const statsContainer = document.getElementById('board-dynamic-stats');
+      statsContainer.innerHTML = schema.map((catObj, i) => {
+        const st = boardState.catStats[i] || { ok: 0, total: 0 };
+        const pct = st.total === 0 ? null : Math.round((st.ok / st.total) * 100);
+        const color = pct === null ? 'var(--success)' : (pct >= 75 ? 'var(--success)' : (pct >= 55 ? 'var(--warning)' : 'var(--danger)'));
+        return `
+          <div class="stat-row">
+            <div class="stat-label"><span>${catObj.label}</span><span>${pct === null ? '—' : pct + '%'}</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${pct || 0}%; background:${color};"></div></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderIndividualArena() {
+      const podiumEl = document.getElementById('indiv-podium-grid');
+      const rosterEl = document.getElementById('indiv-roster');
+
+      const sorted = Object.entries(boardState.players)
+        .map(([pid, p]) => ({ pid, ...p }))
+        .sort((a, b) => b.score - a.score);
+
+      if (sorted.length === 0) {
+        podiumEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--muted); padding:28px;">Esperando a que los alumnos se unan con el PIN...</div>';
+        rosterEl.innerHTML = '';
+        return;
+      }
+
+      const topLeaders = sorted.slice(0, 6);
+      const maxScore = Math.max(1200, ...topLeaders.map(p => p.score));
+      const medals = ['🥇', '🥈', '🥉', '#4', '#5', '#6'];
+
+      podiumEl.innerHTML = topLeaders.map((p, idx) => {
+        const pct = Math.min(82, Math.max(6, Math.round((p.score / maxScore) * 78)));
+        const rankClass = idx < 3 ? `rank-${idx + 1}` : '';
+        const streakTag = p.streak >= 2 ? ` 🔥x${p.streak}` : '';
+        return `
+          <div class="indiv-tower-card ${rankClass}">
+            <div style="font-weight:900; font-size:0.86rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              ${medals[idx]} ${p.name}${streakTag}
+            </div>
+            <div class="indiv-track">
+              <div class="indiv-fill" style="height:${pct}%;"></div>
+              <div class="indiv-runner" style="bottom:${pct}%;">${p.icon || '🐒'}</div>
+            </div>
+            <div style="font-weight:900; color:#93c5fd; font-size:1.05rem;">${p.score} pts</div>
+          </div>
+        `;
+      }).join('');
+
+      rosterEl.innerHTML = sorted.map((p, idx) => {
+        const hasAnswered = boardState.phase === 'question' && Boolean(boardState.roundAnswers[p.pid]);
+        const streakTag = p.streak >= 2 ? ` 🔥x${p.streak}` : '';
+        return `
+          <div class="roster-chip ${hasAnswered ? 'answered' : ''}">
+            <span>
+              <strong>${idx + 1}.</strong> ${p.icon || '🐒'} ${p.name}${streakTag} ${hasAnswered ? '✅' : ''}
+            </span>
+            <span style="display:inline-flex; align-items:center; gap:6px;">
+              <strong style="color:#6ee7b7;">${p.score}</strong>
+              <button class="kick-btn" onclick="kickPlayer('${p.pid}')" title="Eliminar jugador">×</button>
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderFinalPodium() {
+      const podiumEl = document.getElementById('board-final-podium');
+      let winners = [];
+
+      if (boardState.gameMode === 'teams') {
+        const teamSums = [0, 0, 0, 0];
+        const teamCounts = [0, 0, 0, 0];
+        Object.values(boardState.players).forEach(p => {
+          teamSums[p.team] += p.score;
+          teamCounts[p.team] += 1;
+        });
+        winners = [0, 1, 2, 3]
+          .filter(t => teamCounts[t] > 0)
+          .map(t => ({
+            title: TEAM_NAMES[t],
+            icon: TEAM_NAMES[t].split(' ')[0],
+            score: Math.round(teamSums[t] / teamCounts[t]),
+            sub: `${teamCounts[t]} jugadores`
+          }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3);
+      } else {
+        winners = Object.values(boardState.players)
+          .map(p => ({
+            title: p.name,
+            icon: p.icon || '🐒',
+            score: p.score,
+            sub: p.maxStreak >= 2 ? `Racha máx. 🔥x${p.maxStreak}` : 'Individual'
+          }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3);
+      }
+
+      if (winners.length === 0) return;
+
+      const medals = ['🥇 1.º Puesto', '🥈 2.º Puesto', '🥉 3.º Puesto'];
+      const stepsHtml = winners.map((w, idx) => `
+        <div class="podium-step podium-${idx + 1}">
+          <div style="font-size:2.4rem; margin-bottom:4px;">${w.icon}</div>
+          <div style="font-size:0.78rem; font-weight:800; color:#fcd34d;">${medals[idx]}</div>
+          <div style="font-weight:900; font-size:1rem; margin:2px 0;">${w.title}</div>
+          <div style="font-weight:900; font-size:1.15rem; color:#6ee7b7;">${w.score} pts</div>
+          <div style="font-size:0.74rem; color:var(--muted);">${w.sub}</div>
+        </div>
+      `).join('');
+
+      podiumEl.innerHTML = `
+        <h2 style="font-size:1.5rem; font-weight:900; color:#fde047;">🏆 Clasificación Final de la Clase</h2>
+        <div class="podium-stage">${stepsHtml}</div>
+        <button class="btn btn-success" style="margin-top:8px;" onclick="exportResultsCSV()">
+          📥 Descargar notas de alumnos para Excel (.csv)
+        </button>
+      `;
+      podiumEl.classList.remove('hidden');
     }
 
     function renderFinalPedagogicalReport() {
@@ -1419,9 +2614,80 @@
             <span style="font-weight:800; color:${e.pct < 60 ? '#fca5a5' : '#6ee7b7'};">${e.pct}% de acierto</span>
           </div>`
         ).join('');
-        reportEl.innerHTML = `<h3 style="margin-bottom:8px;">📋 Informe para evaluación (palabras ordenadas por dificultad)</h3>${rows}`;
+        reportEl.innerHTML = `<h3 style="margin-bottom:8px;">📋 Informe pedagógico (palabras ordenadas por dificultad)</h3>${rows}`;
       }
       reportEl.classList.remove('hidden');
+    }
+
+    function exportResultsCSV() {
+      const sorted = Object.values(boardState.players).sort((a, b) => b.score - a.score);
+      if (sorted.length === 0) {
+        alert('No hay alumnos registrados para exportar.');
+        return;
+      }
+      const ch = getCurrentChallenge();
+      const lines = [
+        '\uFEFFPuesto;Alumno;Equipo;Puntuacion;Racha_Maxima;Aciertos;Total_Items;Porcentaje_Acierto;Desafio'
+      ];
+      sorted.forEach((p, idx) => {
+        const pct = p.totalAnswered > 0 ? Math.round((p.hits / p.totalAnswered) * 100) : 0;
+        const teamLabel = boardState.gameMode === 'teams' ? TEAM_NAMES[p.team] : 'Individual';
+        lines.push(
+          `${idx + 1};"${p.name.replace(/"/g, '""')}";"${teamLabel}";${p.score};${p.maxStreak || 0};${p.hits || 0};${p.totalAnswered || 0};${pct}%;"${ch.title.replace(/"/g, '""')}"`
+        );
+      });
+
+      const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const today = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `resultados-lengua-quest-${today}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    /* Simple Pure-JS Confetti Celebration */
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#ef4444', '#10b981', '#3b82f6', '#f59e0b', '#a855f7', '#fde047'];
+      const pieces = Array.from({ length: 130 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        w: 8 + Math.random() * 8,
+        h: 6 + Math.random() * 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vy: 2.5 + Math.random() * 4,
+        vx: -1.5 + Math.random() * 3,
+        rot: Math.random() * 360,
+        vrot: -5 + Math.random() * 10
+      }));
+
+      let frames = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vrot;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 210) {
+          requestAnimationFrame(draw);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      requestAnimationFrame(draw);
     }
 
     /* ==================== 5. STUDENT CONTROLLER LOGIC (/PLAY) ==================== */
@@ -1430,44 +2696,156 @@
       pin: '',
       name: '',
       team: 0,
-      picks: [null, null, null, null],
+      gameMode: 'teams',
+      teamAssignMode: 'random',
+      teamCounts: [0, 0, 0, 0],
+      maxAllowedPerTeam: 99,
+      roundEndTime: 0,
+      timerDuration: 30,
+      schema: CHALLENGE_TEMPLATES.sustantivos.schema,
+      picks: [],
       submitted: false,
-      lastWordIndex: -1
+      lastWordIndex: -1,
+      lastPhase: 'lobby'
     };
 
-    function selectStudentTeam(t) {
+    let studentTimerInterval = null;
+
+    function tryRestoreStudentSession() {
+      if (studentState.joined) return;
+      try {
+        const raw = sessionStorage.getItem('lq_student_session');
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (saved && saved.pin && saved.name) {
+          document.getElementById('join-pin').value = saved.pin;
+          document.getElementById('join-name').value = saved.name;
+          studentState.team = saved.team || 0;
+          studentJoinRoom(true);
+        }
+      } catch (e) {}
+    }
+
+    function leaveStudentRoom() {
+      sessionStorage.removeItem('lq_student_session');
+      studentState.joined = false;
+      studentState.lastWordIndex = -1;
+      if (studentTimerInterval) clearInterval(studentTimerInterval);
+      document.getElementById('student-game-card').classList.add('hidden');
+      document.getElementById('student-join-card').classList.remove('hidden');
+    }
+
+    function onStudentPinTyped() {
+      const pin = document.getElementById('join-pin').value.trim();
+      if (pin.length >= 3) {
+        studentState.pin = pin;
+        subscribeCurrentPin();
+        sendClassroomMsg(pin, 'HELLO_LOBBY', { playerId: clientId });
+      }
+    }
+
+    function updateLobbyTeamPickerUI() {
+      const teamSec = document.getElementById('student-team-section');
+      const modeBanner = document.getElementById('student-mode-banner');
+
+      if (studentState.gameMode === 'individual' || studentState.teamAssignMode === 'random') {
+        teamSec.classList.add('hidden');
+        modeBanner.classList.remove('hidden');
+        modeBanner.innerHTML = studentState.gameMode === 'individual'
+          ? 'Modo <strong>Individual</strong> activo: escribe tu nombre y entra directo.'
+          : 'Modo <strong>Grupos Aleatorios</strong> activo: la pizarra te asignará un equipo equilibrado al entrar.';
+      } else {
+        teamSec.classList.remove('hidden');
+        modeBanner.classList.add('hidden');
+        const counts = studentState.teamCounts || [0, 0, 0, 0];
+        const maxAllowed = studentState.maxAllowedPerTeam || 99;
+
+        document.querySelectorAll('.team-choice').forEach(el => {
+          const t = Number(el.dataset.team);
+          const c = counts[t] || 0;
+          const isFull = c >= maxAllowed;
+          el.classList.toggle('full', isFull);
+          const slotEl = document.getElementById(`team-slot-${t}`);
+          if (slotEl) {
+            slotEl.textContent = isFull
+              ? `${c} jug. · Completo (espera al resto)`
+              : `${c} jug. · Disponible`;
+          }
+        });
+
+        if ((counts[studentState.team] || 0) >= maxAllowed) {
+          const openTeam = [0, 1, 2, 3].find(t => (counts[t] || 0) < maxAllowed);
+          if (openTeam !== undefined) selectStudentTeam(openTeam, true);
+        }
+      }
+    }
+
+    function selectStudentTeam(t, silent = false) {
+      const counts = studentState.teamCounts || [0, 0, 0, 0];
+      const maxAllowed = studentState.maxAllowedPerTeam || 99;
+      if (studentState.teamAssignMode === 'balanced_choice' && (counts[t] || 0) >= maxAllowed) {
+        if (!silent) {
+          alert('Este equipo ya tiene el máximo permitido ahora mismo para que todos los grupos tengan los mismos jugadores (o uno más). Elige otro disponible.');
+        }
+        return;
+      }
       studentState.team = t;
       document.querySelectorAll('.team-choice').forEach(el => {
         el.classList.toggle('selected', Number(el.dataset.team) === t);
       });
+      if (!silent) SoundEngine.playClick();
     }
 
-    function studentJoinRoom() {
+    function studentJoinRoom(isAutoRestore = false) {
       const pin = document.getElementById('join-pin').value.trim();
       const name = document.getElementById('join-name').value.trim();
       if (!pin || pin.length < 3) {
-        alert('Escribe el código PIN que aparece en la pizarra digital.');
+        if (!isAutoRestore) alert('Escribe el código PIN que aparece en la pizarra digital.');
         return;
       }
       if (!name) {
-        alert('Escribe tu nombre para entrar.');
+        if (!isAutoRestore) alert('Escribe tu nombre para entrar.');
         return;
       }
       studentState.joined = true;
       studentState.pin = pin;
       studentState.name = name;
 
+      sessionStorage.setItem('lq_student_session', JSON.stringify({
+        pin,
+        name,
+        team: studentState.team
+      }));
+
       subscribeCurrentPin();
       document.getElementById('student-join-card').classList.add('hidden');
       document.getElementById('student-game-card').classList.remove('hidden');
-      document.getElementById('stu-badge-team').textContent = TEAM_NAMES[studentState.team];
+      document.getElementById('stu-badge-team').textContent =
+        studentState.gameMode === 'individual' ? '👤 Individual' : '⏳ Conectando...';
       document.getElementById('stu-badge-name').textContent = studentState.name;
+
+      if (!isAutoRestore) SoundEngine.playJoin();
 
       sendClassroomMsg(pin, 'PLAYER_JOIN', {
         playerId: clientId,
         name: studentState.name,
-        team: studentState.team
+        preferredTeam: studentState.team
       });
+    }
+
+    function renderStudentCategoryButtons(schema) {
+      const container = document.getElementById('stu-dynamic-categories');
+      container.innerHTML = schema.map((catObj, catIdx) => `
+        <div class="cat-group">
+          <div class="cat-title">${catObj.label}</div>
+          <div class="pill-options" data-cat="${catIdx}">
+            ${catObj.options.map(opt => {
+              const isNA = opt.toLowerCase().includes('no procede');
+              return `<button type="button" class="pill-btn ${isNA ? 'na-opt' : ''}" onclick="pickOption(${catIdx}, '${opt.replace(/'/g, "\\'")}', this)">${opt}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
     }
 
     function pickOption(catIdx, value, btnEl) {
@@ -1476,18 +2854,20 @@
       const group = btnEl.parentElement;
       group.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
       btnEl.classList.add('active');
+      SoundEngine.playClick();
     }
 
     function submitStudentAnswer() {
       if (studentState.submitted) return;
       if (studentState.picks.some(v => v === null)) {
-        alert('¡Marca las 4 filas antes de enviar! Si una categoría no se aplica, pulsa «No procede».');
+        alert('¡Marca todas las filas antes de enviar!');
         return;
       }
       studentState.submitted = true;
       document.getElementById('stu-submit-btn').disabled = true;
       document.getElementById('stu-submit-btn').textContent = '⏳ Respuesta enviada · Esperando al profe';
-      document.getElementById('stu-feedback-msg').textContent = '¡Listo! Mira la pizarra digital para ver la solución.';
+      document.getElementById('stu-feedback-msg').textContent = '¡Listo! Mira la pizarra digital para ver subir tu torre.';
+      SoundEngine.playSubmit();
 
       sendClassroomMsg(studentState.pin, 'PLAYER_ANSWER', {
         playerId: clientId,
@@ -1495,49 +2875,132 @@
       });
     }
 
-    function applyBoardStateToStudent(st) {
-      if (!studentState.joined) return;
+    function startStudentTimerLoop() {
+      if (studentTimerInterval) clearInterval(studentTimerInterval);
+      const pill = document.getElementById('stu-timer-pill');
 
-      if (st.players && st.players[clientId]) {
-        document.getElementById('stu-points-label').textContent = `Mis puntos: ${st.players[clientId].score}`;
+      if (!studentState.timerDuration || studentState.timerDuration <= 0 || !studentState.roundEndTime) {
+        pill.classList.add('hidden');
+        return;
+      }
+      pill.classList.remove('hidden');
+
+      const updatePill = () => {
+        const remMs = Math.max(0, studentState.roundEndTime - Date.now());
+        const remSec = Math.ceil(remMs / 1000);
+        pill.textContent = formatSeconds(remSec);
+        pill.classList.remove('warn', 'danger');
+        if (remSec <= 5) {
+          pill.classList.add('danger');
+        } else if (remSec <= 10) {
+          pill.classList.add('warn');
+        }
+        if (remMs <= 0 && !studentState.submitted) {
+          document.getElementById('stu-submit-btn').disabled = true;
+          document.getElementById('stu-submit-btn').textContent = '⏱️ ¡Tiempo agotado!';
+        }
+      };
+
+      updatePill();
+      studentTimerInterval = setInterval(updatePill, 250);
+    }
+
+    function applyBoardStateToStudent(st) {
+      studentState.gameMode = st.gameMode || 'teams';
+      studentState.teamAssignMode = st.teamAssignMode || 'random';
+      studentState.teamCounts = st.teamCounts || [0, 0, 0, 0];
+      studentState.maxAllowedPerTeam = st.maxAllowedPerTeam || 99;
+      studentState.timerDuration = st.timerDuration || 0;
+      studentState.roundEndTime = st.roundEndTime || 0;
+      if (Array.isArray(st.schema) && st.schema.length > 0) {
+        studentState.schema = st.schema;
+      }
+
+      if (!studentState.joined) {
+        updateLobbyTeamPickerUI();
+        return;
+      }
+
+      // Check if player was kicked by teacher
+      const me = st.players && st.players[clientId];
+      if (!me && st.players && Object.keys(st.players).length > 0 && studentState.lastPhase !== 'lobby') {
+        alert('Has sido desconectado de la sala por el profesor.');
+        leaveStudentRoom();
+        return;
+      }
+
+      if (me) {
+        studentState.team = me.team;
+        document.getElementById('stu-points-label').textContent = `Mis puntos: ${me.score}`;
+        document.getElementById('stu-badge-team').textContent =
+          studentState.gameMode === 'individual'
+            ? `${me.icon || '🐒'} Individual`
+            : TEAM_NAMES[me.team];
+
+        const streakEl = document.getElementById('stu-streak-badge');
+        if (me.streak >= 2) {
+          streakEl.textContent = `🔥 Racha x${me.streak}`;
+          streakEl.classList.remove('hidden');
+        } else {
+          streakEl.classList.add('hidden');
+        }
       }
 
       const waitBox = document.getElementById('stu-wait-box');
       const qBox = document.getElementById('stu-question-box');
 
       if (st.phase === 'lobby') {
+        if (studentTimerInterval) clearInterval(studentTimerInterval);
         waitBox.classList.remove('hidden');
         qBox.classList.add('hidden');
         document.getElementById('stu-wait-title').textContent = '¡Ya estás dentro de la sala!';
-        document.getElementById('stu-wait-desc').textContent = 'Esperando a que el profesor pulse Empezar en la pizarra.';
+        document.getElementById('stu-wait-desc').textContent =
+          studentState.gameMode === 'individual'
+            ? 'Compites de forma individual. Espera a que el profesor pulse Empezar.'
+            : `Estás en ${TEAM_NAMES[studentState.team]}. Espera a que el profesor pulse Empezar.`;
       } else if (st.phase === 'finished') {
+        if (studentTimerInterval) clearInterval(studentTimerInterval);
         waitBox.classList.remove('hidden');
         qBox.classList.add('hidden');
         document.getElementById('stu-wait-title').textContent = '🏁 ¡Partida terminada!';
-        document.getElementById('stu-wait-desc').textContent = 'Mira la clasificación final de los 4 equipos en la pizarra.';
+        document.getElementById('stu-wait-desc').textContent = 'Mira el podio final en la pizarra digital.';
+        if (studentState.lastPhase !== 'finished') {
+          SoundEngine.playVictoryFanfare();
+        }
       } else if (st.phase === 'question') {
         waitBox.classList.add('hidden');
         qBox.classList.remove('hidden');
 
-        if (studentState.lastWordIndex !== st.wordIndex) {
+        if (studentState.lastWordIndex !== st.wordIndex || studentState.lastPhase !== 'question') {
           studentState.lastWordIndex = st.wordIndex;
-          studentState.picks = [null, null, null, null];
+          studentState.picks = studentState.schema.map(() => null);
           studentState.submitted = false;
-          document.querySelectorAll('.pill-btn').forEach(b => {
-            b.classList.remove('active', 'correct-reveal', 'wrong-reveal');
-          });
+          renderStudentCategoryButtons(studentState.schema);
           document.getElementById('stu-submit-btn').disabled = false;
           document.getElementById('stu-submit-btn').textContent = '✅ Enviar respuesta';
           document.getElementById('stu-feedback-msg').textContent = '';
+          document.getElementById('stu-explanation-box').classList.add('hidden');
+          SoundEngine.playRoundStart();
         }
 
-        document.getElementById('stu-round-badge').textContent = `Palabra ${st.wordIndex + 1} de ${st.totalWords}`;
+        document.getElementById('stu-round-badge').textContent = `Pregunta ${st.wordIndex + 1} de ${st.totalWords}`;
         document.getElementById('stu-current-word').textContent = st.word;
+        const ctxEl = document.getElementById('stu-current-context');
+        if (st.context) {
+          ctxEl.textContent = `«${st.context}»`;
+          ctxEl.classList.remove('hidden');
+        } else {
+          ctxEl.classList.add('hidden');
+        }
+        startStudentTimerLoop();
       } else if (st.phase === 'reveal' && st.solution) {
+        if (studentTimerInterval) clearInterval(studentTimerInterval);
+        document.getElementById('stu-timer-pill').classList.add('hidden');
         waitBox.classList.add('hidden');
         qBox.classList.remove('hidden');
         document.getElementById('stu-submit-btn').disabled = true;
 
+        const numRows = st.solution.length;
         let hits = 0;
         document.querySelectorAll('.pill-options').forEach(group => {
           const catIdx = Number(group.dataset.cat);
@@ -1555,23 +3018,60 @@
           });
         });
 
-        document.getElementById('stu-feedback-msg').innerHTML =
-          `Has acertado <strong>${hits} de 4</strong> categorías (+${hits * 250} pts${hits === 4 ? ' + bonus rapidez' : ''}).`;
+        if (studentState.lastPhase !== 'reveal') {
+          SoundEngine.playStudentResult(hits === numRows, hits / numRows);
+        }
+
+        if (!studentState.submitted) {
+          document.getElementById('stu-feedback-msg').innerHTML =
+            '⏱️ No enviaste a tiempo esta ronda (0 pts). ¡Prepárate para la siguiente!';
+        } else {
+          const ptsPerRow = Math.round(1000 / numRows);
+          const basePts = hits === numRows ? 1000 : hits * ptsPerRow;
+          document.getElementById('stu-feedback-msg').innerHTML =
+            `Has acertado <strong>${hits} de ${numRows}</strong> filas (+${basePts} pts${hits === numRows ? ' + bonus rapidez/racha' : ''}).`;
+        }
+
+        const explEl = document.getElementById('stu-explanation-box');
+        if (st.explanation) {
+          explEl.innerHTML = `💡 <strong>Explicación:</strong> ${st.explanation}`;
+          explEl.classList.remove('hidden');
+        } else {
+          explEl.classList.add('hidden');
+        }
       }
+
+      studentState.lastPhase = st.phase;
     }
 
     function handleIncomingMessage(msg) {
       if (!msg || !msg.pin) return;
 
-      // Board receives student join & answers
       if (currentView === 'board' && msg.pin === boardState.pin) {
-        if (msg.type === 'PLAYER_JOIN') {
-          const { playerId, name, team } = msg.data;
-          if (!boardState.players[playerId]) {
-            boardState.players[playerId] = { name, team, score: 0 };
+        if (msg.type === 'HELLO_LOBBY') {
+          broadcastBoardState();
+        } else if (msg.type === 'PLAYER_JOIN') {
+          const { playerId, name, preferredTeam } = msg.data;
+          const isNew = !boardState.players[playerId];
+          const assignedTeam = isNew
+            ? pickBalancedTeam(preferredTeam)
+            : boardState.players[playerId].team;
+
+          if (isNew) {
+            const iconIdx = Object.keys(boardState.players).length % CLIMBER_ICONS.length;
+            boardState.players[playerId] = {
+              name,
+              team: assignedTeam,
+              score: 0,
+              streak: 0,
+              maxStreak: 0,
+              hits: 0,
+              totalAnswered: 0,
+              icon: CLIMBER_ICONS[iconIdx]
+            };
+            SoundEngine.playJoin();
           } else {
             boardState.players[playerId].name = name;
-            boardState.players[playerId].team = team;
           }
           renderBoardUI();
           broadcastBoardState();
@@ -1580,19 +3080,31 @@
           if (!boardState.roundAnswers[playerId]) {
             boardState.roundAnswers[playerId] = { cats, ts: Date.now() };
             renderBoardUI();
+
+            const totalPlayers = Object.keys(boardState.players).length;
+            const totalAnswers = Object.keys(boardState.roundAnswers).length;
+            const autoRev = document.getElementById('chk-auto-reveal').checked;
+            if (autoRev && totalPlayers > 0 && totalAnswers >= totalPlayers) {
+              stopBoardTimer();
+              setTimeout(() => {
+                if (boardState.phase === 'question') {
+                  boardReveal(false);
+                }
+              }, 600);
+            }
           }
         }
       }
 
-      // Student receives board updates
-      if (currentView === 'play' && studentState.joined && msg.pin === studentState.pin) {
+      const stuPin = studentState.pin || document.getElementById('join-pin').value.trim();
+      if (currentView === 'play' && stuPin && msg.pin === stuPin) {
         if (msg.type === 'BOARD_STATE') {
           applyBoardStateToStudent(msg.data);
         }
       }
     }
 
-    /* ==================== 6. TEACHER CONTENT EDITOR (/ADMIN) ==================== */
+    /* ==================== 6. MULTI-TOPIC TEACHER CONTENT EDITOR (/ADMIN) ==================== */
     function populateChallengeSelectors() {
       const boardSel = document.getElementById('board-challenge-select');
       const adminSel = document.getElementById('admin-challenge-select');
@@ -1611,47 +3123,134 @@
       boardState.challengeId = boardSel.value;
     }
 
+    function toggleCustomSchemaEditor() {
+      const tpl = document.getElementById('new-challenge-template').value;
+      document.getElementById('custom-schema-builder').classList.toggle('hidden', tpl !== 'custom');
+    }
+
     function createNewChallenge() {
       const inp = document.getElementById('new-challenge-name');
       const name = inp.value.trim();
-      if (!name) return;
+      if (!name) {
+        alert('Escribe un título para el nuevo desafío.');
+        return;
+      }
+
+      const tplKey = document.getElementById('new-challenge-template').value;
+      let schema = [];
+
+      if (tplKey === 'custom') {
+        for (let i = 0; i < 4; i++) {
+          const lbl = document.getElementById(`cust-lbl-${i}`).value.trim();
+          const optsRaw = document.getElementById(`cust-opt-${i}`).value.trim();
+          if (lbl && optsRaw) {
+            const options = optsRaw.split(',').map(s => s.trim()).filter(Boolean);
+            if (options.length >= 2) {
+              schema.push({ label: `${schema.length + 1}. ${lbl}`, options });
+            }
+          }
+        }
+        if (schema.length < 2) {
+          alert('En la plantilla personalizada debes definir al menos 2 filas con 2 opciones cada una separadas por comas.');
+          return;
+        }
+      } else {
+        schema = JSON.parse(JSON.stringify(CHALLENGE_TEMPLATES[tplKey].schema));
+      }
+
       const newCh = {
         id: 'ch_' + Date.now(),
         title: name,
+        templateKey: tplKey,
+        schema,
         words: []
       };
       challenges.push(newCh);
       persistChallenges();
       document.getElementById('admin-challenge-select').value = newCh.id;
       inp.value = '';
+      onAdminChallengeChanged();
+    }
+
+    function duplicateCurrentChallenge() {
+      const chId = document.getElementById('admin-challenge-select').value;
+      const ch = challenges.find(c => c.id === chId);
+      if (!ch) return;
+      const copy = JSON.parse(JSON.stringify(ch));
+      copy.id = 'ch_' + Date.now();
+      copy.title = ch.title + ' (Copia)';
+      challenges.push(copy);
+      persistChallenges();
+      document.getElementById('admin-challenge-select').value = copy.id;
+      onAdminChallengeChanged();
+    }
+
+    function deleteCurrentChallenge() {
+      if (challenges.length <= 1) {
+        alert('Debe quedar al menos un desafío en la plataforma.');
+        return;
+      }
+      const chId = document.getElementById('admin-challenge-select').value;
+      const ch = challenges.find(c => c.id === chId);
+      if (!ch || !confirm(`¿Eliminar el desafío "${ch.title}"?`)) return;
+      challenges = challenges.filter(c => c.id !== chId);
+      persistChallenges();
+      onAdminChallengeChanged();
+    }
+
+    function onAdminChallengeChanged() {
+      cancelEditWord();
+      renderAdminDynamicDropdowns();
       renderAdminTable();
     }
 
-    function autoSuggestGrammaticalRule() {
-      const c0 = document.getElementById('ed-c0').value;
-      const c1 = document.getElementById('ed-c1').value;
-      const c2El = document.getElementById('ed-c2');
-      const c3El = document.getElementById('ed-c3');
+    function renderAdminDynamicDropdowns() {
+      const chId = document.getElementById('admin-challenge-select').value;
+      const ch = challenges.find(c => c.id === chId) || challenges[0];
+      const schema = getChallengeSchema(ch);
+      const container = document.getElementById('ed-dynamic-dropdowns');
 
-      if (c0 === 'Propio') {
-        document.getElementById('ed-c1').value = 'No procede';
-        c2El.value = 'No procede';
-        c3El.value = 'No procede';
-      } else if (c1 === 'Abstracto') {
-        c2El.value = 'No procede';
-        c3El.value = 'No procede';
+      container.innerHTML = schema.map((catObj, idx) => `
+        <div style="margin-bottom:10px;">
+          <label style="display:block; font-size:0.82rem; color:var(--muted); font-weight:700;">${catObj.label}</label>
+          <select id="ed-cat-${idx}" class="dark-select" style="width:100%;" onchange="onEditorDropdownChange(${idx})">
+            ${catObj.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+          </select>
+        </div>
+      `).join('');
+
+      updateEditorPreview();
+    }
+
+    function onEditorDropdownChange(changedIdx) {
+      const chId = document.getElementById('admin-challenge-select').value;
+      const ch = challenges.find(c => c.id === chId) || challenges[0];
+
+      // Smart grammatical rule specifically for 'sustantivos' template
+      if (ch.templateKey === 'sustantivos' && document.getElementById('ed-cat-0')) {
+        const c0 = document.getElementById('ed-cat-0').value;
+        const c1 = document.getElementById('ed-cat-1').value;
+        if (changedIdx === 0 && c0 === 'Propio') {
+          document.getElementById('ed-cat-1').value = 'No procede';
+          document.getElementById('ed-cat-2').value = 'No procede';
+          document.getElementById('ed-cat-3').value = 'No procede';
+        } else if (changedIdx === 1 && c1 === 'Abstracto') {
+          document.getElementById('ed-cat-2').value = 'No procede';
+          document.getElementById('ed-cat-3').value = 'No procede';
+        }
       }
       updateEditorPreview();
     }
 
     function updateEditorPreview() {
-      const w = document.getElementById('ed-word').value.trim() || 'palabra';
-      const vals = [
-        document.getElementById('ed-c0').value,
-        document.getElementById('ed-c1').value,
-        document.getElementById('ed-c2').value,
-        document.getElementById('ed-c3').value
-      ];
+      const chId = document.getElementById('admin-challenge-select').value;
+      const ch = challenges.find(c => c.id === chId) || challenges[0];
+      const schema = getChallengeSchema(ch);
+      const w = document.getElementById('ed-word').value.trim() || 'elemento';
+      const vals = schema.map((_, idx) => {
+        const el = document.getElementById(`ed-cat-${idx}`);
+        return el ? el.value : '';
+      });
       document.getElementById('editor-preview').innerHTML =
         `Vista previa: <strong>${w}</strong> → ${vals.join(' · ')}`;
     }
@@ -1659,25 +3258,25 @@
     function saveWordFromEditor() {
       const word = document.getElementById('ed-word').value.trim();
       if (!word) {
-        alert('Escribe una palabra primero.');
+        alert('Escribe una palabra o expresión primero.');
         return;
       }
-      const cats = [
-        document.getElementById('ed-c0').value,
-        document.getElementById('ed-c1').value,
-        document.getElementById('ed-c2').value,
-        document.getElementById('ed-c3').value
-      ];
-
       const chId = document.getElementById('admin-challenge-select').value;
       const ch = challenges.find(c => c.id === chId);
       if (!ch) return;
 
+      const schema = getChallengeSchema(ch);
+      const cats = schema.map((_, idx) => document.getElementById(`ed-cat-${idx}`).value);
+      const context = document.getElementById('ed-context').value.trim();
+      const explanation = document.getElementById('ed-explanation').value.trim();
+
       const editIdx = Number(document.getElementById('edit-word-index').value);
+      const entry = { word, context, cats, explanation };
+
       if (editIdx >= 0 && editIdx < ch.words.length) {
-        ch.words[editIdx] = { word, cats };
+        ch.words[editIdx] = entry;
       } else {
-        ch.words.push({ word, cats });
+        ch.words.push(entry);
       }
 
       persistChallenges();
@@ -1692,26 +3291,28 @@
 
       const item = ch.words[idx];
       document.getElementById('edit-word-index').value = idx;
-      document.getElementById('editor-form-title').textContent = '✏️ Editando palabra';
+      document.getElementById('editor-form-title').textContent = '✏️ Editando elemento';
       document.getElementById('ed-word').value = item.word;
-      document.getElementById('ed-c0').value = item.cats[0];
-      document.getElementById('ed-c1').value = item.cats[1];
-      document.getElementById('ed-c2').value = item.cats[2];
-      document.getElementById('ed-c3').value = item.cats[3];
+      document.getElementById('ed-context').value = item.context || '';
+      document.getElementById('ed-explanation').value = item.explanation || '';
+
+      item.cats.forEach((val, cIdx) => {
+        const sel = document.getElementById(`ed-cat-${cIdx}`);
+        if (sel) sel.value = val;
+      });
+
       document.getElementById('btn-cancel-edit').classList.remove('hidden');
       updateEditorPreview();
     }
 
     function cancelEditWord() {
       document.getElementById('edit-word-index').value = -1;
-      document.getElementById('editor-form-title').textContent = '➕ Añadir palabra al desafío';
+      document.getElementById('editor-form-title').textContent = '➕ Añadir elemento al desafío';
       document.getElementById('ed-word').value = '';
-      document.getElementById('ed-c0').value = 'Común';
-      document.getElementById('ed-c1').value = 'Concreto';
-      document.getElementById('ed-c2').value = 'Contable';
-      document.getElementById('ed-c3').value = 'Individual';
+      document.getElementById('ed-context').value = '';
+      document.getElementById('ed-explanation').value = '';
       document.getElementById('btn-cancel-edit').classList.add('hidden');
-      updateEditorPreview();
+      renderAdminDynamicDropdowns();
     }
 
     function deleteWordRow(idx) {
@@ -1726,18 +3327,35 @@
     function renderAdminTable() {
       const chId = document.getElementById('admin-challenge-select').value;
       const ch = challenges.find(c => c.id === chId) || challenges[0];
+      const schema = getChallengeSchema(ch);
+
       document.getElementById('admin-list-heading').textContent = ch.title;
-      document.getElementById('admin-word-count').textContent = `${ch.words.length} palabras`;
+      document.getElementById('admin-schema-summary').textContent =
+        'Columnas evaluadas: ' + schema.map(s => s.label).join(' | ');
+      document.getElementById('admin-word-count').textContent = `${ch.words.length} elementos`;
+
+      const thead = document.getElementById('admin-words-thead');
+      thead.innerHTML = `
+        <tr>
+          <th>Palabra / Contexto</th>
+          ${schema.map(s => `<th>${s.label}</th>`).join('')}
+          <th>Acciones</th>
+        </tr>
+      `;
 
       const tbody = document.getElementById('admin-words-tbody');
       if (ch.words.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted); text-align:center; padding:20px;">Aún no hay palabras en este desafío. Añade la primera a la izquierda.</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="${schema.length + 2}" style="color:var(--muted); text-align:center; padding:20px;">Aún no hay elementos en este desafío. Añade el primero a la izquierda.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = ch.words.map((item, idx) => `
         <tr>
-          <td><strong>${item.word}</strong></td>
+          <td>
+            <strong>${item.word}</strong>
+            ${item.context ? `<div style="font-size:0.78rem; color:var(--muted); font-style:italic;">«${item.context}»</div>` : ''}
+            ${item.explanation ? `<div style="font-size:0.75rem; color:#6ee7b7;">💡 ${item.explanation}</div>` : ''}
+          </td>
           ${item.cats.map(c => `<td><span class="tag ${c === 'No procede' ? 'na' : ''}">${c}</span></td>`).join('')}
           <td style="white-space:nowrap;">
             <button class="btn btn-ghost" style="padding:5px 9px; font-size:0.8rem;" onclick="editWordRow(${idx})">✏️</button>
@@ -1752,7 +3370,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'desafios-sustantivo-quest.json';
+      a.download = 'desafios-lengua-quest.json';
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -1765,9 +3383,13 @@
         try {
           const imported = JSON.parse(e.target.result);
           if (Array.isArray(imported) && imported.length > 0) {
-            challenges = imported;
+            challenges = imported.map(ch => ({
+              ...ch,
+              templateKey: ch.templateKey || 'sustantivos',
+              schema: getChallengeSchema(ch)
+            }));
             persistChallenges();
-            renderAdminTable();
+            onAdminChallengeChanged();
             alert('¡Banco de desafíos cargado correctamente!');
           } else {
             alert('El archivo no tiene el formato esperado.');
@@ -1780,10 +3402,10 @@
     }
 
     function restoreDefaultChallenges() {
-      if (!confirm('¿Restaurar los 4 desafíos iniciales? Se perderán los cambios no exportados.')) return;
+      if (!confirm('¿Restaurar los 5 desafíos iniciales? Se perderán los cambios no exportados.')) return;
       challenges = JSON.parse(JSON.stringify(DEFAULT_CHALLENGES));
       persistChallenges();
-      renderAdminTable();
+      onAdminChallengeChanged();
     }
 
     /* ==================== 7. INITIALIZATION ==================== */
@@ -1792,7 +3414,6 @@
       renderBoardQR();
       initRealtime();
 
-      // Check URL query parameters (?pin=XXXX or ?role=play)
       const params = new URLSearchParams(window.location.search);
       const urlPin = params.get('pin');
       const urlRole = params.get('role');
