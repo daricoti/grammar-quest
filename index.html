@@ -4,10 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lengua Quest · Plataforma Educativa 6.º Primaria</title>
+  <!-- Fuentes Fredoka y Nunito con respaldo seguro del sistema -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    /* ==================== VARIABLES Y ESTILOS BASE ==================== */
+    /* ==================== 1. VARIABLES Y DISEÑO BASE ==================== */
     :root {
-      --bg-grad: linear-gradient(135deg, #e0f2fe 0%, #eef2ff 50%, #f3e8ff 100%);
+      --font-display: 'Fredoka', 'Trebuchet MS', system-ui, -apple-system, sans-serif;
+      --font-body: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --bg-grad: linear-gradient(135deg, #e0f2fe 0%, #eef2ff 50%, #fae8ff 100%);
       --card: #ffffff;
       --card-soft: #f8fafc;
       --border: #e2e8f0;
@@ -16,20 +22,24 @@
       --primary: #4f46e5;
       --primary-hover: #4338ca;
       --primary-soft: #eef2ff;
+      --sky: #0284c7;
+      --sky-soft: #e0f2fe;
       --success: #059669;
       --success-soft: #d1fae5;
       --warning: #d97706;
       --warning-soft: #fef3c7;
       --danger: #dc2626;
       --danger-soft: #fee2e2;
+      --purple: #7c3aed;
+      --purple-soft: #f3e8ff;
       --team-0: #ef4444; /* Equipo Rojo 🦊 */
       --team-1: #3b82f6; /* Equipo Azul 🐬 */
       --team-2: #10b981; /* Equipo Verde 🐸 */
       --team-3: #f59e0b; /* Equipo Amarillo 🦁 */
       --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
       --shadow-md: 0 10px 26px rgba(30, 41, 59, 0.09);
-      --shadow-lg: 0 18px 40px rgba(30, 41, 59, 0.15);
-      --radius: 18px;
+      --shadow-lg: 0 18px 42px rgba(30, 41, 59, 0.15);
+      --radius: 20px;
     }
 
     * {
@@ -39,7 +49,7 @@
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      font-family: var(--font-body);
       background: var(--bg-grad);
       color: var(--text);
       min-height: 100vh;
@@ -47,7 +57,12 @@
       overflow-x: hidden;
     }
 
-    button, input, select {
+    h1, h2, h3, h4, .brand-title, .stage-word, .stu-word-title, .portal-title {
+      font-family: var(--font-display);
+      letter-spacing: 0.01em;
+    }
+
+    button, input, select, textarea {
       font-family: inherit;
     }
 
@@ -65,17 +80,17 @@
       z-index: 950;
     }
 
-    /* ==================== BARRA SUPERIOR ==================== */
+    /* ==================== 2. BARRA SUPERIOR ==================== */
     .topbar {
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
-      padding: 12px 22px;
+      padding: 11px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -86,39 +101,43 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-weight: 900;
-      font-size: 1.25rem;
-      color: #1e1b4b;
-      letter-spacing: -0.02em;
+      cursor: pointer;
+      user-select: none;
     }
 
     .brand-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
       background: linear-gradient(135deg, #4f46e5, #0ea5e9);
-      color: #fff;
+      color: #ffffff;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.35rem;
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #1e1b4b;
     }
 
     .brand-tag {
       background: #e0e7ff;
       color: #3730a3;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 800;
       padding: 4px 10px;
       border-radius: 999px;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.04em;
     }
 
     .nav-tabs {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
@@ -126,10 +145,10 @@
       background: #f1f5f9;
       color: #334155;
       border: 2px solid transparent;
-      padding: 9px 16px;
+      padding: 8px 13px;
       border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.94rem;
+      font-weight: 800;
+      font-size: 0.88rem;
       cursor: pointer;
       transition: all 0.16s ease;
     }
@@ -142,13 +161,7 @@
     .nav-btn.active {
       background: var(--primary);
       color: #ffffff;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.32);
-    }
-
-    .topbar-tools {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
     }
 
     .sound-btn {
@@ -157,7 +170,7 @@
       color: var(--text);
       padding: 7px 14px;
       border-radius: 999px;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 800;
       cursor: pointer;
       transition: all 0.15s;
@@ -174,7 +187,7 @@
       color: #991b1b;
     }
 
-    /* ==================== CONTENEDOR Y TARJETAS ==================== */
+    /* ==================== 3. CONTENEDOR, TARJETAS Y CONTROLES ==================== */
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -186,19 +199,18 @@
       border-radius: var(--radius);
       border: 1px solid var(--border);
       box-shadow: var(--shadow-md);
-      padding: 20px;
+      padding: 22px;
     }
 
-    /* ==================== BOTONES E INPUTS ==================== */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 7px;
       padding: 10px 16px;
-      border-radius: 12px;
+      border-radius: 13px;
       border: none;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.92rem;
       cursor: pointer;
       transition: transform 0.1s, filter 0.15s, background 0.15s;
@@ -213,54 +225,27 @@
       cursor: not-allowed;
     }
 
-    .btn-primary {
-      background: var(--primary);
-      color: #ffffff;
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: var(--primary-hover);
-    }
+    .btn-primary { background: var(--primary); color: #ffffff; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
 
-    .btn-success {
-      background: var(--success);
-      color: #ffffff;
-    }
-    .btn-success:hover:not(:disabled) {
-      filter: brightness(1.07);
-    }
+    .btn-success { background: var(--success); color: #ffffff; }
+    .btn-success:hover:not(:disabled) { filter: brightness(1.07); }
 
-    .btn-warning {
-      background: #f59e0b;
-      color: #ffffff;
-    }
-    .btn-warning:hover:not(:disabled) {
-      filter: brightness(1.06);
-    }
+    .btn-warning { background: #f59e0b; color: #ffffff; }
+    .btn-warning:hover:not(:disabled) { filter: brightness(1.06); }
 
-    .btn-danger {
-      background: var(--danger);
-      color: #ffffff;
-    }
-    .btn-danger:hover:not(:disabled) {
-      filter: brightness(1.07);
-    }
+    .btn-danger { background: var(--danger); color: #ffffff; }
+    .btn-danger:hover:not(:disabled) { filter: brightness(1.07); }
 
-    .btn-purple {
-      background: #7c3aed;
-      color: #ffffff;
-    }
-    .btn-purple:hover:not(:disabled) {
-      background: #6d28d9;
-    }
+    .btn-purple { background: var(--purple); color: #ffffff; }
+    .btn-purple:hover:not(:disabled) { filter: brightness(1.08); }
 
     .btn-soft {
       background: #f1f5f9;
       color: #1e293b;
       border: 1px solid #cbd5e1;
     }
-    .btn-soft:hover:not(:disabled) {
-      background: #e2e8f0;
-    }
+    .btn-soft:hover:not(:disabled) { background: #e2e8f0; }
 
     .btn-sm {
       padding: 6px 11px;
@@ -268,24 +253,174 @@
       border-radius: 10px;
     }
 
-    .input-field, .select-field {
+    .input-field, .select-field, .textarea-field {
       background: #ffffff;
       color: var(--text);
       border: 2px solid #cbd5e1;
       border-radius: 12px;
-      padding: 8px 12px;
-      font-size: 0.92rem;
-      font-weight: 600;
+      padding: 9px 12px;
+      font-size: 0.93rem;
+      font-weight: 700;
       outline: none;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .input-field:focus, .select-field:focus {
+    .input-field:focus, .select-field:focus, .textarea-field:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
     }
 
-    /* ==================== PIZARRA DIGITAL ==================== */
+    /* ==================== 4. PANTALLA DE INICIO (4 ACCESOS) ==================== */
+    .home-hero {
+      text-align: center;
+      max-width: 820px;
+      margin: 14px auto 28px;
+    }
+
+    .home-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 2px solid #c7d2fe;
+      color: #3730a3;
+      font-weight: 800;
+      font-size: 0.86rem;
+      padding: 6px 15px;
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 12px;
+    }
+
+    .home-hero h1 {
+      font-size: clamp(2rem, 4.5vw, 3.1rem);
+      color: #1e1b4b;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .home-hero p {
+      color: var(--muted);
+      font-size: 1.06rem;
+      font-weight: 600;
+    }
+
+    .portals-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 1060px;
+      margin: 0 auto 24px;
+    }
+
+    @media (max-width: 760px) {
+      .portals-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .portal-card {
+      background: #ffffff;
+      border-radius: 24px;
+      border: 2px solid var(--border);
+      padding: 26px 24px;
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portal-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .portal-card.p-board { border-top: 7px solid #4f46e5; }
+    .portal-card.p-board:hover { border-color: #4f46e5; }
+
+    .portal-card.p-student { border-top: 7px solid #059669; }
+    .portal-card.p-student:hover { border-color: #059669; }
+
+    .portal-card.p-study { border-top: 7px solid #0284c7; }
+    .portal-card.p-study:hover { border-color: #0284c7; }
+
+    .portal-card.p-admin { border-top: 7px solid #d97706; }
+    .portal-card.p-admin:hover { border-color: #d97706; }
+
+    .portal-icon-box {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 14px;
+    }
+
+    .p-board .portal-icon-box { background: #eef2ff; }
+    .p-student .portal-icon-box { background: #d1fae5; }
+    .p-study .portal-icon-box { background: #e0f2fe; }
+    .p-admin .portal-icon-box { background: #fef3c7; }
+
+    .portal-title {
+      font-size: 1.42rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .portal-desc {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .portal-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 0.92rem;
+    }
+
+    .p-board .portal-cta { color: #4f46e5; }
+    .p-student .portal-cta { color: #059669; }
+    .p-study .portal-cta { color: #0284c7; }
+    .p-admin .portal-cta { color: #d97706; }
+
+    .home-blocks-strip {
+      max-width: 1060px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .block-pill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.86rem;
+    }
+
+    /* ==================== 5. PIZARRA DIGITAL (PROFESOR) ==================== */
     .board-controls-card {
       margin-bottom: 18px;
       display: flex;
@@ -326,6 +461,25 @@
       color: var(--muted);
     }
 
+    .pin-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      color: #ffffff;
+      padding: 7px 14px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(30, 27, 75, 0.25);
+    }
+
+    .pin-code-digits {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: #fde047;
+    }
+
     .controls-bottom-row {
       display: flex;
       flex-wrap: wrap;
@@ -338,7 +492,7 @@
     .question-stage {
       background: linear-gradient(135deg, #ffffff 0%, #f5f7ff 100%);
       border: 2px solid #c7d2fe;
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 22px 20px;
       text-align: center;
       margin-bottom: 20px;
@@ -360,10 +514,9 @@
     }
 
     .stage-word {
-      font-size: clamp(2.2rem, 5vw, 3.7rem);
-      font-weight: 900;
+      font-size: clamp(2.1rem, 4.8vw, 3.6rem);
+      font-weight: 700;
       color: #1e1b4b;
-      letter-spacing: -0.02em;
       line-height: 1.15;
       margin: 4px 0 8px;
     }
@@ -375,27 +528,53 @@
       color: #1e3a8a;
       padding: 8px 16px;
       border-radius: 10px;
-      font-size: 1.1rem;
+      font-size: 1.12rem;
       font-style: italic;
-      font-weight: 600;
+      font-weight: 700;
       margin: 6px auto 8px;
-      max-width: 780px;
+      max-width: 820px;
     }
 
     .stage-context mark {
       background: #fde047;
       color: #1e1b4b;
-      padding: 1px 5px;
-      border-radius: 5px;
-      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-weight: 900;
       font-style: normal;
+    }
+
+    /* Tabla Visual de Radar de Conjugación Completa (Formato B de Verbos) */
+    .conjugation-radar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      max-width: 780px;
+      margin: 10px auto 6px;
+    }
+
+    @media (max-width: 640px) {
+      .conjugation-radar-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .conj-cell {
+      background: #ffffff;
+      border: 2px solid #bae6fd;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: #0c4a6e;
+      box-shadow: var(--shadow-sm);
     }
 
     .solution-chips {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       margin-top: 14px;
     }
 
@@ -403,10 +582,10 @@
       background: var(--success-soft);
       border: 2px solid #10b981;
       color: #065f46;
-      padding: 7px 14px;
+      padding: 6px 13px;
       border-radius: 12px;
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       animation: popScale 0.28s ease-out;
     }
 
@@ -418,14 +597,14 @@
 
     .stage-explanation {
       margin: 12px auto 0;
-      max-width: 720px;
+      max-width: 760px;
       background: #fefce8;
       border: 1px solid #fde047;
       color: #713f12;
       padding: 9px 15px;
       border-radius: 12px;
       font-size: 0.94rem;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     @keyframes popScale {
@@ -433,7 +612,7 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-    /* ==================== TORRES MODO EQUIPOS (4 EQUIPOS) ==================== */
+    /* ==================== 6. TORRES EQUIPOS E INDIVIDUAL ==================== */
     .teams-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -455,15 +634,10 @@
     }
 
     @media (max-width: 920px) {
-      .teams-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .teams-grid { grid-template-columns: repeat(2, 1fr); }
     }
-
     @media (max-width: 520px) {
-      .teams-grid {
-        grid-template-columns: 1fr;
-      }
+      .teams-grid { grid-template-columns: 1fr; }
     }
 
     .team-tower-card {
@@ -511,7 +685,7 @@
 
     .tower-sky {
       width: 100%;
-      height: 255px;
+      height: 245px;
       border-radius: 14px;
       background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 65%, #dcfce7 100%);
       border: 1px solid #cbd5e1;
@@ -556,7 +730,7 @@
     }
 
     .tower-brick {
-      height: 20px;
+      height: 19px;
       border-radius: 5px;
       box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), 0 2px 4px rgba(0,0,0,0.12);
       animation: brickDrop 0.35s ease-out;
@@ -609,7 +783,7 @@
       padding: 2px 7px;
       border-radius: 999px;
       font-size: 0.74rem;
-      font-weight: 700;
+      font-weight: 800;
       color: #334155;
     }
 
@@ -622,9 +796,7 @@
       padding: 0 2px;
     }
 
-    .member-chip button:hover {
-      color: var(--danger);
-    }
+    .member-chip button:hover { color: var(--danger); }
 
     /* Insignia animada de racha */
     .streak-boost-badge {
@@ -636,7 +808,7 @@
       color: #ffffff;
       font-weight: 900;
       font-size: 0.76rem;
-      padding: 4px 10px;
+      padding: 4px 11px;
       border-radius: 999px;
       white-space: nowrap;
       box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
@@ -649,7 +821,7 @@
       to { transform: translateX(-50%) scale(1.06); }
     }
 
-    /* ==================== MODO INDIVIDUAL (HASTA 20 JUGADORES) ==================== */
+    /* Modo Individual (hasta 20 jugadores) */
     .indiv-panel {
       display: flex;
       flex-direction: column;
@@ -768,7 +940,7 @@
       color: var(--primary);
     }
 
-    /* ==================== PANTALLA FINAL: PODIO OLÍMPICO Y RADAR DE FALLOS ==================== */
+    /* ==================== 7. PODIO FINAL Y RADAR DE FALLOS ==================== */
     .final-results-grid {
       display: grid;
       grid-template-columns: 1.15fr 1fr;
@@ -778,15 +950,13 @@
     }
 
     @media (max-width: 980px) {
-      .final-results-grid {
-        grid-template-columns: 1fr;
-      }
+      .final-results-grid { grid-template-columns: 1fr; }
     }
 
     .podium-card {
       background: linear-gradient(180deg, #ffffff 0%, #fefce8 100%);
       border: 2px solid #fde047;
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 24px 20px;
       box-shadow: var(--shadow-lg);
       text-align: center;
@@ -814,7 +984,7 @@
     }
 
     .podium-crown {
-      font-size: 1.6rem;
+      font-size: 1.65rem;
       line-height: 1;
       margin-bottom: -2px;
       animation: floatCrown 1.4s ease-in-out infinite alternate;
@@ -825,10 +995,7 @@
       to { transform: translateY(-5px); }
     }
 
-    .podium-avatar {
-      font-size: 2.5rem;
-      line-height: 1.1;
-    }
+    .podium-avatar { font-size: 2.5rem; line-height: 1.1; }
 
     .podium-name {
       font-weight: 900;
@@ -870,23 +1037,9 @@
       animation: riseStep 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
 
-    .step-1 {
-      height: 138px;
-      background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
-      border: 2px solid #fef08a;
-    }
-
-    .step-2 {
-      height: 104px;
-      background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
-      border: 2px solid #e2e8f0;
-    }
-
-    .step-3 {
-      height: 82px;
-      background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
-      border: 2px solid #fed7aa;
-    }
+    .step-1 { height: 138px; background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%); border: 2px solid #fef08a; }
+    .step-2 { height: 104px; background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%); border: 2px solid #e2e8f0; }
+    .step-3 { height: 82px;  background: linear-gradient(180deg, #d97706 0%, #92400e 100%); border: 2px solid #fed7aa; }
 
     @keyframes riseStep {
       from { transform: scaleY(0.2); opacity: 0; }
@@ -909,18 +1062,16 @@
       padding: 8px 14px;
       border-bottom: 1px solid #f1f5f9;
       font-size: 0.88rem;
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    .rest-ranking-row:last-child {
-      border-bottom: none;
-    }
+    .rest-ranking-row:last-child { border-bottom: none; }
 
     /* Radar de Fallos */
     .radar-card {
       background: #ffffff;
       border: 2px solid #fecaca;
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 22px 20px;
       box-shadow: var(--shadow-lg);
     }
@@ -931,7 +1082,7 @@
       border-radius: 12px;
       padding: 12px 14px;
       color: #7f1d1d;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.94rem;
       margin: 12px 0 16px;
     }
@@ -958,10 +1109,30 @@
       border-radius: 999px;
     }
 
-    /* ==================== MANDO DEL ALUMNO ==================== */
+    /* ==================== 8. MANDO ALUMNO Y MODO ESTUDIO ==================== */
     .student-wrapper {
-      max-width: 720px;
+      max-width: 780px;
       margin: 0 auto;
+    }
+
+    .adapted-check-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fefce8;
+      border: 2px solid #fde047;
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin: 10px 0 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .adapted-check-box input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #d97706;
+      cursor: pointer;
     }
 
     .team-select-grid {
@@ -972,9 +1143,7 @@
     }
 
     @media (max-width: 480px) {
-      .team-select-grid {
-        grid-template-columns: 1fr;
-      }
+      .team-select-grid { grid-template-columns: 1fr; }
     }
 
     .team-choice-btn {
@@ -1024,14 +1193,14 @@
       text-align: center;
       background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%);
       border: 2px solid #c7d2fe;
-      border-radius: 18px;
-      padding: 18px;
+      border-radius: 20px;
+      padding: 18px 16px;
       margin-bottom: 16px;
     }
 
     .stu-word-title {
-      font-size: clamp(2rem, 5vw, 2.9rem);
-      font-weight: 900;
+      font-size: clamp(1.9rem, 4.8vw, 2.8rem);
+      font-weight: 700;
       color: #1e1b4b;
     }
 
@@ -1043,13 +1212,34 @@
       margin-bottom: 12px;
     }
 
+    .cat-block.is-auto-locked {
+      background: #f1f5f9;
+      border-style: dashed;
+    }
+
     .cat-block-label {
       font-size: 0.84rem;
-      font-weight: 800;
+      font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: #475569;
+      color: #334155;
       margin-bottom: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .auto-hint-banner {
+      background: #e0f2fe;
+      border: 1px solid #7dd3fc;
+      color: #0369a1;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 12px;
     }
 
     .options-grid {
@@ -1064,9 +1254,33 @@
     }
 
     @media (max-width: 480px) {
-      .options-grid.grid-2x3 {
-        grid-template-columns: 1fr;
-      }
+      .options-grid.grid-2x3 { grid-template-columns: 1fr; }
+    }
+
+    /* Agrupación visual de Tiempos Simples vs Tiempos Compuestos en Verbos */
+    .tense-subgroup {
+      margin-bottom: 10px;
+    }
+
+    .tense-subgroup:last-child {
+      margin-bottom: 0;
+    }
+
+    .tense-sublabel {
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: #64748b;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tense-sublabel::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #cbd5e1;
     }
 
     .opt-btn {
@@ -1074,9 +1288,9 @@
       color: #1e293b;
       border: 2px solid #cbd5e1;
       border-radius: 12px;
-      padding: 12px 10px;
-      font-weight: 700;
-      font-size: 0.94rem;
+      padding: 11px 10px;
+      font-weight: 800;
+      font-size: 0.92rem;
       cursor: pointer;
       transition: all 0.14s ease;
       text-align: center;
@@ -1106,6 +1320,11 @@
       color: #ffffff !important;
     }
 
+    .opt-btn.adapted-big {
+      padding: 15px 12px;
+      font-size: 1.05rem;
+    }
+
     .feedback-panel {
       margin-top: 16px;
       padding: 15px;
@@ -1133,7 +1352,7 @@
       color: #7f1d1d;
     }
 
-    /* ==================== EDITOR DEL PROFESOR ==================== */
+    /* ==================== 9. EDITOR DEL PROFESOR ==================== */
     .lock-card {
       max-width: 440px;
       margin: 34px auto;
@@ -1152,29 +1371,25 @@
 
     .admin-layout {
       display: grid;
-      grid-template-columns: 380px 1fr;
+      grid-template-columns: 400px 1fr;
       gap: 20px;
       align-items: start;
     }
 
-    @media (max-width: 960px) {
-      .admin-layout {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 980px) {
+      .admin-layout { grid-template-columns: 1fr; }
     }
 
-    .table-wrap {
-      overflow-x: auto;
-    }
+    .table-wrap { overflow-x: auto; }
 
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
 
     .data-table th, .data-table td {
-      padding: 10px 10px;
+      padding: 10px 9px;
       text-align: left;
       border-bottom: 1px solid var(--border);
       vertical-align: top;
@@ -1183,7 +1398,7 @@
     .data-table th {
       background: #f8fafc;
       color: #475569;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
@@ -1192,7 +1407,7 @@
       display: inline-block;
       padding: 3px 9px;
       border-radius: 8px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 800;
       white-space: nowrap;
     }
@@ -1203,7 +1418,7 @@
     .badge-purple { background: #f3e8ff; color: #6b21a8; }
     .badge-slate { background: #f1f5f9; color: #64748b; }
 
-    /* ==================== TOASTS Y MODAL PERSONALIZADO ==================== */
+    /* ==================== 10. TOASTS Y MODAL PERSONALIZADO ==================== */
     #toast-area {
       position: fixed;
       bottom: 20px;
@@ -1222,7 +1437,7 @@
       padding: 12px 16px;
       border-radius: 12px;
       font-size: 0.9rem;
-      font-weight: 700;
+      font-weight: 800;
       box-shadow: var(--shadow-lg);
       border-left: 5px solid var(--primary);
       animation: slideToast 0.22s ease-out;
@@ -1252,7 +1467,7 @@
       background: #ffffff;
       border-radius: 20px;
       padding: 24px;
-      max-width: 440px;
+      max-width: 450px;
       width: 100%;
       box-shadow: var(--shadow-lg);
       border: 1px solid var(--border);
@@ -1264,11 +1479,11 @@
   <!-- Lienzo de Confeti -->
   <canvas id="confetti-canvas"></canvas>
 
-  <!-- Notificaciones Toast y Diálogo Modal (sin alert/confirm/prompt) -->
+  <!-- Notificaciones Toast y Modal Personalizado (sin alert/confirm/prompt) -->
   <div id="toast-area"></div>
   <div id="custom-modal" class="modal-overlay hidden">
     <div class="modal-box">
-      <h3 id="modal-title" style="font-size:1.15rem; font-weight:900; margin-bottom:8px;">Confirmación</h3>
+      <h3 id="modal-title" style="font-size:1.2rem; font-weight:700; margin-bottom:8px;">Confirmación</h3>
       <p id="modal-text" style="color:var(--muted); font-size:0.94rem; margin-bottom:14px;"></p>
       <input type="password" id="modal-input" class="input-field hidden" style="width:100%; margin-bottom:14px;" />
       <div id="modal-buttons" style="display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;">
@@ -1280,36 +1495,111 @@
 
   <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
   <header class="topbar">
-    <div class="brand">
+    <div class="brand" onclick="switchView('home')" title="Volver a la pantalla de inicio">
       <span class="brand-icon">🏰</span>
-      <span>Lengua Quest</span>
+      <span class="brand-title">Lengua Quest</span>
       <span class="brand-tag">6.º Primaria</span>
     </div>
 
     <nav class="nav-tabs">
-      <button class="nav-btn active" id="tab-board" onclick="switchTab('board')">🖥️ Pizarra Digital</button>
-      <button class="nav-btn" id="tab-play" onclick="switchTab('play')">🎮 Mando Alumno</button>
-      <button class="nav-btn" id="tab-admin" onclick="switchTab('admin')">🔒 Editor del Profesor</button>
+      <button class="nav-btn active" id="nav-home" onclick="switchView('home')">🏠 Inicio</button>
+      <button class="nav-btn" id="nav-board" onclick="switchView('board')">📺 Pizarra Digital</button>
+      <button class="nav-btn" id="nav-play" onclick="switchView('play')">💻 Mando Alumno</button>
+      <button class="nav-btn" id="nav-study" onclick="switchView('study')">📖 Modo Estudio</button>
+      <button class="nav-btn" id="nav-admin" onclick="switchView('admin')">🔒 Editor</button>
     </nav>
 
-    <div class="topbar-tools">
-      <button class="sound-btn" id="sound-toggle" onclick="toggleAudio()">🔊 Sonido</button>
-    </div>
+    <button class="sound-btn" id="sound-toggle" onclick="toggleAudio()">🔊 Sonido</button>
   </header>
 
   <main class="container">
 
-    <!-- ==================== 1. PIZARRA DIGITAL ==================== -->
-    <section id="view-board">
+    <!-- ==================== 0. PANTALLA DE INICIO (4 ACCESOS) ==================== -->
+    <section id="view-home">
+      <div class="home-hero">
+        <div class="home-hero-badge">✨ Plataforma Interactiva de Morfología · 6.º de Primaria</div>
+        <h1>Aprende, compite y domina la Lengua en clase o en casa</h1>
+        <p>Elige cómo quieres entrar hoy: proyecta la carrera de torres en el aula, conéctate con tu mando, repasa a tu ritmo o gestiona tus desafíos.</p>
+      </div>
+
+      <div class="portals-grid">
+        <!-- Acceso 1: Pizarra Digital -->
+        <button type="button" class="portal-card p-board" onclick="switchView('board')">
+          <div>
+            <div class="portal-icon-box">📺</div>
+            <div class="portal-title">📺 Pizarra Digital (Profesor)</div>
+            <div class="portal-desc">
+              Proyecta las palabras, oraciones y radares de conjugación en el aula. Controla el PIN de sala, equipos con tope y reparto automático, rachas x3, podio olímpico y radar de fallos.
+            </div>
+          </div>
+          <span class="portal-cta">Abrir Pizarra Digital ➡️</span>
+        </button>
+
+        <!-- Acceso 2: Mando Alumno -->
+        <button type="button" class="portal-card p-student" onclick="switchView('play')">
+          <div>
+            <div class="portal-icon-box">💻</div>
+            <div class="portal-title">💻 Mando Alumno (En clase)</div>
+            <div class="portal-desc">
+              Introduce el PIN de la pizarra y tu nombre para unirte a la partida en directo. Incluye opción discreta de ⭐ Nivel Adaptado integrada en la misma carrera.
+            </div>
+          </div>
+          <span class="portal-cta">Entrar con PIN de clase ➡️</span>
+        </button>
+
+        <!-- Acceso 3: Practicar solo (Modo Estudio) -->
+        <button type="button" class="portal-card p-study" onclick="switchView('study')">
+          <div>
+            <div class="portal-icon-box">🏠</div>
+            <div class="portal-title">🏠 Practicar solo (Modo Estudio)</div>
+            <div class="portal-desc">
+              Repasa desde casa sin necesidad de PIN ni pizarra. Elige cualquier desafío de Sustantivos, Adjetivos o Verbos, recibe corrección inmediata y revisa tus fallos al terminar.
+            </div>
+          </div>
+          <span class="portal-cta">Empezar repaso individual ➡️</span>
+        </button>
+
+        <!-- Acceso 4: Editor del Profesor -->
+        <button type="button" class="portal-card p-admin" onclick="switchView('admin')">
+          <div>
+            <div class="portal-icon-box">🔒</div>
+            <div class="portal-title">🔒 Editor del Profesor</div>
+            <div class="portal-desc">
+              Zona protegida con contraseña para crear o editar palabras, oraciones y tablas de conjugación completa, y descargar o importar copias de seguridad en JSON.
+            </div>
+          </div>
+          <span class="portal-cta">Acceder al Editor docente ➡️</span>
+        </button>
+      </div>
+
+      <div class="home-blocks-strip">
+        <strong style="font-size:0.92rem; color:#1e1b4b;">📚 Bloques incluidos en la plataforma:</strong>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <span class="block-pill-tag" style="background:#eef2ff; color:#3730a3;">📘 Sustantivos (Desafíos 1 al 5)</span>
+          <span class="block-pill-tag" style="background:#d1fae5; color:#065f46;">📗 Adjetivos (6 grados en 2×3)</span>
+          <span class="block-pill-tag" style="background:#f3e8ff; color:#6b21a8;">📙 Verbos (6 filas + Radar + Adaptado)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 1. PIZARRA DIGITAL (PROFESOR) ==================== -->
+    <section id="view-board" class="hidden">
       <div class="card board-controls-card">
-        <!-- Selectores de Bloque, Desafío y Modo -->
         <div class="controls-top-row">
           <div class="control-group">
+            <!-- PIN de Sala -->
+            <div class="pin-banner" title="Comparte este PIN con los alumnos en clase">
+              <span style="font-size:0.82rem; font-weight:800; opacity:0.9;">🔑 PIN SALA:</span>
+              <span class="pin-code-digits" id="board-pin-display">4826</span>
+              <button type="button" class="btn btn-soft btn-sm" style="padding:3px 8px; font-size:0.75rem;" onclick="regenerateRoomPin()" title="Generar nuevo PIN">🔄</button>
+            </div>
+
             <div class="control-pill">
               <span class="control-label">📚 Bloque:</span>
               <select id="board-block-select" class="select-field" onchange="onBoardBlockChange()">
                 <option value="sustantivos">Sustantivos</option>
                 <option value="adjetivos">Adjetivos</option>
+                <option value="verbos">Verbos</option>
               </select>
             </div>
 
@@ -1326,35 +1616,31 @@
               </select>
             </div>
 
-            <!-- Selector de Tope por Equipo (visible solo en Modo Equipos) -->
             <div class="control-pill" id="board-team-cap-pill">
-              <span class="control-label">⚖️ Tope por equipo:</span>
+              <span class="control-label">⚖️ Tope equipo:</span>
               <select id="board-team-cap-select" class="select-field" onchange="onBoardTeamCapChange()">
                 <option value="0">Sin límite</option>
-                <option value="3">3 jugadores</option>
                 <option value="4">4 jugadores</option>
                 <option value="5" selected>5 jugadores</option>
                 <option value="6">6 jugadores</option>
                 <option value="7">7 jugadores</option>
-                <option value="8">8 jugadores</option>
               </select>
             </div>
           </div>
         </div>
 
-        <!-- Botones de control de partida -->
         <div class="controls-bottom-row">
           <div class="control-group">
             <button class="btn btn-soft" id="btn-prev-word" onclick="boardPrevWord()">⬅️ Anterior</button>
             <button class="btn btn-warning" id="btn-reveal-word" onclick="boardRevealWord()">👁️ Revelar Solución</button>
             <button class="btn btn-primary" id="btn-next-word" onclick="boardNextWord()">Siguiente Palabra ➡️</button>
-            <button class="btn btn-purple" id="btn-simulate-round" onclick="simulateRoundResponses()" title="Simula respuestas de los alumnos conectados para probar rachas, torres y radar de fallos">
-              ⚡ Simular respuestas de la ronda
+            <button class="btn btn-purple" id="btn-simulate-round" onclick="simulateRoundResponses()" title="Simula respuestas de alumnos conectados para probar rachas y radar">
+              ⚡ Simular ronda
             </button>
           </div>
           <div class="control-group">
-            <button class="btn btn-success" id="btn-finish-match" onclick="finishMatchNow()">🏁 Finalizar y ver Podio</button>
-            <button class="btn btn-danger" onclick="boardResetMatch()">🔄 Reiniciar Partida</button>
+            <button class="btn btn-success" id="btn-finish-match" onclick="finishMatchNow()">🏁 Finalizar y Podio</button>
+            <button class="btn btn-danger" onclick="boardResetMatch()">🔄 Reiniciar</button>
           </div>
         </div>
       </div>
@@ -1364,11 +1650,12 @@
         <div class="stage-meta" id="board-progress-badge">Desafío 1 · Palabra 1 de 10</div>
         <div class="stage-word" id="board-current-word">lápiz</div>
         <div class="stage-context hidden" id="board-current-context"></div>
+        <div class="conjugation-radar-grid hidden" id="board-conjugation-grid"></div>
         <div class="solution-chips hidden" id="board-solution-chips"></div>
         <div class="stage-explanation hidden" id="board-explanation"></div>
       </div>
 
-      <!-- A) Arena Modo Equipos (4 equipos: Rojo 🦊, Azul 🐬, Verde 🐸, Amarillo 🦁) -->
+      <!-- A) Arena Modo Equipos -->
       <div id="board-teams-view">
         <div class="teams-toolbar">
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -1386,15 +1673,14 @@
               onkeydown="if(event.key==='Enter') addPlayerFromBoard('teams')"
             />
             <button class="btn btn-primary btn-sm" onclick="addPlayerFromBoard('teams')">+ Añadir</button>
-            <button class="btn btn-warning btn-sm" onclick="shuffleTeamsBalanced()">🎲 Reparto aleatorio</button>
+            <button class="btn btn-warning btn-sm" onclick="shuffleTeamsBalanced()">🔀 Reparto automático</button>
             <button class="btn btn-success btn-sm" onclick="populateDemo16TeamPlayers()">+ Demo 16 alumnos</button>
           </div>
         </div>
 
         <div class="teams-grid">
-          <!-- Equipo 0: Rojo 🦊 -->
           <div class="team-tower-card" data-team="0" id="team-card-0">
-            <div class="streak-boost-badge hidden" id="team-boost-0">🔥 ¡Racha x3! +Impulso</div>
+            <div class="streak-boost-badge hidden" id="team-boost-0">🔥 RACHA x3</div>
             <div class="team-header">
               <span style="color:var(--team-0);">🦊 Equipo Rojo</span>
               <span class="team-cap-pill" id="team-cap-0">0/5</span>
@@ -1409,9 +1695,8 @@
             <div class="team-roster-list" id="team-roster-0"></div>
           </div>
 
-          <!-- Equipo 1: Azul 🐬 -->
           <div class="team-tower-card" data-team="1" id="team-card-1">
-            <div class="streak-boost-badge hidden" id="team-boost-1">🔥 ¡Racha x3! +Impulso</div>
+            <div class="streak-boost-badge hidden" id="team-boost-1">🔥 RACHA x3</div>
             <div class="team-header">
               <span style="color:var(--team-1);">🐬 Equipo Azul</span>
               <span class="team-cap-pill" id="team-cap-1">0/5</span>
@@ -1426,9 +1711,8 @@
             <div class="team-roster-list" id="team-roster-1"></div>
           </div>
 
-          <!-- Equipo 2: Verde 🐸 -->
           <div class="team-tower-card" data-team="2" id="team-card-2">
-            <div class="streak-boost-badge hidden" id="team-boost-2">🔥 ¡Racha x3! +Impulso</div>
+            <div class="streak-boost-badge hidden" id="team-boost-2">🔥 RACHA x3</div>
             <div class="team-header">
               <span style="color:var(--team-2);">🐸 Equipo Verde</span>
               <span class="team-cap-pill" id="team-cap-2">0/5</span>
@@ -1443,9 +1727,8 @@
             <div class="team-roster-list" id="team-roster-2"></div>
           </div>
 
-          <!-- Equipo 3: Amarillo 🦁 -->
           <div class="team-tower-card" data-team="3" id="team-card-3">
-            <div class="streak-boost-badge hidden" id="team-boost-3">🔥 ¡Racha x3! +Impulso</div>
+            <div class="streak-boost-badge hidden" id="team-boost-3">🔥 RACHA x3</div>
             <div class="team-header">
               <span style="color:var(--team-3);">🦁 Equipo Amarillo</span>
               <span class="team-cap-pill" id="team-cap-3">0/5</span>
@@ -1466,7 +1749,7 @@
       <div class="card indiv-panel hidden" id="board-indiv-view">
         <div class="indiv-toolbar">
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <h3 style="font-size:1.1rem; font-weight:900;">🏔️ Escalada Individual</h3>
+            <h3 style="font-size:1.15rem;">🏔️ Escalada Individual</h3>
             <span class="count-badge" id="indiv-counter">0 / 20 jugadores</span>
           </div>
 
@@ -1488,40 +1771,66 @@
         <div class="indiv-towers-grid" id="indiv-towers-grid"></div>
       </div>
 
-      <!-- C) Pantalla Final: Podio Olímpico + Radar de Fallos -->
+      <!-- C) Pantalla Final: Podio Olímpico + Radar de Fallos de la Clase -->
       <div class="final-results-grid hidden" id="board-final-view">
-        <!-- Podio Olímpico -->
         <div class="podium-card" id="board-podium-container"></div>
-
-        <!-- Radar de Fallos de la Clase -->
         <div class="radar-card" id="board-radar-container"></div>
       </div>
     </section>
 
-    <!-- ==================== 2. MANDO ALUMNO ==================== -->
+    <!-- ==================== 2. MANDO ALUMNO (EN CLASE) ==================== -->
     <section id="view-play" class="hidden">
       <div class="student-wrapper">
-        <!-- Tarjeta de Registro / Selección de Equipo -->
+        <!-- Tarjeta de Registro con PIN, Nombre, Nivel Adaptado y Equipo -->
         <div class="card" id="stu-join-card">
-          <h2 style="font-size:1.5rem; font-weight:900; margin-bottom:4px;">🎮 Mando del Alumno</h2>
+          <h2 style="font-size:1.55rem; margin-bottom:4px;">💻 Mando Alumno (En clase)</h2>
           <p style="color:var(--muted); font-size:0.94rem; margin-bottom:16px;" id="stu-join-subtitle">
-            Escribe tu nombre y elige tu equipo para empezar a escalar.
+            Introduce el PIN proyectado en la pizarra y tu nombre para empezar.
           </p>
 
-          <div style="margin-bottom:14px;">
-            <label for="stu-name-input" style="display:block; font-weight:800; font-size:0.86rem; color:var(--muted); margin-bottom:5px;">
-              Tu nombre:
-            </label>
-            <input
-              type="text"
-              id="stu-name-input"
-              class="input-field"
-              placeholder="Escribe tu nombre..."
-              maxlength="20"
-              style="width:100%; font-size:1.05rem;"
-              onkeydown="if(event.key==='Enter') joinAsStudent()"
-            />
+          <div style="display:grid; grid-template-columns: 150px 1fr; gap:12px; margin-bottom:8px;">
+            <div>
+              <label for="stu-pin-input" style="display:block; font-weight:800; font-size:0.84rem; color:var(--muted); margin-bottom:5px;">
+                🔑 PIN Sala:
+              </label>
+              <input
+                type="text"
+                id="stu-pin-input"
+                class="input-field"
+                placeholder="Ej. 4826"
+                maxlength="6"
+                inputmode="numeric"
+                style="width:100%; font-size:1.1rem; text-align:center; letter-spacing:0.12em;"
+                onkeydown="if(event.key==='Enter') joinAsStudent()"
+              />
+            </div>
+
+            <div>
+              <label for="stu-name-input" style="display:block; font-weight:800; font-size:0.84rem; color:var(--muted); margin-bottom:5px;">
+                👤 Tu nombre:
+              </label>
+              <input
+                type="text"
+                id="stu-name-input"
+                class="input-field"
+                placeholder="Escribe tu nombre..."
+                maxlength="20"
+                style="width:100%; font-size:1.05rem;"
+                onkeydown="if(event.key==='Enter') joinAsStudent()"
+              />
+            </div>
           </div>
+
+          <!-- Casilla discreta Nivel Adaptado NEAE -->
+          <label class="adapted-check-box" for="stu-adapted-checkbox">
+            <input type="checkbox" id="stu-adapted-checkbox" />
+            <div>
+              <strong style="font-size:0.94rem; color:#92400e;">⭐ Nivel Adaptado</strong>
+              <div style="font-size:0.8rem; color:#78350f; font-weight:600;">
+                Activa esta casilla si trabajas con adaptación (pasado / presente / futuro simplificado en verbos).
+              </div>
+            </div>
+          </label>
 
           <!-- Selección de Equipo (visible en Modo Equipos) -->
           <div id="stu-team-picker-wrap">
@@ -1531,7 +1840,6 @@
                 🎲 Equipo automático
               </button>
             </div>
-
             <div class="team-select-grid" id="stu-team-buttons-grid"></div>
           </div>
 
@@ -1542,7 +1850,7 @@
           <!-- Selector rápido si ya hay alumnos conectados en este dispositivo -->
           <div id="stu-existing-wrap" class="hidden" style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border);">
             <label style="display:block; font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:6px;">
-              O selecciona un alumno ya conectado:
+              O selecciona un alumno ya conectado en sala:
             </label>
             <div style="display:flex; gap:8px;">
               <select id="stu-existing-select" class="select-field" style="flex:1;"></select>
@@ -1551,49 +1859,136 @@
           </div>
         </div>
 
-        <!-- Tarjeta Activa de Respuesta del Alumno -->
+        <!-- Tarjeta Activa de Respuesta en Clase -->
         <div class="card hidden" id="stu-play-card">
           <div class="student-header-bar">
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <span id="stu-player-badge" style="font-weight:900; font-size:1rem;">🦊 Alumno</span>
               <span id="stu-team-badge" class="badge badge-indigo">Equipo Rojo</span>
-              <span id="stu-streak-pill" class="badge badge-amber hidden">🔥 Racha: 0</span>
+              <span id="stu-adapted-badge" class="badge badge-amber hidden">⭐ Adaptado</span>
+              <span id="stu-streak-pill" class="badge badge-amber hidden">🔥 RACHA x2</span>
             </div>
             <div style="display:flex; align-items:center; gap:10px;">
-              <strong style="color:var(--primary); font-size:1.02rem;" id="stu-score-display">0 pts</strong>
+              <strong style="color:var(--primary); font-size:1.05rem;" id="stu-score-display">0 pts</strong>
               <button type="button" class="btn btn-soft btn-sm" onclick="leaveCurrentStudent()">Cambiar</button>
             </div>
           </div>
 
-          <!-- Palabra y contexto actuales -->
           <div class="stu-word-banner">
-            <div style="font-size:0.82rem; font-weight:800; color:#4338ca; margin-bottom:4px;" id="stu-challenge-label">
+            <div style="font-size:0.84rem; font-weight:800; color:#4338ca; margin-bottom:4px;" id="stu-challenge-label">
               Desafío 1 · Palabra 1 de 10
             </div>
             <div class="stu-word-title" id="stu-word-text">lápiz</div>
             <div class="stage-context hidden" id="stu-word-context" style="font-size:1rem;"></div>
+            <div class="conjugation-radar-grid hidden" id="stu-conjugation-grid"></div>
           </div>
 
-          <!-- Categorías dinámicas (4 filas para Sustantivos o cuadrícula 2x3 para Adjetivos) -->
+          <div id="stu-auto-hint" class="auto-hint-banner hidden"></div>
           <div id="stu-options-container"></div>
 
-          <!-- Botón Comprobar Respuesta -->
           <button type="button" class="btn btn-success" id="btn-check-answer" style="width:100%; padding:14px; font-size:1.08rem; margin-top:6px;" onclick="checkStudentResponse()">
             ✅ Comprobar Respuesta
           </button>
 
-          <!-- Feedback visual inmediato -->
           <div id="stu-feedback-box" class="feedback-panel hidden"></div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== 3. EDITOR DEL PROFESOR ==================== -->
+    <!-- ==================== 3. PRACTICAR SOLO (MODO ESTUDIO EN CASA) ==================== -->
+    <section id="view-study" class="hidden">
+      <div class="student-wrapper">
+        <!-- Configuración inicial de Modo Estudio -->
+        <div class="card" id="study-setup-card">
+          <h2 style="font-size:1.55rem; margin-bottom:4px;">🏠 Practicar solo (Modo Estudio)</h2>
+          <p style="color:var(--muted); font-size:0.94rem; margin-bottom:16px;">
+            Repasa desde casa sin necesidad de PIN ni pizarra. Elige el bloque, el desafío y comprueba tus respuestas paso a paso.
+          </p>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:10px;">
+            <div>
+              <label style="display:block; font-weight:800; font-size:0.84rem; color:var(--muted); margin-bottom:5px;">
+                📚 Bloque gramatical:
+              </label>
+              <select id="study-block-select" class="select-field" style="width:100%;" onchange="populateStudyChallenges()">
+                <option value="sustantivos">Sustantivos</option>
+                <option value="adjetivos">Adjetivos</option>
+                <option value="verbos">Verbos</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="display:block; font-weight:800; font-size:0.84rem; color:var(--muted); margin-bottom:5px;">
+                🎯 Desafío:
+              </label>
+              <select id="study-challenge-select" class="select-field" style="width:100%;"></select>
+            </div>
+          </div>
+
+          <label class="adapted-check-box" for="study-adapted-checkbox">
+            <input type="checkbox" id="study-adapted-checkbox" />
+            <div>
+              <strong style="font-size:0.94rem; color:#92400e;">⭐ Nivel Adaptado</strong>
+              <div style="font-size:0.8rem; color:#78350f; font-weight:600;">
+                Simplifica el análisis de verbos a Pasado · Presente · Futuro y Personal / No personal.
+              </div>
+            </div>
+          </label>
+
+          <button type="button" class="btn btn-primary" style="width:100%; padding:14px; font-size:1.06rem;" onclick="startStudySession()">
+            📖 Empezar práctica individual
+          </button>
+        </div>
+
+        <!-- Sesión Activa de Estudio -->
+        <div class="card hidden" id="study-active-card">
+          <div class="student-header-bar">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span class="badge badge-sky" id="study-header-title">Desafío 1</span>
+              <span class="badge badge-amber hidden" id="study-adapted-pill">⭐ Nivel Adaptado</span>
+              <span class="badge badge-amber hidden" id="study-streak-pill">🔥 RACHA x2</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <strong style="color:var(--primary); font-size:1.05rem;" id="study-score-text">0 / 0 aciertos</strong>
+              <button type="button" class="btn btn-soft btn-sm" onclick="exitStudyToSetup()">Cambiar desafío</button>
+            </div>
+          </div>
+
+          <div class="stu-word-banner">
+            <div style="font-size:0.84rem; font-weight:800; color:#0369a1; margin-bottom:4px;" id="study-progress-label">
+              Pregunta 1 de 10
+            </div>
+            <div class="stu-word-title" id="study-word-text">lápiz</div>
+            <div class="stage-context hidden" id="study-word-context" style="font-size:1rem;"></div>
+            <div class="conjugation-radar-grid hidden" id="study-conjugation-grid"></div>
+          </div>
+
+          <div id="study-auto-hint" class="auto-hint-banner hidden"></div>
+          <div id="study-options-container"></div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+            <button type="button" class="btn btn-success" id="btn-study-check" style="flex:1; padding:14px; font-size:1.06rem;" onclick="checkStudyAnswer()">
+              ✅ Comprobar Respuesta
+            </button>
+            <button type="button" class="btn btn-primary hidden" id="btn-study-next" style="flex:1; padding:14px; font-size:1.06rem;" onclick="nextStudyQuestion()">
+              Siguiente Pregunta ➡️
+            </button>
+          </div>
+
+          <div id="study-feedback-box" class="feedback-panel hidden"></div>
+        </div>
+
+        <!-- Resumen Final de Estudio -->
+        <div class="card hidden" id="study-summary-card"></div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. EDITOR DEL PROFESOR ==================== -->
     <section id="view-admin" class="hidden">
       <!-- Pantalla de Bloqueo con Contraseña -->
       <div id="admin-lock-box" class="card lock-card">
         <div style="font-size:3rem; margin-bottom:10px;">🔒</div>
-        <h2 style="font-size:1.5rem; font-weight:900; margin-bottom:6px;">Editor del Profesor</h2>
+        <h2 style="font-size:1.55rem; margin-bottom:6px;">Editor del Profesor</h2>
         <p style="color:var(--muted); font-size:0.92rem; margin-bottom:18px;">
           Introduce la contraseña docente para gestionar los desafíos y copias de seguridad.
         </p>
@@ -1605,7 +2000,7 @@
           style="width:100%; text-align:center; font-size:1.05rem; margin-bottom:12px;"
           onkeydown="if(event.key==='Enter') unlockAdmin()"
         />
-        <div id="admin-pass-err" class="hidden" style="color:var(--danger); font-weight:700; font-size:0.88rem; margin-bottom:10px;">
+        <div id="admin-pass-err" class="hidden" style="color:var(--danger); font-weight:800; font-size:0.88rem; margin-bottom:10px;">
           ❌ Contraseña incorrecta. Inténtalo de nuevo.
         </div>
         <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="unlockAdmin()">
@@ -1617,8 +2012,8 @@
       <div id="admin-content-box" class="hidden">
         <div class="admin-topbar">
           <div>
-            <h2 style="font-size:1.55rem; font-weight:900;">✏️ Gestión de Contenidos</h2>
-            <p style="color:var(--muted); font-size:0.92rem;">Edita desafíos, crea preguntas y guarda copias de seguridad en JSON.</p>
+            <h2 style="font-size:1.55rem;">✏️ Gestión de Contenidos</h2>
+            <p style="color:var(--muted); font-size:0.92rem;">Edita Sustantivos, Adjetivos y Verbos, y guarda copias de seguridad en JSON.</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="btn btn-primary btn-sm" onclick="exportChallengesBackup()">📥 Exportar copia (.json)</button>
@@ -1631,16 +2026,17 @@
         </div>
 
         <div class="admin-layout">
-          <!-- Panel izquierdo: Selector de bloque/desafío y formulario de elemento -->
+          <!-- Panel izquierdo: Selector y formulario -->
           <div style="display:flex; flex-direction:column; gap:16px;">
             <div class="card">
-              <h3 style="font-size:1.05rem; font-weight:900; margin-bottom:12px;">📁 Bloque y Desafío</h3>
+              <h3 style="font-size:1.08rem; margin-bottom:12px;">📁 Bloque y Desafío</h3>
 
               <div style="margin-bottom:10px;">
                 <label style="display:block; font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">Bloque temático</label>
                 <select id="admin-block-select" class="select-field" style="width:100%;" onchange="onAdminBlockChange()">
                   <option value="sustantivos">Sustantivos</option>
                   <option value="adjetivos">Adjetivos</option>
+                  <option value="verbos">Verbos</option>
                 </select>
               </div>
 
@@ -1657,24 +2053,60 @@
 
             <!-- Formulario añadir / editar elemento -->
             <div class="card">
-              <h3 id="admin-form-heading" style="font-size:1.05rem; font-weight:900; margin-bottom:12px;">➕ Añadir elemento</h3>
+              <h3 id="admin-form-heading" style="font-size:1.08rem; margin-bottom:12px;">➕ Añadir elemento</h3>
               <input type="hidden" id="admin-edit-idx" value="-1" />
 
-              <div style="margin-bottom:10px;">
-                <label style="display:block; font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">Palabra o expresión</label>
-                <input type="text" id="admin-inp-word" class="input-field" placeholder="Ej. lápiz, veloz, Madrid..." style="width:100%;" />
+              <!-- Selector de Formato (solo visible en Verbos) -->
+              <div id="admin-verb-format-wrap" class="hidden" style="margin-bottom:10px;">
+                <label style="display:block; font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">Formato de pregunta verbal</label>
+                <select id="admin-verb-format" class="select-field" style="width:100%;" onchange="onAdminVerbFormatChange()">
+                  <option value="sentence">Formato A · Verbo en oración</option>
+                  <option value="conjugation_radar">Formato B · Radar de conjugación entera (6 personas)</option>
+                </select>
               </div>
 
               <div style="margin-bottom:10px;">
+                <label id="admin-word-label" style="display:block; font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">Palabra o expresión</label>
+                <input type="text" id="admin-inp-word" class="input-field" placeholder="Ej. lápiz, veloz, cantábamos..." style="width:100%;" />
+              </div>
+
+              <div id="admin-context-wrap" style="margin-bottom:10px;">
                 <label style="display:block; font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">Oración de contexto (opcional)</label>
-                <input type="text" id="admin-inp-context" class="input-field" placeholder="Ej. El guepardo es un animal veloz." style="width:100%;" />
+                <input type="text" id="admin-inp-context" class="input-field" placeholder="Ej. Nosotros cantábamos en la excursión." style="width:100%;" />
+              </div>
+
+              <!-- Tabla de 6 personas para Formato B de Verbos -->
+              <div id="admin-conj-table-wrap" class="hidden" style="margin-bottom:10px;">
+                <label style="display:block; font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">
+                  Las 6 formas conjugadas (una por línea):
+                </label>
+                <textarea
+                  id="admin-inp-conj-lines"
+                  class="textarea-field"
+                  rows="6"
+                  style="width:100%; resize:vertical;"
+                  placeholder="yo cantaba&#10;tú cantabas&#10;él/ella cantaba&#10;nosotros/as cantábamos&#10;vosotros/as cantabais&#10;ellos/as cantaban"
+                ></textarea>
               </div>
 
               <div id="admin-dynamic-cat-fields"></div>
 
+              <!-- Tiempo básico para Nivel Adaptado (solo visible en Verbos) -->
+              <div id="admin-verb-basic-tense-wrap" class="hidden" style="margin-bottom:10px;">
+                <label style="display:block; font-size:0.82rem; font-weight:800; color:#92400e; margin-bottom:4px;">
+                  ⭐ Tiempo para Nivel Adaptado
+                </label>
+                <select id="admin-inp-basic-tense" class="select-field" style="width:100%;">
+                  <option value="Pasado">Pasado</option>
+                  <option value="Presente">Presente</option>
+                  <option value="Futuro">Futuro</option>
+                  <option value="No procede">No procede (forma no personal)</option>
+                </select>
+              </div>
+
               <div style="margin-bottom:12px;">
                 <label style="display:block; font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">Explicación gramatical (opcional)</label>
-                <input type="text" id="admin-inp-explanation" class="input-field" placeholder="Ej. Es colectivo porque en singular nombra un conjunto." style="width:100%;" />
+                <input type="text" id="admin-inp-explanation" class="input-field" placeholder="Ej. Es 1.ª conjugación (-ar) en pretérito imperfecto." style="width:100%;" />
               </div>
 
               <div style="display:flex; gap:8px;">
@@ -1684,11 +2116,11 @@
             </div>
           </div>
 
-          <!-- Panel derecho: Tabla de elementos del desafío -->
+          <!-- Panel derecho: Tabla de elementos -->
           <div class="card table-wrap">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
               <div>
-                <h3 id="admin-table-title" style="font-size:1.15rem; font-weight:900;">Desafío 1</h3>
+                <h3 id="admin-table-title" style="font-size:1.2rem;">Desafío 1</h3>
                 <p id="admin-table-subtitle" style="font-size:0.84rem; color:var(--muted);"></p>
               </div>
               <span class="badge badge-indigo" id="admin-table-count">10 elementos</span>
@@ -1706,7 +2138,7 @@
   </main>
 
   <script>
-    /* ==================== 1. ALMACENAMIENTO SEGURO (ANTI-ERRORES EN SANDBOX/IFRAME) ==================== */
+    /* ==================== 1. ALMACENAMIENTO SEGURO (SafeStorage & SafeSession) ==================== */
     const SafeStorage = (() => {
       const memoryFallback = {};
       return {
@@ -1721,17 +2153,13 @@
           memoryFallback[key] = String(value);
           try {
             window.localStorage.setItem(key, String(value));
-          } catch (e) {
-            // Respaldo silencioso en memoria
-          }
+          } catch (e) {}
         },
         removeItem(key) {
           delete memoryFallback[key];
           try {
             window.localStorage.removeItem(key);
-          } catch (e) {
-            // Respaldo silencioso en memoria
-          }
+          } catch (e) {}
         }
       };
     })();
@@ -1764,7 +2192,21 @@
     const STORAGE_KEY = 'lengua_quest_v7_data';
     const DEFAULT_ADMIN_PASS = 'profe2026';
 
-    /* ==================== 2. DEFINICIÓN DE ESQUEMAS Y BANCO INICIAL ==================== */
+    /* ==================== 2. ESQUEMAS GRAMATICALES Y BANCO INICIAL ==================== */
+    const VERB_SIMPLE_TENSES = [
+      'Presente',
+      'Pretérito imperfecto',
+      'Pretérito perfecto simple',
+      'Futuro simple',
+      'Condicional simple'
+    ];
+    const VERB_COMPOUND_TENSES = [
+      'Pretérito perfecto compuesto',
+      'Pretérito pluscuamperfecto',
+      'Futuro compuesto',
+      'Condicional compuesto'
+    ];
+
     const SCHEMAS = {
       sustantivos: [
         { label: '1. Según su extensión', options: ['Común', 'Propio'] },
@@ -1784,11 +2226,22 @@
             'Superlativo absoluto'
           ]
         }
+      ],
+      verbos: [
+        { label: '1. Conjugación (según infinitivo)', options: ['1.ª (-ar)', '2.ª (-er)', '3.ª (-ir)'] },
+        { label: '2. Forma verbal', options: ['Personal', 'Infinitivo', 'Gerundio', 'Participio'] },
+        { label: '3. Persona', options: ['1.ª persona', '2.ª persona', '3.ª persona', 'No procede'] },
+        { label: '4. Número', options: ['Singular', 'Plural', 'No procede'] },
+        { label: '5. Modo', options: ['Indicativo', 'Subjuntivo', 'Imperativo', 'No procede'] },
+        {
+          label: '6. Tiempo verbal específico',
+          options: [...VERB_SIMPLE_TENSES, ...VERB_COMPOUND_TENSES, 'No procede']
+        }
       ]
     };
 
     const INITIAL_CHALLENGES = [
-      /* ----- SUSTANTIVOS: DESAFÍO 1 A DESAFÍO 5 (50 PALABRAS EXACTAS) ----- */
+      /* ----- BLOQUE 1: SUSTANTIVOS (DESAFÍO 1 AL DESAFÍO 5 · 50 PALABRAS EXACTAS) ----- */
       {
         id: 'sust-1',
         block: 'sustantivos',
@@ -1875,7 +2328,7 @@
         ]
       },
 
-      /* ----- ADJETIVOS: 2 DESAFÍOS INICIALES (6 OPCIONES) ----- */
+      /* ----- BLOQUE 2: ADJETIVOS (2 DESAFÍOS INICIALES · 6 GRADOS EN 2x3) ----- */
       {
         id: 'adj-1',
         block: 'adjetivos',
@@ -1909,6 +2362,262 @@
           { word: 'la menos extensa', context: 'Esta redacción es la menos extensa de toda la clase.', cats: ['Superlativo relativo'], explanation: 'Expresa el grado mínimo dentro de un grupo («de toda la clase»).' },
           { word: 'la más brillante', context: 'Sirio es la estrella más brillante del cielo nocturno.', cats: ['Superlativo relativo'], explanation: 'Indica el grado máximo dentro de un conjunto («del cielo nocturno»).' }
         ]
+      },
+
+      /* ----- BLOQUE 3: VERBOS (FORMATO A EN ORACIÓN + FORMATO B RADAR DE CONJUGACIÓN) ----- */
+      {
+        id: 'verb-1',
+        block: 'verbos',
+        title: 'Verbos · Desafío 1 (En oración)',
+        words: [
+          {
+            word: 'cantábamos',
+            context: 'Nosotros cantábamos canciones tradicionales en la excursión.',
+            format: 'sentence',
+            cats: ['1.ª (-ar)', 'Personal', '1.ª persona', 'Plural', 'Indicativo', 'Pretérito imperfecto'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Infinitivo «cantar» (1.ª conj.), 1.ª persona plural, pretérito imperfecto de indicativo.'
+          },
+          {
+            word: 'escribirán',
+            context: 'Mañana los alumnos escribirán un cuento fantástico.',
+            format: 'sentence',
+            cats: ['3.ª (-ir)', 'Personal', '3.ª persona', 'Plural', 'Indicativo', 'Futuro simple'],
+            tiempoBasico: 'Futuro',
+            explanation: 'Infinitivo «escribir» (3.ª conj.), 3.ª persona plural, futuro simple de indicativo.'
+          },
+          {
+            word: 'hayáis terminado',
+            context: 'Ojalá hayáis terminado los deberes antes de las seis.',
+            format: 'sentence',
+            cats: ['1.ª (-ar)', 'Personal', '2.ª persona', 'Plural', 'Subjuntivo', 'Pretérito perfecto compuesto'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Con «ojalá» aparece el subjuntivo: pretérito perfecto compuesto («hayáis terminado»).'
+          },
+          {
+            word: 'corriendo',
+            context: 'El atleta llegó corriendo hasta la línea de meta.',
+            format: 'sentence',
+            cats: ['2.ª (-er)', 'Gerundio', 'No procede', 'No procede', 'No procede', 'No procede'],
+            tiempoBasico: 'No procede',
+            explanation: 'Acaba en «-iendo» (de «correr», 2.ª conj.): es un gerundio (forma no personal, sin persona ni tiempo).'
+          },
+          {
+            word: 'bebiste',
+            context: 'Ayer tú bebiste mucha agua después del partido.',
+            format: 'sentence',
+            cats: ['2.ª (-er)', 'Personal', '2.ª persona', 'Singular', 'Indicativo', 'Pretérito perfecto simple'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Infinitivo «beber» (2.ª conj.), 2.ª persona singular, pretérito perfecto simple de indicativo.'
+          },
+          {
+            word: 'viviría',
+            context: 'Yo viviría encantado cerca de la playa.',
+            format: 'sentence',
+            cats: ['3.ª (-ir)', 'Personal', '1.ª persona', 'Singular', 'Indicativo', 'Condicional simple'],
+            tiempoBasico: 'Futuro',
+            explanation: 'Infinitivo «vivir» (3.ª conj.), 1.ª persona singular, condicional simple de indicativo.'
+          },
+          {
+            word: 'Escuchad',
+            context: '¡Escuchad con atención las instrucciones del juego!',
+            format: 'sentence',
+            cats: ['1.ª (-ar)', 'Personal', '2.ª persona', 'Plural', 'Imperativo', 'Presente'],
+            tiempoBasico: 'Presente',
+            explanation: 'Expresa una orden dirigida a «vosotros/as»: modo imperativo (presente, 2.ª persona plural).'
+          },
+          {
+            word: 'había salido',
+            context: 'Cuando llegamos a la estación, el tren ya había salido.',
+            format: 'sentence',
+            cats: ['3.ª (-ir)', 'Personal', '3.ª persona', 'Singular', 'Indicativo', 'Pretérito pluscuamperfecto'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Acción pasada anterior a otra pasada («había + participio»): pretérito pluscuamperfecto de indicativo.'
+          },
+          {
+            word: 'roto',
+            context: 'El cristal de la ventana estaba roto por el viento.',
+            format: 'sentence',
+            cats: ['2.ª (-er)', 'Participio', 'No procede', 'No procede', 'No procede', 'No procede'],
+            tiempoBasico: 'No procede',
+            explanation: '«Roto» es el participio irregular de «romper» (2.ª conj.); forma no personal.'
+          },
+          {
+            word: 'vengas',
+            context: 'Espero que mañana vengas pronto a mi fiesta.',
+            format: 'sentence',
+            cats: ['3.ª (-ir)', 'Personal', '2.ª persona', 'Singular', 'Subjuntivo', 'Presente'],
+            tiempoBasico: 'Presente',
+            explanation: 'Infinitivo «venir» (3.ª conj.), deseo con «espero que»: presente de subjuntivo, 2.ª persona singular.'
+          }
+        ]
+      },
+      {
+        id: 'verb-2',
+        block: 'verbos',
+        title: 'Verbos · Desafío 2 (Radar de conjugación)',
+        words: [
+          {
+            word: 'Verbo CANTAR · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo cantaba',
+              'tú cantabas',
+              'él/ella cantaba',
+              'nosotros/as cantábamos',
+              'vosotros/as cantabais',
+              'ellos/as cantaban'
+            ],
+            cats: ['1.ª (-ar)', 'Personal', 'No procede', 'No procede', 'Indicativo', 'Pretérito imperfecto'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Verbo «cantar» (1.ª conj.), modo indicativo, pretérito imperfecto (terminaciones en -aba).'
+          },
+          {
+            word: 'Verbo COMER · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo como',
+              'tú comes',
+              'él/ella come',
+              'nosotros/as comemos',
+              'vosotros/as coméis',
+              'ellos/as comen'
+            ],
+            cats: ['2.ª (-er)', 'Personal', 'No procede', 'No procede', 'Indicativo', 'Presente'],
+            tiempoBasico: 'Presente',
+            explanation: 'Verbo «comer» (2.ª conj.), modo indicativo, tiempo presente.'
+          },
+          {
+            word: 'Verbo VIVIR · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo viviré',
+              'tú vivirás',
+              'él/ella vivirá',
+              'nosotros/as viviremos',
+              'vosotros/as viviréis',
+              'ellos/as vivirán'
+            ],
+            cats: ['3.ª (-ir)', 'Personal', 'No procede', 'No procede', 'Indicativo', 'Futuro simple'],
+            tiempoBasico: 'Futuro',
+            explanation: 'Verbo «vivir» (3.ª conj.), modo indicativo, futuro simple.'
+          },
+          {
+            word: 'Verbo SALTAR · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo salté',
+              'tú saltaste',
+              'él/ella saltó',
+              'nosotros/as saltamos',
+              'vosotros/as saltasteis',
+              'ellos/as saltaron'
+            ],
+            cats: ['1.ª (-ar)', 'Personal', 'No procede', 'No procede', 'Indicativo', 'Pretérito perfecto simple'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Verbo «saltar» (1.ª conj.), modo indicativo, pretérito perfecto simple.'
+          },
+          {
+            word: 'Verbo TEMER · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo tema',
+              'tú temas',
+              'él/ella tema',
+              'nosotros/as temamos',
+              'vosotros/as temáis',
+              'ellos/as teman'
+            ],
+            cats: ['2.ª (-er)', 'Personal', 'No procede', 'No procede', 'Subjuntivo', 'Presente'],
+            tiempoBasico: 'Presente',
+            explanation: 'Verbo «temer» (2.ª conj.): el cambio de vocal temática a «-a» marca el presente de subjuntivo.'
+          },
+          {
+            word: 'Verbo PARTIR · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo he partido',
+              'tú has partido',
+              'él/ella ha partido',
+              'nosotros/as hemos partido',
+              'vosotros/as habéis partido',
+              'ellos/as han partido'
+            ],
+            cats: ['3.ª (-ir)', 'Personal', 'No procede', 'No procede', 'Indicativo', 'Pretérito perfecto compuesto'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Verbo «partir» (3.ª conj.), auxiliar «haber» en presente + participio: pretérito perfecto compuesto.'
+          },
+          {
+            word: 'Verbo HABLAR · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo hablaría',
+              'tú hablarías',
+              'él/ella hablaría',
+              'nosotros/as hablaríamos',
+              'vosotros/as hablaríais',
+              'ellos/as hablarían'
+            ],
+            cats: ['1.ª (-ar)', 'Personal', 'No procede', 'No procede', 'Indicativo', 'Condicional simple'],
+            tiempoBasico: 'Futuro',
+            explanation: 'Verbo «hablar» (1.ª conj.), terminaciones en «-ía» sobre el infinitivo: condicional simple.'
+          },
+          {
+            word: 'Verbo BEBER · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo bebiera / bebiese',
+              'tú bebieras / bebieses',
+              'él/ella bebiera / bebiese',
+              'nosotros/as bebiéramos / bebiésemos',
+              'vosotros/as bebierais / bebieseis',
+              'ellos/as bebieran / bebiesen'
+            ],
+            cats: ['2.ª (-er)', 'Personal', 'No procede', 'No procede', 'Subjuntivo', 'Pretérito imperfecto'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Verbo «beber» (2.ª conj.), formas en «-iera / -iese»: pretérito imperfecto de subjuntivo.'
+          },
+          {
+            word: 'Verbo ESCRIBIR · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo había escrito',
+              'tú habías escrito',
+              'él/ella había escrito',
+              'nosotros/as habíamos escrito',
+              'vosotros/as habíais escrito',
+              'ellos/as habían escrito'
+            ],
+            cats: ['3.ª (-ir)', 'Personal', 'No procede', 'No procede', 'Indicativo', 'Pretérito pluscuamperfecto'],
+            tiempoBasico: 'Pasado',
+            explanation: 'Verbo «escribir» (3.ª conj.), «había + participio»: pretérito pluscuamperfecto de indicativo.'
+          },
+          {
+            word: 'Verbo ESTUDIAR · Serie completa',
+            context: '',
+            format: 'conjugation_radar',
+            conjugationTable: [
+              'yo habré estudiado',
+              'tú habrás estudiado',
+              'él/ella habrá estudiado',
+              'nosotros/as habremos estudiado',
+              'vosotros/as habréis estudiado',
+              'ellos/as habrán estudiado'
+            ],
+            cats: ['1.ª (-ar)', 'Personal', 'No procede', 'No procede', 'Indicativo', 'Futuro compuesto'],
+            tiempoBasico: 'Futuro',
+            explanation: 'Verbo «estudiar» (1.ª conj.), «habré + participio»: futuro compuesto de indicativo.'
+          }
+        ]
       }
     ];
 
@@ -1925,7 +2634,7 @@
     ];
     const MAX_INDIVIDUAL_PLAYERS = 20;
 
-    /* ==================== 3. AUDIO SINTÉTICO WEB AUDIO API (SIN ARCHIVOS MP3) ==================== */
+    /* ==================== 3. AUDIO SINTÉTICO WEB AUDIO API ==================== */
     const AudioFX = (() => {
       let ctx = null;
       let enabled = true;
@@ -1958,9 +2667,7 @@
           enabled = !enabled;
           return enabled;
         },
-        click() {
-          playTone(540, 0, 0.06, 'sine', 0.08);
-        },
+        click() { playTone(540, 0, 0.06, 'sine', 0.08); },
         join() {
           playTone(440, 0.00, 0.10, 'triangle', 0.12);
           playTone(659.25, 0.08, 0.15, 'triangle', 0.12);
@@ -2008,7 +2715,6 @@
       if (on) AudioFX.click();
     }
 
-    /* Confeti para Podio Final */
     function launchConfetti() {
       const canvas = document.getElementById('confetti-canvas');
       if (!canvas) return;
@@ -2043,16 +2749,13 @@
           ctx.restore();
         });
         frames++;
-        if (frames < 190) {
-          requestAnimationFrame(step);
-        } else {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+        if (frames < 190) requestAnimationFrame(step);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       requestAnimationFrame(step);
     }
 
-    /* ==================== 4. NOTIFICACIONES Y DIÁLOGOS MODALES ==================== */
+    /* ==================== 4. TOASTS Y MODALES (SIN ALERT/CONFIRM/PROMPT) ==================== */
     function showToast(msg, type = 'info') {
       const area = document.getElementById('toast-area');
       const el = document.createElement('div');
@@ -2136,41 +2839,78 @@
       });
     }
 
-    /* ==================== 5. ESTADO DE DATOS, MIGRACIÓN Y SINCRONIZACIÓN ==================== */
+    /* ==================== 5. DATOS, MIGRACIÓN Y SINCRONIZACIÓN ==================== */
     let appData = loadAndValidateData();
+
+    function inferBasicTense(specificTense, forma) {
+      if (forma && forma !== 'Personal') return 'No procede';
+      if (specificTense === 'Presente') return 'Presente';
+      if (['Futuro simple', 'Futuro compuesto', 'Condicional simple', 'Condicional compuesto'].includes(specificTense)) {
+        return 'Futuro';
+      }
+      if ([
+        'Pretérito imperfecto',
+        'Pretérito perfecto simple',
+        'Pretérito perfecto compuesto',
+        'Pretérito pluscuamperfecto'
+      ].includes(specificTense)) {
+        return 'Pasado';
+      }
+      return 'No procede';
+    }
 
     function normalizeChallengeList(rawList) {
       let sustCounter = 0;
       let adjCounter = 0;
+      let verbCounter = 0;
+
       return rawList
         .filter(c => c && typeof c === 'object' && Array.isArray(c.words))
         .map((c, idx) => {
-          const block = c.block === 'adjetivos' ? 'adjetivos' : 'sustantivos';
+          const block = ['sustantivos', 'adjetivos', 'verbos'].includes(c.block) ? c.block : 'sustantivos';
           let title = typeof c.title === 'string' ? c.title.trim() : '';
+
           if (block === 'sustantivos') {
             sustCounter += 1;
             if (!title || /^sustantivos/i.test(title) || /^desafío\s*\d+$/i.test(title)) {
               title = `Desafío ${sustCounter}`;
             }
-          } else {
+          } else if (block === 'adjetivos') {
             adjCounter += 1;
-            if (!title) {
-              title = `Adjetivos · Desafío ${adjCounter}`;
-            }
+            if (!title) title = `Adjetivos · Desafío ${adjCounter}`;
+          } else {
+            verbCounter += 1;
+            if (!title) title = `Verbos · Desafío ${verbCounter}`;
           }
 
           const expectedCols = SCHEMAS[block].length;
           const validWords = c.words
             .filter(w => w && typeof w.word === 'string' && w.word.trim() && Array.isArray(w.cats))
-            .map(w => ({
-              word: w.word.trim(),
-              context: typeof w.context === 'string' ? w.context : '',
-              cats: SCHEMAS[block].map((col, colIdx) => {
+            .map(w => {
+              const cleanCats = SCHEMAS[block].map((col, colIdx) => {
                 const val = w.cats[colIdx];
                 return col.options.includes(val) ? val : col.options[0];
-              }).slice(0, expectedCols),
-              explanation: typeof w.explanation === 'string' ? w.explanation : ''
-            }));
+              }).slice(0, expectedCols);
+
+              const itemObj = {
+                word: w.word.trim(),
+                context: typeof w.context === 'string' ? w.context : '',
+                cats: cleanCats,
+                explanation: typeof w.explanation === 'string' ? w.explanation : ''
+              };
+
+              if (block === 'verbos') {
+                itemObj.format = w.format === 'conjugation_radar' ? 'conjugation_radar' : 'sentence';
+                itemObj.conjugationTable = Array.isArray(w.conjugationTable)
+                  ? w.conjugationTable.map(s => String(s || '').trim()).filter(Boolean)
+                  : [];
+                const allowedBasic = ['Pasado', 'Presente', 'Futuro', 'No procede'];
+                itemObj.tiempoBasico = allowedBasic.includes(w.tiempoBasico)
+                  ? w.tiempoBasico
+                  : inferBasicTense(cleanCats[5], cleanCats[1]);
+              }
+              return itemObj;
+            });
 
           return {
             id: c.id || `${block}_${idx}_${Date.now()}`,
@@ -2200,12 +2940,11 @@
         }
 
         const cleanChallenges = normalizeChallengeList(parsed.challenges);
-        if (!cleanChallenges.some(c => c.block === 'sustantivos')) {
-          cleanChallenges.unshift(...JSON.parse(JSON.stringify(INITIAL_CHALLENGES.filter(c => c.block === 'sustantivos'))));
-        }
-        if (!cleanChallenges.some(c => c.block === 'adjetivos')) {
-          cleanChallenges.push(...JSON.parse(JSON.stringify(INITIAL_CHALLENGES.filter(c => c.block === 'adjetivos'))));
-        }
+        ['sustantivos', 'adjetivos', 'verbos'].forEach(blk => {
+          if (!cleanChallenges.some(c => c.block === blk)) {
+            cleanChallenges.push(...JSON.parse(JSON.stringify(INITIAL_CHALLENGES.filter(c => c.block === blk))));
+          }
+        });
 
         const result = {
           adminPassword: typeof parsed.adminPassword === 'string' && parsed.adminPassword.length >= 4
@@ -2225,23 +2964,28 @@
       SafeStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     }
 
+    function generateRoomPin() {
+      return String(Math.floor(1000 + Math.random() * 9000));
+    }
+
     // Estado en vivo de la partida
     let matchState = {
+      roomPin: generateRoomPin(),
       block: 'sustantivos',
       challengeId: appData.challenges[0].id,
       wordIndex: 0,
       revealed: false,
       phase: 'playing', // 'playing' | 'finished'
       mode: 'teams', // 'teams' | 'individual'
-      teamCap: 5, // 0 = Sin límite, 3..8
-      players: [], // { id, name, icon, team, score, streak, maxStreak, isDemo }
-      answeredByWord: {}, // { [wordIndex]: { [playerId]: true } }
-      answerLog: [], // { word, catIndex, catLabel, correctOption, chosenOption, isCorrect, playerId }
-      teamBoostTick: [0, 0, 0, 0], // timestamp de último impulso x3 por equipo
-      playerBoostTick: {} // { [playerId]: timestamp }
+      teamCap: 5,
+      players: [], // { id, name, icon, team, score, streak, maxStreak, adapted, isDemo }
+      answeredByWord: {},
+      answerLog: [],
+      teamBoostTick: [0, 0, 0, 0],
+      playerBoostTick: {}
     };
 
-    // Estado local de esta pestaña de alumno
+    // Estado local de esta pestaña de alumno en clase
     let studentLocal = {
       playerId: SafeSession.getItem('lq_tab_player_id') || '',
       selectedTeam: 0,
@@ -2249,9 +2993,28 @@
       lastWordIndex: -1,
       lastChallengeId: '',
       lastFeedbackHtml: '',
-      lastFeedbackClass: ''
+      lastFeedbackClass: '',
+      autoHintText: ''
     };
 
+    // Estado local del Modo Estudio (Practicar solo en casa)
+    let studyLocal = {
+      block: 'sustantivos',
+      challengeId: 'sust-1',
+      adapted: false,
+      wordIndex: 0,
+      picks: [],
+      checked: false,
+      correctCount: 0,
+      streak: 0,
+      maxStreak: 0,
+      history: [],
+      autoHintText: '',
+      feedbackHtml: '',
+      feedbackClass: ''
+    };
+
+    // Sincronización entre pestañas con BroadcastChannel
     let syncChannel = null;
     try {
       if ('BroadcastChannel' in window) {
@@ -2285,23 +3048,25 @@
       } catch (e) {}
     }
 
-    /* ==================== 6. NAVEGACIÓN ENTRE PESTAÑAS ==================== */
-    let activeTab = 'board';
+    /* ==================== 6. NAVEGACIÓN ENTRE VISTAS ==================== */
+    let activeView = 'home';
     let isAdminUnlocked = false;
 
-    function switchTab(tabName) {
-      activeTab = tabName;
-      ['board', 'play', 'admin'].forEach(t => {
-        document.getElementById('view-' + t).classList.toggle('hidden', t !== tabName);
-        document.getElementById('tab-' + t).classList.toggle('active', t === tabName);
+    function switchView(viewName) {
+      activeView = viewName;
+      ['home', 'board', 'play', 'study', 'admin'].forEach(v => {
+        document.getElementById('view-' + v).classList.toggle('hidden', v !== viewName);
+        document.getElementById('nav-' + v).classList.toggle('active', v === viewName);
       });
       AudioFX.click();
 
-      if (tabName === 'board') {
+      if (viewName === 'board') {
         renderBoard();
-      } else if (tabName === 'play') {
+      } else if (viewName === 'play') {
         renderStudentView();
-      } else if (tabName === 'admin') {
+      } else if (viewName === 'study') {
+        populateStudyChallenges();
+      } else if (viewName === 'admin') {
         renderAdminLockState();
       }
     }
@@ -2361,13 +3126,311 @@
       return bestTeams[Math.floor(Math.random() * bestTeams.length)];
     }
 
-    /* ==================== 8. LÓGICA DE LA PIZARRA DIGITAL ==================== */
+    /* ==================== 8. MOTOR DE FILAS, AUTOMATISMOS Y EVALUACIÓN (SUST / ADJ / VERBOS) ==================== */
+    function buildQuestionRows(block, item, adapted) {
+      if (block === 'sustantivos') {
+        return SCHEMAS.sustantivos.map((col, idx) => ({
+          key: `sust_${idx}`,
+          label: col.label,
+          options: col.options,
+          expected: item.cats[idx],
+          isGrid2x3: false,
+          isTenseGrouped: false,
+          isAdaptedBig: false
+        }));
+      }
+
+      if (block === 'adjetivos') {
+        return SCHEMAS.adjetivos.map((col, idx) => ({
+          key: `adj_${idx}`,
+          label: col.label,
+          options: col.options,
+          expected: item.cats[idx],
+          isGrid2x3: true,
+          isTenseGrouped: false,
+          isAdaptedBig: false
+        }));
+      }
+
+      // BLOQUE VERBOS
+      const isNonPersonal = item.cats[1] !== 'Personal';
+      if (adapted) {
+        // Nivel Adaptado NEAE: 5 filas (Modo oculto, Forma simplificada a Personal/No personal, Tiempo a Pasado/Presente/Futuro)
+        return [
+          {
+            key: 'v_conj',
+            label: '1. Conjugación (según infinitivo)',
+            options: ['1.ª (-ar)', '2.ª (-er)', '3.ª (-ir)'],
+            expected: item.cats[0],
+            isGrid2x3: false,
+            isTenseGrouped: false,
+            isAdaptedBig: true
+          },
+          {
+            key: 'v_form_adapted',
+            label: '2. Forma verbal',
+            options: ['Personal', 'No personal'],
+            expected: isNonPersonal ? 'No personal' : 'Personal',
+            isGrid2x3: false,
+            isTenseGrouped: false,
+            isAdaptedBig: true
+          },
+          {
+            key: 'v_pers',
+            label: '3. Persona',
+            options: ['1.ª persona', '2.ª persona', '3.ª persona', 'No procede'],
+            expected: item.cats[2],
+            isGrid2x3: false,
+            isTenseGrouped: false,
+            isAdaptedBig: false
+          },
+          {
+            key: 'v_num',
+            label: '4. Número',
+            options: ['Singular', 'Plural', 'No procede'],
+            expected: item.cats[3],
+            isGrid2x3: false,
+            isTenseGrouped: false,
+            isAdaptedBig: false
+          },
+          {
+            key: 'v_tense_adapted',
+            label: '5. Tiempo verbal',
+            options: ['Pasado', 'Presente', 'Futuro', 'No procede'],
+            expected: isNonPersonal ? 'No procede' : (item.tiempoBasico || inferBasicTense(item.cats[5], item.cats[1])),
+            isGrid2x3: false,
+            isTenseGrouped: false,
+            isAdaptedBig: true
+          }
+        ];
+      }
+
+      // Mando General (Clase): 6 filas completas
+      return SCHEMAS.verbos.map((col, idx) => ({
+        key: `verb_${idx}`,
+        label: col.label,
+        options: col.options,
+        expected: item.cats[idx],
+        isGrid2x3: false,
+        isTenseGrouped: idx === 5,
+        isAdaptedBig: false
+      }));
+    }
+
+    function initPicksForItem(block, item, adapted) {
+      const rows = buildQuestionRows(block, item, adapted);
+      const picks = rows.map(() => null);
+      let hint = '';
+
+      // Si es Formato B de Verbos (Radar de conjugación entera), preseleccionar Persona y Número en "No procede" y Forma en "Personal"
+      if (block === 'verbos' && item.format === 'conjugation_radar') {
+        picks[1] = 'Personal';
+        picks[2] = 'No procede';
+        picks[3] = 'No procede';
+        hint = '📡 Radar de conjugación entera: Forma, Persona y Número ya están marcados. ¡Identifica Conjugación, Modo y Tiempo!';
+        if (adapted) {
+          hint = '📡 Radar de conjugación entera: identifica la Conjugación y si está en Pasado, Presente o Futuro.';
+        }
+      }
+
+      return { picks, hint };
+    }
+
+    function computeRowLocks(block, item, adapted, picks) {
+      const rows = buildQuestionRows(block, item, adapted);
+      const locked = rows.map(() => false);
+
+      if (block === 'sustantivos') {
+        if (picks[0] === 'Propio') {
+          locked[1] = true;
+          locked[2] = true;
+          locked[3] = true;
+        } else if (picks[1] === 'Abstracto') {
+          locked[2] = true;
+          locked[3] = true;
+        } else if (picks[2] === 'No contable') {
+          locked[3] = true;
+        }
+      } else if (block === 'verbos') {
+        if (item.format === 'conjugation_radar') {
+          locked[1] = true;
+          locked[2] = true;
+          locked[3] = true;
+        } else if (!adapted && ['Infinitivo', 'Gerundio', 'Participio'].includes(picks[1])) {
+          locked[2] = true;
+          locked[3] = true;
+          locked[4] = true;
+          locked[5] = true;
+        } else if (adapted && picks[1] === 'No personal') {
+          locked[2] = true;
+          locked[3] = true;
+          locked[4] = true;
+        }
+      }
+
+      return locked;
+    }
+
+    function applyPedagogicalSelection(block, item, adapted, picks, rowIdx, chosenVal) {
+      const nextPicks = [...picks];
+      const prevVal = nextPicks[rowIdx];
+      nextPicks[rowIdx] = chosenVal;
+      let hint = '';
+
+      if (block === 'sustantivos') {
+        if (rowIdx === 0) {
+          if (chosenVal === 'Propio') {
+            nextPicks[1] = 'No procede';
+            nextPicks[2] = 'No procede';
+            nextPicks[3] = 'No procede';
+            hint = 'ℹ️ Sustantivo propio seleccionado: las filas 2, 3 y 4 pasan automáticamente a «No procede».';
+          } else if (prevVal === 'Propio') {
+            nextPicks[1] = null;
+            nextPicks[2] = null;
+            nextPicks[3] = null;
+          }
+        } else if (rowIdx === 1) {
+          if (chosenVal === 'Abstracto') {
+            nextPicks[2] = 'No procede';
+            nextPicks[3] = 'No procede';
+            hint = 'ℹ️ Sustantivo abstracto seleccionado: las filas 3 y 4 pasan automáticamente a «No procede».';
+          } else if (prevVal === 'Abstracto') {
+            nextPicks[2] = null;
+            nextPicks[3] = null;
+          }
+        } else if (rowIdx === 2) {
+          if (chosenVal === 'No contable') {
+            nextPicks[3] = 'No procede';
+            hint = 'ℹ️ Sustantivo no contable seleccionado: la fila 4 pasa automáticamente a «No procede».';
+          } else if (prevVal === 'No contable') {
+            nextPicks[3] = null;
+          }
+        }
+      } else if (block === 'verbos') {
+        if (item.format === 'conjugation_radar') {
+          hint = '📡 Radar de conjugación entera: Persona y Número aparecen en «No procede» porque se muestra toda la serie.';
+        } else if (!adapted && rowIdx === 1) {
+          if (['Infinitivo', 'Gerundio', 'Participio'].includes(chosenVal)) {
+            nextPicks[2] = 'No procede';
+            nextPicks[3] = 'No procede';
+            nextPicks[4] = 'No procede';
+            nextPicks[5] = 'No procede';
+            hint = `ℹ️ Forma no personal (${chosenVal}) seleccionada: Persona, Número, Modo y Tiempo pasan automáticamente a «No procede».`;
+          } else if (['Infinitivo', 'Gerundio', 'Participio'].includes(prevVal)) {
+            nextPicks[2] = null;
+            nextPicks[3] = null;
+            nextPicks[4] = null;
+            nextPicks[5] = null;
+          }
+        } else if (adapted && rowIdx === 1) {
+          if (chosenVal === 'No personal') {
+            nextPicks[2] = 'No procede';
+            nextPicks[3] = 'No procede';
+            nextPicks[4] = 'No procede';
+            hint = 'ℹ️ Forma no personal seleccionada: Persona, Número y Tiempo pasan automáticamente a «No procede».';
+          } else if (prevVal === 'No personal') {
+            nextPicks[2] = null;
+            nextPicks[3] = null;
+            nextPicks[4] = null;
+          }
+        }
+      }
+
+      return { picks: nextPicks, hint };
+    }
+
+    function renderRowsHTML(rows, picks, locked, disabledAll, onSelectFnName) {
+      return rows.map((row, rIdx) => {
+        const isLockedRow = locked[rIdx];
+        const rowDisabled = disabledAll || isLockedRow;
+
+        let innerButtonsHtml = '';
+        if (row.isTenseGrouped) {
+          // Agrupación visual de Tiempos Simples vs Tiempos Compuestos + No procede
+          const renderBtn = (opt) => {
+            const isSel = picks[rIdx] === opt;
+            let cls = isSel ? 'selected' : '';
+            if (disabledAll) {
+              if (opt === row.expected) cls = 'is-correct';
+              else if (isSel && opt !== row.expected) cls = 'is-wrong';
+            }
+            return `
+              <button
+                type="button"
+                class="opt-btn ${cls}"
+                ${rowDisabled ? 'disabled' : ''}
+                onclick="${onSelectFnName}(${rIdx}, '${escapeHTML(opt)}')"
+              >
+                ${escapeHTML(opt)}
+              </button>
+            `;
+          };
+
+          innerButtonsHtml = `
+            <div class="tense-subgroup">
+              <div class="tense-sublabel">Tiempos simples</div>
+              <div class="options-grid">
+                ${VERB_SIMPLE_TENSES.map(renderBtn).join('')}
+              </div>
+            </div>
+            <div class="tense-subgroup">
+              <div class="tense-sublabel">Tiempos compuestos</div>
+              <div class="options-grid">
+                ${VERB_COMPOUND_TENSES.map(renderBtn).join('')}
+              </div>
+            </div>
+            <div class="tense-subgroup">
+              <div class="options-grid">
+                ${renderBtn('No procede')}
+              </div>
+            </div>
+          `;
+        } else {
+          innerButtonsHtml = `
+            <div class="options-grid ${row.isGrid2x3 ? 'grid-2x3' : ''}">
+              ${row.options.map(opt => {
+                const isSel = picks[rIdx] === opt;
+                let cls = isSel ? 'selected' : '';
+                if (row.isAdaptedBig) cls += ' adapted-big';
+                if (disabledAll) {
+                  if (opt === row.expected) cls = 'is-correct';
+                  else if (isSel && opt !== row.expected) cls = 'is-wrong';
+                }
+                return `
+                  <button
+                    type="button"
+                    class="opt-btn ${cls}"
+                    ${rowDisabled ? 'disabled' : ''}
+                    onclick="${onSelectFnName}(${rIdx}, '${escapeHTML(opt)}')"
+                  >
+                    ${escapeHTML(opt)}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="cat-block ${isLockedRow ? 'is-auto-locked' : ''}">
+            <div class="cat-block-label">
+              <span>${escapeHTML(row.label)}</span>
+              ${isLockedRow ? '<span class="badge badge-slate">Automático: No procede</span>' : ''}
+            </div>
+            ${innerButtonsHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==================== 9. PIZARRA DIGITAL (PROFESOR) ==================== */
     function populateBoardSelectors() {
       const blockSel = document.getElementById('board-block-select');
       const chSel = document.getElementById('board-challenge-select');
       const modeSel = document.getElementById('board-mode-select');
       const capSel = document.getElementById('board-team-cap-select');
 
+      document.getElementById('board-pin-display').textContent = matchState.roomPin;
       blockSel.value = matchState.block;
       modeSel.value = matchState.mode;
       capSel.value = String(matchState.teamCap);
@@ -2383,6 +3446,13 @@
         matchState.challengeId = blockChallenges[0].id;
         chSel.value = matchState.challengeId;
       }
+    }
+
+    function regenerateRoomPin() {
+      matchState.roomPin = generateRoomPin();
+      AudioFX.click();
+      syncAllViews(true);
+      showToast(`🔑 Nuevo PIN de sala generado: ${matchState.roomPin}`, 'info');
     }
 
     function onBoardBlockChange() {
@@ -2410,7 +3480,6 @@
       if (matchState.mode === 'individual' && matchState.players.length > MAX_INDIVIDUAL_PLAYERS) {
         matchState.players = matchState.players.slice(0, MAX_INDIVIDUAL_PLAYERS);
       }
-      // Asignar avatares únicos en modo individual
       matchState.players.forEach((p, idx) => {
         if (matchState.mode === 'individual') {
           p.icon = ANIMAL_AVATARS[idx % ANIMAL_AVATARS.length];
@@ -2493,7 +3562,6 @@
       showToast('🔄 Partida reiniciada a 0 puntos.', 'info');
     }
 
-    /* Añadir jugadores desde la Pizarra Digital */
     function addPlayerFromBoard(targetMode) {
       const inputEl = document.getElementById(targetMode === 'teams' ? 'team-quick-name' : 'indiv-new-name');
       const name = inputEl.value.trim();
@@ -2517,6 +3585,7 @@
           score: 0,
           streak: 0,
           maxStreak: 0,
+          adapted: false,
           isDemo: false
         });
       } else {
@@ -2533,6 +3602,7 @@
           score: 0,
           streak: 0,
           maxStreak: 0,
+          adapted: false,
           isDemo: false
         });
       }
@@ -2552,7 +3622,6 @@
       syncAllViews(true);
     }
 
-    /* Reparto aleatorio equilibrado entre los 4 equipos (respetando el tope) */
     function shuffleTeamsBalanced() {
       if (matchState.players.length === 0) {
         showToast('No hay alumnos conectados para repartir.', 'warn');
@@ -2560,9 +3629,8 @@
       }
       const cap = Number(matchState.teamCap) || 0;
       if (cap > 0 && matchState.players.length > cap * 4) {
-        const neededCap = Math.min(8, Math.ceil(matchState.players.length / 4));
-        matchState.teamCap = neededCap === 0 ? 0 : neededCap;
-        if (matchState.players.length > 32) matchState.teamCap = 0;
+        const neededCap = Math.min(7, Math.ceil(matchState.players.length / 4));
+        matchState.teamCap = matchState.players.length > 28 ? 0 : neededCap;
       }
 
       const indices = matchState.players.map((_, i) => i);
@@ -2579,7 +3647,7 @@
 
       AudioFX.roundChange();
       syncAllViews(true);
-      showToast('🎲 ¡Alumnos repartidos aleatoriamente de forma equilibrada!', 'success');
+      showToast('🔀 ¡Alumnos repartidos aleatoriamente de forma equilibrada!', 'success');
     }
 
     function populateDemo16TeamPlayers() {
@@ -2602,6 +3670,7 @@
           score: 0,
           streak: 0,
           maxStreak: 0,
+          adapted: false,
           isDemo: true
         };
       });
@@ -2628,6 +3697,7 @@
         score: 0,
         streak: 0,
         maxStreak: 0,
+        adapted: false,
         isDemo: true
       }));
       matchState.answeredByWord = {};
@@ -2638,8 +3708,7 @@
       showToast('👥 20 alumnos demo añadidos a la escalada individual.', 'success');
     }
 
-    /* Evaluar respuesta de un jugador (usado tanto por Mando Alumno como por Simulación) */
-    function processPlayerSubmission(playerId, chosenCats) {
+    function processPlayerSubmission(playerId, chosenPicks) {
       const ch = getActiveChallenge();
       const item = ch.words[matchState.wordIndex];
       const player = matchState.players.find(p => p.id === playerId);
@@ -2648,28 +3717,27 @@
       if (!matchState.answeredByWord[matchState.wordIndex]) {
         matchState.answeredByWord[matchState.wordIndex] = {};
       }
-      if (matchState.answeredByWord[matchState.wordIndex][playerId]) {
-        return null; // Ya respondió esta palabra
-      }
+      if (matchState.answeredByWord[matchState.wordIndex][playerId]) return null;
       matchState.answeredByWord[matchState.wordIndex][playerId] = true;
 
-      const schema = SCHEMAS[ch.block];
+      const rows = buildQuestionRows(ch.block, item, Boolean(player.adapted));
       let hits = 0;
-      for (let i = 0; i < schema.length; i++) {
-        const isCatOk = chosenCats[i] === item.cats[i];
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const isCatOk = chosenPicks[i] === row.expected;
         if (isCatOk) hits++;
         matchState.answerLog.push({
           word: item.word,
-          catIndex: i,
-          catLabel: schema[i].label,
-          correctOption: item.cats[i],
-          chosenOption: chosenCats[i],
+          catLabel: row.label,
+          correctOption: row.expected,
+          chosenOption: chosenPicks[i],
           isCorrect: isCatOk,
           playerId
         });
       }
 
-      const isPerfect = (hits === schema.length);
+      const isPerfect = (hits === rows.length);
       let pointsAdded = 0;
       let triggeredStreakBoost = false;
 
@@ -2680,11 +3748,11 @@
 
         if (player.streak > 0 && player.streak % 3 === 0) {
           triggeredStreakBoost = true;
-          pointsAdded += 15; // Impulso extra +15 pts (total +25 pts)
+          pointsAdded += 15;
           const now = Date.now();
           matchState.playerBoostTick[player.id] = { ts: now, streak: player.streak };
           if (matchState.mode === 'teams') {
-            matchState.teamBoostTick[player.team] = { ts: now, streak: player.streak, by: player.name };
+            matchState.teamBoostTick[player.team] = { ts: now, streak: player.streak };
           }
         }
         player.score += pointsAdded;
@@ -2695,17 +3763,17 @@
       return {
         isPerfect,
         hits,
-        totalRows: schema.length,
+        totalRows: rows.length,
         pointsAdded,
         streak: player.streak,
-        triggeredStreakBoost
+        triggeredStreakBoost,
+        rows
       };
     }
 
-    /* Simular respuestas de la ronda para todos los alumnos pendientes */
     function simulateRoundResponses() {
       if (matchState.phase === 'finished') {
-        showToast('La partida ya ha terminado. Pulsa Reiniciar Partida para empezar otra.', 'warn');
+        showToast('La partida ya ha terminado. Pulsa Reiniciar para empezar otra.', 'warn');
         return;
       }
       if (matchState.players.length === 0) {
@@ -2715,28 +3783,27 @@
 
       const ch = getActiveChallenge();
       const item = ch.words[matchState.wordIndex];
-      const schema = SCHEMAS[ch.block];
       if (!item) return;
 
       const answeredMap = matchState.answeredByWord[matchState.wordIndex] || {};
       const pending = matchState.players.filter(p => !answeredMap[p.id]);
 
       if (pending.length === 0) {
-        showToast('✅ Todos los alumnos ya respondieron esta palabra. Pulsa Siguiente Palabra.', 'info');
+        showToast('✅ Todos los alumnos ya respondieron esta pregunta. Pulsa Siguiente Palabra.', 'info');
         return;
       }
 
       let anyBoost = false;
       pending.forEach(p => {
-        // 80% de acierto por categoría para generar rachas x3 y algunos errores realistas en el radar
-        const simulatedCats = schema.map((col, idx) => {
-          if (Math.random() < 0.80) return item.cats[idx];
-          const wrongOpts = col.options.filter(o => o !== item.cats[idx]);
+        const rows = buildQuestionRows(ch.block, item, Boolean(p.adapted));
+        const simulatedPicks = rows.map(row => {
+          if (Math.random() < 0.80) return row.expected;
+          const wrongOpts = row.options.filter(o => o !== row.expected);
           return wrongOpts.length > 0
             ? wrongOpts[Math.floor(Math.random() * wrongOpts.length)]
-            : item.cats[idx];
+            : row.expected;
         });
-        const res = processPlayerSubmission(p.id, simulatedCats);
+        const res = processPlayerSubmission(p.id, simulatedPicks);
         if (res && res.triggeredStreakBoost) anyBoost = true;
       });
 
@@ -2758,11 +3825,8 @@
       const isFinished = matchState.phase === 'finished';
       document.getElementById('board-question-stage').classList.toggle('hidden', isFinished);
       document.getElementById('board-final-view').classList.toggle('hidden', !isFinished);
-
-      // Visibilidad del selector de tope por equipo
       document.getElementById('board-team-cap-pill').classList.toggle('hidden', matchState.mode !== 'teams');
 
-      // Botones
       document.getElementById('btn-prev-word').disabled = !isFinished && matchState.wordIndex <= 0;
       document.getElementById('btn-reveal-word').disabled = isFinished || total === 0 || matchState.revealed;
       document.getElementById('btn-next-word').textContent =
@@ -2773,33 +3837,45 @@
       if (isFinished) {
         document.getElementById('board-teams-view').classList.add('hidden');
         document.getElementById('board-indiv-view').classList.add('hidden');
-        renderFinalPodiumAndRadar();
+        renderOlympicPodium();
+        renderClassErrorRadar();
         return;
       }
 
-      // Escenario de pregunta actual
       const badgeEl = document.getElementById('board-progress-badge');
       const wordEl = document.getElementById('board-current-word');
       const ctxEl = document.getElementById('board-current-context');
+      const conjGridEl = document.getElementById('board-conjugation-grid');
       const solEl = document.getElementById('board-solution-chips');
       const expEl = document.getElementById('board-explanation');
 
       if (!item) {
         badgeEl.textContent = `${ch.title} · Sin elementos`;
-        wordEl.textContent = 'Añade palabras en el Editor';
+        wordEl.textContent = 'Añade elementos en el Editor';
         ctxEl.classList.add('hidden');
+        conjGridEl.classList.add('hidden');
         solEl.classList.add('hidden');
         expEl.classList.add('hidden');
       } else {
         const answeredCount = Object.keys(matchState.answeredByWord[matchState.wordIndex] || {}).length;
-        badgeEl.textContent = `${ch.title} · Palabra ${matchState.wordIndex + 1} de ${total} · Respuestas: ${answeredCount}/${matchState.players.length}`;
+        badgeEl.textContent = `${ch.title} · Pregunta ${matchState.wordIndex + 1} de ${total} · Respuestas: ${answeredCount}/${matchState.players.length}`;
         wordEl.textContent = item.word;
 
-        if (item.context) {
-          ctxEl.innerHTML = formatContextHTML(item.context, item.word);
-          ctxEl.classList.remove('hidden');
-        } else {
+        // Contexto en oración vs Tabla de conjugación completa (Formato B de Verbos)
+        if (item.format === 'conjugation_radar' && Array.isArray(item.conjugationTable) && item.conjugationTable.length > 0) {
           ctxEl.classList.add('hidden');
+          conjGridEl.innerHTML = item.conjugationTable
+            .map(formStr => `<div class="conj-cell">${escapeHTML(formStr)}</div>`)
+            .join('');
+          conjGridEl.classList.remove('hidden');
+        } else {
+          conjGridEl.classList.add('hidden');
+          if (item.context) {
+            ctxEl.innerHTML = formatContextHTML(item.context, item.word);
+            ctxEl.classList.remove('hidden');
+          } else {
+            ctxEl.classList.add('hidden');
+          }
         }
 
         if (matchState.revealed) {
@@ -2824,11 +3900,8 @@
       document.getElementById('board-teams-view').classList.toggle('hidden', !isTeams);
       document.getElementById('board-indiv-view').classList.toggle('hidden', isTeams);
 
-      if (isTeams) {
-        renderTeamsBoard(total);
-      } else {
-        renderIndividualTowersBoard(total);
-      }
+      if (isTeams) renderTeamsBoard(total);
+      else renderIndividualTowersBoard(total);
     }
 
     function renderTeamsBoard(totalWords) {
@@ -2859,31 +3932,28 @@
 
         const stackEl = document.getElementById(`team-stack-${t}`);
         let bricks = '';
-        for (let f = 0; f < floors; f++) {
-          bricks += '<div class="tower-brick"></div>';
-        }
+        for (let f = 0; f < floors; f++) bricks += '<div class="tower-brick"></div>';
         stackEl.innerHTML = bricks;
-        document.getElementById(`team-climber-${t}`).style.bottom = (14 + floors * 21) + 'px';
+        document.getElementById(`team-climber-${t}`).style.bottom = (14 + floors * 20) + 'px';
         document.getElementById(`team-score-${t}`).textContent = `${pts} pts`;
         document.getElementById(`team-card-${t}`).classList.toggle('leader', topScore > 0 && pts === topScore);
 
-        // Insignia animada de impulso x3 reciente (últimos 4.5 segundos)
         const boostInfo = matchState.teamBoostTick[t];
         const boostEl = document.getElementById(`team-boost-${t}`);
-        if (boostInfo && (now - boostInfo.ts) < 4500) {
-          boostEl.textContent = `🔥 ¡Racha x${boostInfo.streak}! +Impulso`;
+        if (boostInfo && (now - boostInfo.ts) < 5000) {
+          boostEl.textContent = `🔥 RACHA x${boostInfo.streak}`;
           boostEl.classList.remove('hidden');
         } else {
           boostEl.classList.add('hidden');
         }
 
-        // Lista de miembros del equipo
+        // Nunca muestra etiquetas de Nivel Adaptado en la pizarra
         const rosterEl = document.getElementById(`team-roster-${t}`);
         if (members.length === 0) {
           rosterEl.innerHTML = '<span style="font-size:0.75rem; color:#94a3b8;">Sin jugadores</span>';
         } else {
           rosterEl.innerHTML = members.map(m => {
-            const streakTag = m.streak >= 2 ? ` 🔥x${m.streak}` : '';
+            const streakTag = m.streak >= 3 ? ` 🔥x${m.streak}` : '';
             return `
               <span class="member-chip">
                 ${escapeHTML(m.name)}${streakTag} (${m.score})
@@ -2904,8 +3974,8 @@
 
       if (players.length === 0) {
         gridEl.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; color:var(--muted); font-weight:600;">
-            Aún no hay alumnos inscritos. Añádelos arriba por su nombre, únete desde <strong>Mando Alumno</strong> o pulsa <strong>+ Demo 20 alumnos</strong>.
+          <div style="grid-column: 1 / -1; text-align:center; padding:32px 16px; color:var(--muted); font-weight:700;">
+            Aún no hay alumnos inscritos. Añádelos arriba por su nombre, únete desde <strong>Mando Alumno</strong> con el PIN <strong>${matchState.roomPin}</strong> o pulsa <strong>+ Demo 20 alumnos</strong>.
           </div>
         `;
         return;
@@ -2913,9 +3983,7 @@
 
       const sorted = [...players].sort((a, b) => b.score - a.score);
       const rankMap = {};
-      sorted.forEach((p, idx) => {
-        rankMap[p.id] = p.score > 0 ? idx + 1 : 999;
-      });
+      sorted.forEach((p, idx) => { rankMap[p.id] = p.score > 0 ? idx + 1 : 999; });
 
       const maxScale = Math.max(100, totalWords * 15, ...players.map(p => p.score));
       const medals = { 1: '🥇 ', 2: '🥈 ', 3: '🥉 ' };
@@ -2927,14 +3995,14 @@
         const medal = medals[rank] || '';
         const pct = p.score <= 0 ? 4 : Math.min(82, Math.max(10, Math.round((p.score / maxScale) * 78)));
         const boost = matchState.playerBoostTick[p.id];
-        const showBoost = boost && (now - boost.ts) < 4500;
-        const streakLabel = p.streak >= 2 ? ` 🔥x${p.streak}` : '';
+        const showBoost = (boost && (now - boost.ts) < 5000) || p.streak >= 3;
+        const badgeStreak = boost ? boost.streak : p.streak;
 
         return `
           <div class="indiv-card ${rankClass}">
-            ${showBoost ? `<div class="streak-boost-badge" style="font-size:0.65rem; padding:2px 6px;">🔥 ¡Racha x${boost.streak}!</div>` : ''}
+            ${showBoost ? `<div class="streak-boost-badge" style="font-size:0.65rem; padding:2px 7px;">🔥 RACHA x${badgeStreak}</div>` : ''}
             <button class="indiv-remove-btn" onclick="removePlayerById('${p.id}')" title="Quitar alumno">×</button>
-            <div class="indiv-name" title="${escapeHTML(p.name)}">${medal}${escapeHTML(p.name)}${streakLabel}</div>
+            <div class="indiv-name" title="${escapeHTML(p.name)}">${medal}${escapeHTML(p.name)}</div>
             <div class="indiv-sky">
               <div class="indiv-bar" style="height:${pct}%;"></div>
               <div class="indiv-avatar" style="bottom:${pct}%;">${p.icon}</div>
@@ -2943,12 +4011,6 @@
           </div>
         `;
       }).join('');
-    }
-
-    /* ==================== 9. PODIO FINAL OLÍMPICO Y RADAR DE FALLOS ==================== */
-    function renderFinalPodiumAndRadar() {
-      renderOlympicPodium();
-      renderClassErrorRadar();
     }
 
     function renderOlympicPodium() {
@@ -2982,13 +4044,12 @@
 
       if (entries.length === 0) {
         container.innerHTML = `
-          <h2 style="font-size:1.5rem; font-weight:900;">🏆 Podio Final</h2>
+          <h2 style="font-size:1.5rem;">🏆 Podio de Ganadores</h2>
           <p style="color:var(--muted); margin-top:10px;">No hubo participantes registrados en esta partida.</p>
         `;
         return;
       }
 
-      // Orden visual olímpico: 2.º a la izquierda, 1.º en el centro, 3.º a la derecha
       const podiumOrder = [
         { rank: 2, medal: '🥈 2.º', stepClass: 'step-2', item: entries[1] || null },
         { rank: 1, medal: '🥇 1.º', stepClass: 'step-1', item: entries[0] || null },
@@ -2999,8 +4060,8 @@
         if (!slot.item) {
           return `<div class="podium-column"><div class="podium-step ${slot.stepClass}">${slot.medal}</div></div>`;
         }
-        const streakHtml = slot.item.maxStreak >= 2
-          ? `<div class="podium-streak-tag">🔥 Racha máx. x${slot.item.maxStreak}</div>`
+        const streakHtml = slot.item.maxStreak >= 3
+          ? `<div class="podium-streak-tag">🔥 RACHA x${slot.item.maxStreak}</div>`
           : '';
         return `
           <div class="podium-column">
@@ -3018,7 +4079,6 @@
         `;
       }).join('');
 
-      // Clasificación del resto de participantes
       let restHtml = '';
       if (matchState.mode === 'teams') {
         const fourth = entries[3];
@@ -3026,11 +4086,11 @@
         restHtml = `
           ${fourth ? `<div class="rest-ranking-list" style="margin-bottom:12px;"><div class="rest-ranking-row"><span>4.º ${fourth.icon} ${escapeHTML(fourth.name)} (${fourth.sub})</span><span>${fourth.score} pts</span></div></div>` : ''}
           ${sortedPlayers.length > 0 ? `
-            <h4 style="text-align:left; font-size:0.9rem; color:var(--muted); margin:10px 0 6px;">⭐ Clasificación individual por puntos y rachas:</h4>
+            <h4 style="text-align:left; font-size:0.9rem; color:var(--muted); margin:10px 0 6px;">⭐ Clasificación individual:</h4>
             <div class="rest-ranking-list">
               ${sortedPlayers.map((p, i) => `
                 <div class="rest-ranking-row">
-                  <span>${i + 1}.º ${p.icon} ${escapeHTML(p.name)} ${p.maxStreak >= 2 ? `<span class="podium-streak-tag">🔥 x${p.maxStreak}</span>` : ''}</span>
+                  <span>${i + 1}.º ${p.icon} ${escapeHTML(p.name)} ${p.maxStreak >= 3 ? `<span class="podium-streak-tag">🔥 x${p.maxStreak}</span>` : ''}</span>
                   <span style="color:var(--primary);">${p.score} pts</span>
                 </div>
               `).join('')}
@@ -3042,7 +4102,7 @@
           <div class="rest-ranking-list">
             ${entries.slice(3).map((e, idx) => `
               <div class="rest-ranking-row">
-                <span>${idx + 4}.º ${e.icon} ${escapeHTML(e.name)} ${e.maxStreak >= 2 ? `<span class="podium-streak-tag">🔥 x${e.maxStreak}</span>` : ''}</span>
+                <span>${idx + 4}.º ${e.icon} ${escapeHTML(e.name)} ${e.maxStreak >= 3 ? `<span class="podium-streak-tag">🔥 x${e.maxStreak}</span>` : ''}</span>
                 <span style="color:var(--primary);">${e.score} pts</span>
               </div>
             `).join('')}
@@ -3051,8 +4111,8 @@
       }
 
       container.innerHTML = `
-        <h2 style="font-size:1.6rem; font-weight:900; color:#1e1b4b;">🏆 Podio Final Olímpico</h2>
-        <p style="font-size:0.88rem; color:var(--muted);">¡Enhorabuena a todos los escaladores!</p>
+        <h2 style="font-size:1.65rem; color:#1e1b4b;">🏆 Podio de Ganadores</h2>
+        <p style="font-size:0.88rem; color:var(--muted); font-weight:700;">¡Enhorabuena a todos los escaladores!</p>
         <div class="olympic-stage">${stageHtml}</div>
         ${restHtml}
       `;
@@ -3064,13 +4124,12 @@
 
       if (logs.length === 0) {
         container.innerHTML = `
-          <h2 style="font-size:1.35rem; font-weight:900;">📡 Radar de fallos de la clase</h2>
+          <h2 style="font-size:1.4rem;">🎯 Radar de Fallos de la Clase</h2>
           <p style="color:var(--muted); margin-top:10px;">Aún no se han registrado respuestas en esta partida.</p>
         `;
         return;
       }
 
-      // Agrupar por (palabra + categoría)
       const groups = {};
       logs.forEach(entry => {
         const key = `${entry.word}|||${entry.catLabel}|||${entry.correctOption}`;
@@ -3110,7 +4169,7 @@
 
       if (hotspots.length === 0) {
         container.innerHTML = `
-          <h2 style="font-size:1.35rem; font-weight:900;">📡 Radar de fallos de la clase</h2>
+          <h2 style="font-size:1.4rem;">🎯 Radar de Fallos de la Clase</h2>
           <div style="background:#d1fae5; border:2px solid #10b981; color:#065f46; border-radius:14px; padding:16px; margin-top:14px; font-weight:800;">
             🌟 ¡Pleno del 100 %! Ningún alumno falló en esta partida.
           </div>
@@ -3128,30 +4187,27 @@
           <div class="radar-bar-bg">
             <div class="radar-bar-fill" style="width:${h.pct}%;"></div>
           </div>
-          <div style="font-size:0.82rem; color:#334155;">
+          <div style="font-size:0.82rem; color:#334155; font-weight:700;">
             ✅ Correcta: <strong style="color:#065f46;">${escapeHTML(h.correctOption)}</strong> ·
-            ❌ Error más común: <strong style="color:#b91c1c;">${escapeHTML(h.topWrongOpt)}</strong>
+            ❌ Error más frecuente: <strong style="color:#b91c1c;">${escapeHTML(h.topWrongOpt)}</strong>
           </div>
         </div>
       `).join('');
 
       container.innerHTML = `
-        <h2 style="font-size:1.35rem; font-weight:900;">📡 Radar de fallos de la clase</h2>
+        <h2 style="font-size:1.4rem;">🎯 Radar de Fallos de la Clase</h2>
         <div class="radar-highlight">
           ⚠️ El ${top1.pct} % dudó en «${escapeHTML(top1.word)}» → ${escapeHTML(top1.catLabel)} ·
-          Correcta: <u>${escapeHTML(top1.correctOption)}</u> (el error más común fue <em>${escapeHTML(top1.topWrongOpt)}</em>).
+          Correcta: <u>${escapeHTML(top1.correctOption)}</u> (error más común: <em>${escapeHTML(top1.topWrongOpt)}</em>).
         </div>
         ${top4Html}
       `;
     }
 
-    /* ==================== 10. LÓGICA DEL MANDO DEL ALUMNO ==================== */
+    /* ==================== 10. MANDO ALUMNO (EN CLASE CON PIN + NIVEL ADAPTADO) ==================== */
     function renderStudentView() {
       const ch = getActiveChallenge();
-      const schema = SCHEMAS[ch.block];
       const item = ch.words[matchState.wordIndex];
-
-      // Comprobar si el alumno guardado en esta pestaña sigue existiendo
       const myPlayer = matchState.players.find(p => p.id === studentLocal.playerId);
 
       const joinCard = document.getElementById('stu-join-card');
@@ -3167,7 +4223,6 @@
       joinCard.classList.add('hidden');
       playCard.classList.remove('hidden');
 
-      // Cabecera del alumno activo
       document.getElementById('stu-player-badge').textContent = `${myPlayer.icon} ${myPlayer.name}`;
       const teamBadgeEl = document.getElementById('stu-team-badge');
       if (matchState.mode === 'teams') {
@@ -3178,9 +4233,11 @@
         teamBadgeEl.classList.add('hidden');
       }
 
+      document.getElementById('stu-adapted-badge').classList.toggle('hidden', !myPlayer.adapted);
+
       const streakPill = document.getElementById('stu-streak-pill');
       if (myPlayer.streak >= 2) {
-        streakPill.textContent = `🔥 Racha: ${myPlayer.streak}`;
+        streakPill.textContent = myPlayer.streak >= 3 ? `🔥 RACHA x${myPlayer.streak}` : `🔥 Racha: ${myPlayer.streak}/3`;
         streakPill.classList.remove('hidden');
       } else {
         streakPill.classList.add('hidden');
@@ -3188,11 +4245,18 @@
 
       document.getElementById('stu-score-display').textContent = `${myPlayer.score} pts`;
 
-      // Si cambió la palabra o el desafío, limpiar selección local
+      // Si cambió la palabra o el desafío, inicializar selecciones
       if (studentLocal.lastWordIndex !== matchState.wordIndex || studentLocal.lastChallengeId !== ch.id) {
         studentLocal.lastWordIndex = matchState.wordIndex;
         studentLocal.lastChallengeId = ch.id;
-        studentLocal.picks = schema.map(() => null);
+        if (item) {
+          const init = initPicksForItem(ch.block, item, Boolean(myPlayer.adapted));
+          studentLocal.picks = init.picks;
+          studentLocal.autoHintText = init.hint;
+        } else {
+          studentLocal.picks = [];
+          studentLocal.autoHintText = '';
+        }
         studentLocal.lastFeedbackHtml = '';
         studentLocal.lastFeedbackClass = '';
       }
@@ -3200,16 +4264,19 @@
       const optsContainer = document.getElementById('stu-options-container');
       const checkBtn = document.getElementById('btn-check-answer');
       const fbBox = document.getElementById('stu-feedback-box');
+      const autoHintEl = document.getElementById('stu-auto-hint');
 
       if (matchState.phase === 'finished') {
         document.getElementById('stu-challenge-label').textContent = `${ch.title} · Partida finalizada`;
-        document.getElementById('stu-word-text').textContent = '🏁 ¡Mira el Podio Final!';
+        document.getElementById('stu-word-text').textContent = '🏁 ¡Mira el Podio en la Pizarra!';
         document.getElementById('stu-word-context').classList.add('hidden');
+        document.getElementById('stu-conjugation-grid').classList.add('hidden');
+        autoHintEl.classList.add('hidden');
         optsContainer.innerHTML = '';
         checkBtn.classList.add('hidden');
-        fbBox.classList.remove('hidden', 'ok', 'boost', 'partial');
-        fbBox.classList.add('ok');
-        fbBox.innerHTML = `🏆 Has terminado con <strong>${myPlayer.score} puntos</strong> y racha máxima <strong>🔥 x${myPlayer.maxStreak || 0}</strong>.`;
+        fbBox.className = 'feedback-panel ok';
+        fbBox.innerHTML = `🏆 Has terminado con <strong>${myPlayer.score} puntos</strong> y racha máxima <strong>🔥 RACHA x${myPlayer.maxStreak || 0}</strong>.`;
+        fbBox.classList.remove('hidden');
         return;
       }
 
@@ -3219,6 +4286,8 @@
         document.getElementById('stu-challenge-label').textContent = ch.title;
         document.getElementById('stu-word-text').textContent = 'Sin palabras disponibles';
         document.getElementById('stu-word-context').classList.add('hidden');
+        document.getElementById('stu-conjugation-grid').classList.add('hidden');
+        autoHintEl.classList.add('hidden');
         optsContainer.innerHTML = '';
         checkBtn.disabled = true;
         fbBox.classList.add('hidden');
@@ -3226,15 +4295,30 @@
       }
 
       document.getElementById('stu-challenge-label').textContent =
-        `${ch.title} · Palabra ${matchState.wordIndex + 1} de ${ch.words.length}`;
+        `${ch.title} · Pregunta ${matchState.wordIndex + 1} de ${ch.words.length}`;
       document.getElementById('stu-word-text').textContent = item.word;
 
       const stuCtx = document.getElementById('stu-word-context');
-      if (item.context) {
-        stuCtx.innerHTML = formatContextHTML(item.context, item.word);
-        stuCtx.classList.remove('hidden');
-      } else {
+      const stuConjGrid = document.getElementById('stu-conjugation-grid');
+      if (item.format === 'conjugation_radar' && Array.isArray(item.conjugationTable) && item.conjugationTable.length > 0) {
         stuCtx.classList.add('hidden');
+        stuConjGrid.innerHTML = item.conjugationTable.map(f => `<div class="conj-cell">${escapeHTML(f)}</div>`).join('');
+        stuConjGrid.classList.remove('hidden');
+      } else {
+        stuConjGrid.classList.add('hidden');
+        if (item.context) {
+          stuCtx.innerHTML = formatContextHTML(item.context, item.word);
+          stuCtx.classList.remove('hidden');
+        } else {
+          stuCtx.classList.add('hidden');
+        }
+      }
+
+      if (studentLocal.autoHintText) {
+        autoHintEl.textContent = studentLocal.autoHintText;
+        autoHintEl.classList.remove('hidden');
+      } else {
+        autoHintEl.classList.add('hidden');
       }
 
       const alreadyAnswered = Boolean(
@@ -3242,41 +4326,16 @@
         matchState.answeredByWord[matchState.wordIndex][myPlayer.id]
       );
 
-      if (studentLocal.picks.length !== schema.length) {
-        studentLocal.picks = schema.map(() => null);
+      const rows = buildQuestionRows(ch.block, item, Boolean(myPlayer.adapted));
+      if (studentLocal.picks.length !== rows.length) {
+        const init = initPicksForItem(ch.block, item, Boolean(myPlayer.adapted));
+        studentLocal.picks = init.picks;
       }
 
-      optsContainer.innerHTML = schema.map((catObj, rIdx) => {
-        const isGrid2x3 = ch.block === 'adjetivos' || catObj.options.length === 6;
-        return `
-          <div class="cat-block">
-            <div class="cat-block-label">${escapeHTML(catObj.label)}</div>
-            <div class="options-grid ${isGrid2x3 ? 'grid-2x3' : ''}">
-              ${catObj.options.map((opt, optIdx) => {
-                const isSelected = studentLocal.picks[rIdx] === opt;
-                let extraClass = isSelected ? 'selected' : '';
-                if (alreadyAnswered || matchState.revealed) {
-                  const correctOpt = item.cats[rIdx];
-                  if (opt === correctOpt) extraClass = 'is-correct';
-                  else if (isSelected && opt !== correctOpt) extraClass = 'is-wrong';
-                }
-                return `
-                  <button
-                    type="button"
-                    class="opt-btn ${extraClass}"
-                    ${(alreadyAnswered || matchState.revealed) ? 'disabled' : ''}
-                    onclick="selectStudentOption(${rIdx}, ${optIdx})"
-                  >
-                    ${escapeHTML(opt)}
-                  </button>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      checkBtn.disabled = alreadyAnswered || matchState.revealed;
+      const locked = computeRowLocks(ch.block, item, Boolean(myPlayer.adapted), studentLocal.picks);
+      const disabledAll = alreadyAnswered || matchState.revealed;
+      optsContainer.innerHTML = renderRowsHTML(rows, studentLocal.picks, locked, disabledAll, 'selectStudentOption');
+      checkBtn.disabled = disabledAll;
 
       if (studentLocal.lastFeedbackHtml) {
         fbBox.className = `feedback-panel ${studentLocal.lastFeedbackClass}`;
@@ -3284,7 +4343,7 @@
         fbBox.classList.remove('hidden');
       } else if (matchState.revealed && !alreadyAnswered) {
         fbBox.className = 'feedback-panel partial';
-        fbBox.innerHTML = `👁️ Solución revelada en la pizarra: <strong>${item.cats.map(escapeHTML).join(' · ')}</strong>`;
+        fbBox.innerHTML = `👁️ Solución revelada en la pizarra: <strong>${rows.map(r => escapeHTML(r.expected)).join(' · ')}</strong>`;
         fbBox.classList.remove('hidden');
       } else {
         fbBox.classList.add('hidden');
@@ -3299,11 +4358,10 @@
 
       if (isTeams) {
         teamPickerWrap.classList.remove('hidden');
-        subtitle.textContent = 'Escribe tu nombre y elige un equipo disponible (o pulsa Equipo automático).';
+        subtitle.textContent = 'Escribe el PIN de la pizarra, tu nombre y elige tu equipo.';
         const cap = Number(matchState.teamCap) || 0;
         const gridEl = document.getElementById('stu-team-buttons-grid');
 
-        // Asegurar que selectedTeam apunte a un equipo libre si existe
         if (cap > 0 && getTeamMemberCount(studentLocal.selectedTeam) >= cap) {
           const open = getSmallestAvailableTeam();
           if (open !== -1) studentLocal.selectedTeam = open;
@@ -3339,13 +4397,12 @@
         teamPickerWrap.classList.add('hidden');
         const free = MAX_INDIVIDUAL_PLAYERS - matchState.players.length;
         subtitle.textContent = free > 0
-          ? `Modo Individual: escribe tu nombre para unirte (${matchState.players.length}/${MAX_INDIVIDUAL_PLAYERS} ocupadas).`
+          ? `Modo Individual: escribe el PIN de sala y tu nombre (${matchState.players.length}/${MAX_INDIVIDUAL_PLAYERS} plazas).`
           : `Sala completa (${MAX_INDIVIDUAL_PLAYERS}/${MAX_INDIVIDUAL_PLAYERS} jugadores).`;
         joinBtn.disabled = free <= 0;
         joinBtn.textContent = free > 0 ? '🚀 Entrar a jugar' : '⚠️ Sala completa (20/20)';
       }
 
-      // Lista de alumnos ya conectados por si comparten dispositivo
       const existingWrap = document.getElementById('stu-existing-wrap');
       const existingSel = document.getElementById('stu-existing-select');
       if (matchState.players.length > 0) {
@@ -3376,8 +4433,19 @@
     }
 
     function joinAsStudent(forcedTeam = null) {
+      const pinInp = document.getElementById('stu-pin-input');
       const nameInp = document.getElementById('stu-name-input');
+      const adaptedChk = document.getElementById('stu-adapted-checkbox');
+
+      const enteredPin = pinInp.value.trim();
       const name = nameInp.value.trim();
+
+      if (!enteredPin || enteredPin !== String(matchState.roomPin)) {
+        showToast(`🔑 PIN incorrecto. Mira el PIN proyectado en la Pizarra Digital.`, 'danger');
+        pinInp.focus();
+        return;
+      }
+
       if (!name) {
         showToast('Escribe tu nombre antes de entrar.', 'warn');
         nameInp.focus();
@@ -3415,11 +4483,13 @@
         score: 0,
         streak: 0,
         maxStreak: 0,
+        adapted: Boolean(adaptedChk.checked),
         isDemo: false
       };
 
       matchState.players.push(newPlayer);
       studentLocal.playerId = newPlayer.id;
+      studentLocal.lastWordIndex = -1;
       SafeSession.setItem('lq_tab_player_id', newPlayer.id);
       nameInp.value = '';
 
@@ -3451,11 +4521,16 @@
       renderStudentView();
     }
 
-    function selectStudentOption(rowIdx, optIdx) {
+    function selectStudentOption(rowIdx, optVal) {
+      const myPlayer = matchState.players.find(p => p.id === studentLocal.playerId);
+      if (!myPlayer) return;
       const ch = getActiveChallenge();
-      const schema = SCHEMAS[ch.block];
-      const optVal = schema[rowIdx].options[optIdx];
-      studentLocal.picks[rowIdx] = optVal;
+      const item = ch.words[matchState.wordIndex];
+      if (!item) return;
+
+      const updated = applyPedagogicalSelection(ch.block, item, Boolean(myPlayer.adapted), studentLocal.picks, rowIdx, optVal);
+      studentLocal.picks = updated.picks;
+      studentLocal.autoHintText = updated.hint;
       AudioFX.click();
       renderStudentView();
     }
@@ -3480,7 +4555,7 @@
         AudioFX.streakBoost();
         studentLocal.lastFeedbackClass = 'boost';
         studentLocal.lastFeedbackHtml =
-          `🔥 <strong>¡Racha x${result.streak}! +Impulso (+${result.pointsAdded} pts)</strong><br>` +
+          `🔥 <strong>¡RACHA x${result.streak}! +Impulso (+${result.pointsAdded} pts)</strong><br>` +
           `¡Encadenaste ${result.streak} aciertos seguidos y tu torre sube un impulso extra!`;
       } else if (result.isPerfect) {
         AudioFX.success();
@@ -3493,18 +4568,293 @@
         studentLocal.lastFeedbackClass = 'partial';
         studentLocal.lastFeedbackHtml =
           `❌ Has acertado <strong>${result.hits} de ${result.totalRows}</strong> (la racha vuelve a 0).<br>` +
-          `Solución correcta: <strong>${item.cats.map(escapeHTML).join(' · ')}</strong>` +
+          `Solución correcta: <strong>${result.rows.map(r => escapeHTML(r.expected)).join(' · ')}</strong>` +
           (item.explanation ? `<div style="margin-top:6px; font-weight:600;">💡 ${escapeHTML(item.explanation)}</div>` : '');
       }
 
       syncAllViews(true);
     }
 
-    /* ==================== 11. EDITOR DEL PROFESOR (CONTRASEÑA + EXPORTAR/IMPORTAR JSON) ==================== */
+    /* ==================== 11. PRACTICAR SOLO (MODO ESTUDIO EN CASA SIN PIN) ==================== */
+    function populateStudyChallenges() {
+      const blockSel = document.getElementById('study-block-select');
+      const chSel = document.getElementById('study-challenge-select');
+      studyLocal.block = blockSel.value || 'sustantivos';
+
+      const list = appData.challenges.filter(c => c.block === studyLocal.block);
+      chSel.innerHTML = list.map(c =>
+        `<option value="${c.id}">${escapeHTML(c.title)} (${c.words.length} preguntas)</option>`
+      ).join('') + `<option value="mixed_${studyLocal.block}">🎲 Repaso Mixto (10 aleatorias del bloque)</option>`;
+    }
+
+    function startStudySession() {
+      studyLocal.block = document.getElementById('study-block-select').value;
+      studyLocal.challengeId = document.getElementById('study-challenge-select').value;
+      studyLocal.adapted = Boolean(document.getElementById('study-adapted-checkbox').checked);
+      studyLocal.wordIndex = 0;
+      studyLocal.correctCount = 0;
+      studyLocal.streak = 0;
+      studyLocal.maxStreak = 0;
+      studyLocal.history = [];
+      studyLocal.checked = false;
+      studyLocal.feedbackHtml = '';
+
+      // Preparar lista de preguntas del estudio
+      if (studyLocal.challengeId.startsWith('mixed_')) {
+        const pool = appData.challenges
+          .filter(c => c.block === studyLocal.block)
+          .flatMap(c => c.words);
+        const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 10);
+        studyLocal.sessionTitle = `Repaso Mixto (${studyLocal.block})`;
+        studyLocal.sessionWords = shuffled;
+      } else {
+        const ch = appData.challenges.find(c => c.id === studyLocal.challengeId) || appData.challenges[0];
+        studyLocal.sessionTitle = ch.title;
+        studyLocal.sessionWords = [...ch.words];
+      }
+
+      if (studyLocal.sessionWords.length === 0) {
+        showToast('Este desafío aún no tiene preguntas.', 'warn');
+        return;
+      }
+
+      const firstItem = studyLocal.sessionWords[0];
+      const init = initPicksForItem(studyLocal.block, firstItem, studyLocal.adapted);
+      studyLocal.picks = init.picks;
+      studyLocal.autoHintText = init.hint;
+
+      document.getElementById('study-setup-card').classList.add('hidden');
+      document.getElementById('study-summary-card').classList.add('hidden');
+      document.getElementById('study-active-card').classList.remove('hidden');
+
+      AudioFX.roundChange();
+      renderStudyQuestion();
+    }
+
+    function exitStudyToSetup() {
+      document.getElementById('study-active-card').classList.add('hidden');
+      document.getElementById('study-summary-card').classList.add('hidden');
+      document.getElementById('study-setup-card').classList.remove('hidden');
+      populateStudyChallenges();
+      AudioFX.click();
+    }
+
+    function renderStudyQuestion() {
+      const total = studyLocal.sessionWords.length;
+      const item = studyLocal.sessionWords[studyLocal.wordIndex];
+
+      document.getElementById('study-header-title').textContent = studyLocal.sessionTitle;
+      document.getElementById('study-adapted-pill').classList.toggle('hidden', !studyLocal.adapted);
+      document.getElementById('study-score-text').textContent =
+        `${studyLocal.correctCount} / ${studyLocal.history.length} aciertos`;
+
+      const streakPill = document.getElementById('study-streak-pill');
+      if (studyLocal.streak >= 2) {
+        streakPill.textContent = studyLocal.streak >= 3 ? `🔥 RACHA x${studyLocal.streak}` : `🔥 Racha: ${studyLocal.streak}/3`;
+        streakPill.classList.remove('hidden');
+      } else {
+        streakPill.classList.add('hidden');
+      }
+
+      document.getElementById('study-progress-label').textContent =
+        `Pregunta ${studyLocal.wordIndex + 1} de ${total}`;
+      document.getElementById('study-word-text').textContent = item.word;
+
+      const ctxEl = document.getElementById('study-word-context');
+      const conjGridEl = document.getElementById('study-conjugation-grid');
+      if (item.format === 'conjugation_radar' && Array.isArray(item.conjugationTable) && item.conjugationTable.length > 0) {
+        ctxEl.classList.add('hidden');
+        conjGridEl.innerHTML = item.conjugationTable.map(f => `<div class="conj-cell">${escapeHTML(f)}</div>`).join('');
+        conjGridEl.classList.remove('hidden');
+      } else {
+        conjGridEl.classList.add('hidden');
+        if (item.context) {
+          ctxEl.innerHTML = formatContextHTML(item.context, item.word);
+          ctxEl.classList.remove('hidden');
+        } else {
+          ctxEl.classList.add('hidden');
+        }
+      }
+
+      const autoHintEl = document.getElementById('study-auto-hint');
+      if (studyLocal.autoHintText) {
+        autoHintEl.textContent = studyLocal.autoHintText;
+        autoHintEl.classList.remove('hidden');
+      } else {
+        autoHintEl.classList.add('hidden');
+      }
+
+      const rows = buildQuestionRows(studyLocal.block, item, studyLocal.adapted);
+      const locked = computeRowLocks(studyLocal.block, item, studyLocal.adapted, studyLocal.picks);
+      document.getElementById('study-options-container').innerHTML =
+        renderRowsHTML(rows, studyLocal.picks, locked, studyLocal.checked, 'selectStudyOption');
+
+      document.getElementById('btn-study-check').classList.toggle('hidden', studyLocal.checked);
+      const nextBtn = document.getElementById('btn-study-next');
+      nextBtn.classList.toggle('hidden', !studyLocal.checked);
+      nextBtn.textContent = (studyLocal.wordIndex + 1 >= total) ? '🏁 Ver Resumen Final' : 'Siguiente Pregunta ➡️';
+
+      const fbBox = document.getElementById('study-feedback-box');
+      if (studyLocal.checked && studyLocal.feedbackHtml) {
+        fbBox.className = `feedback-panel ${studyLocal.feedbackClass}`;
+        fbBox.innerHTML = studyLocal.feedbackHtml;
+        fbBox.classList.remove('hidden');
+      } else {
+        fbBox.classList.add('hidden');
+      }
+    }
+
+    function selectStudyOption(rowIdx, optVal) {
+      if (studyLocal.checked) return;
+      const item = studyLocal.sessionWords[studyLocal.wordIndex];
+      const updated = applyPedagogicalSelection(studyLocal.block, item, studyLocal.adapted, studyLocal.picks, rowIdx, optVal);
+      studyLocal.picks = updated.picks;
+      studyLocal.autoHintText = updated.hint;
+      AudioFX.click();
+      renderStudyQuestion();
+    }
+
+    function checkStudyAnswer() {
+      if (studyLocal.checked) return;
+      if (studyLocal.picks.some(v => v === null)) {
+        showToast('Marca una opción en cada fila antes de comprobar.', 'warn');
+        return;
+      }
+
+      const item = studyLocal.sessionWords[studyLocal.wordIndex];
+      const rows = buildQuestionRows(studyLocal.block, item, studyLocal.adapted);
+      let hits = 0;
+      const failedRows = [];
+
+      rows.forEach((row, idx) => {
+        if (studyLocal.picks[idx] === row.expected) {
+          hits++;
+        } else {
+          failedRows.push({
+            label: row.label,
+            chosen: studyLocal.picks[idx],
+            expected: row.expected
+          });
+        }
+      });
+
+      const isPerfect = hits === rows.length;
+      studyLocal.checked = true;
+
+      if (isPerfect) {
+        studyLocal.correctCount += 1;
+        studyLocal.streak += 1;
+        studyLocal.maxStreak = Math.max(studyLocal.maxStreak, studyLocal.streak);
+
+        if (studyLocal.streak > 0 && studyLocal.streak % 3 === 0) {
+          AudioFX.streakBoost();
+          studyLocal.feedbackClass = 'boost';
+          studyLocal.feedbackHtml =
+            `🔥 <strong>¡RACHA x${studyLocal.streak}! ¡Excelente trabajo!</strong><br>` +
+            (item.explanation ? `💡 ${escapeHTML(item.explanation)}` : '¡Has encadenado 3 aciertos seguidos!');
+        } else {
+          AudioFX.success();
+          studyLocal.feedbackClass = 'ok';
+          studyLocal.feedbackHtml =
+            `🎉 <strong>¡Respuesta perfecta!</strong>` +
+            (item.explanation ? `<div style="margin-top:6px; font-weight:600;">💡 ${escapeHTML(item.explanation)}</div>` : '');
+        }
+      } else {
+        studyLocal.streak = 0;
+        AudioFX.wrong();
+        studyLocal.feedbackClass = 'partial';
+        studyLocal.feedbackHtml =
+          `❌ Has acertado <strong>${hits} de ${rows.length}</strong>.<br>` +
+          `Solución correcta: <strong>${rows.map(r => escapeHTML(r.expected)).join(' · ')}</strong>` +
+          (item.explanation ? `<div style="margin-top:6px; font-weight:600;">💡 ${escapeHTML(item.explanation)}</div>` : '');
+      }
+
+      studyLocal.history.push({
+        word: item.word,
+        isPerfect,
+        failedRows,
+        expectedSummary: rows.map(r => r.expected).join(' · '),
+        explanation: item.explanation || ''
+      });
+
+      renderStudyQuestion();
+    }
+
+    function nextStudyQuestion() {
+      if (studyLocal.wordIndex + 1 < studyLocal.sessionWords.length) {
+        studyLocal.wordIndex += 1;
+        studyLocal.checked = false;
+        studyLocal.feedbackHtml = '';
+        const item = studyLocal.sessionWords[studyLocal.wordIndex];
+        const init = initPicksForItem(studyLocal.block, item, studyLocal.adapted);
+        studyLocal.picks = init.picks;
+        studyLocal.autoHintText = init.hint;
+        AudioFX.roundChange();
+        renderStudyQuestion();
+      } else {
+        renderStudySummary();
+      }
+    }
+
+    function renderStudySummary() {
+      document.getElementById('study-active-card').classList.add('hidden');
+      const summaryCard = document.getElementById('study-summary-card');
+      summaryCard.classList.remove('hidden');
+
+      const total = studyLocal.history.length;
+      const pct = total > 0 ? Math.round((studyLocal.correctCount / total) * 100) : 0;
+      const missed = studyLocal.history.filter(h => !h.isPerfect);
+
+      if (pct >= 70) {
+        AudioFX.podiumFanfare();
+        launchConfetti();
+      } else {
+        AudioFX.success();
+      }
+
+      const missedHtml = missed.length === 0
+        ? `<div style="background:#d1fae5; border:2px solid #10b981; color:#065f46; border-radius:14px; padding:15px; font-weight:800; margin:16px 0;">
+            🌟 ¡Pleno absoluto! Has acertado todas las preguntas sin ningún fallo.
+           </div>`
+        : `<div style="text-align:left; margin:16px 0;">
+            <h3 style="font-size:1.1rem; color:#991b1b; margin-bottom:10px;">🎯 Palabras para repasar (${missed.length}):</h3>
+            ${missed.map(m => `
+              <div class="radar-item">
+                <div style="font-weight:900; font-size:0.98rem; color:#0f172a;">«${escapeHTML(m.word)}»</div>
+                <div style="font-size:0.85rem; color:#065f46; font-weight:800; margin-top:3px;">
+                  ✅ Solución: ${escapeHTML(m.expectedSummary)}
+                </div>
+                ${m.explanation ? `<div style="font-size:0.82rem; color:#475569; margin-top:4px;">💡 ${escapeHTML(m.explanation)}</div>` : ''}
+              </div>
+            `).join('')}
+           </div>`;
+
+      summaryCard.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:3rem; margin-bottom:6px;">${pct >= 80 ? '🏆' : (pct >= 50 ? '👏' : '💪')}</div>
+          <h2 style="font-size:1.65rem; color:#1e1b4b;">¡Repaso completado!</h2>
+          <p style="color:var(--muted); font-weight:700; margin-bottom:14px;">${escapeHTML(studyLocal.sessionTitle)}</p>
+
+          <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+            <span class="badge badge-indigo" style="font-size:0.95rem; padding:7px 14px;">✅ Aciertos: ${studyLocal.correctCount} / ${total} (${pct}%)</span>
+            <span class="badge badge-amber" style="font-size:0.95rem; padding:7px 14px;">🔥 Racha máxima: x${studyLocal.maxStreak}</span>
+          </div>
+
+          ${missedHtml}
+
+          <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
+            <button type="button" class="btn btn-primary" onclick="startStudySession()">🔄 Repetir este desafío</button>
+            <button type="button" class="btn btn-soft" onclick="exitStudyToSetup()">📚 Elegir otro desafío</button>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ==================== 12. EDITOR DEL PROFESOR (CONTRASEÑA + 3 BLOQUES + JSON) ==================== */
     function renderAdminLockState() {
       document.getElementById('admin-lock-box').classList.toggle('hidden', isAdminUnlocked);
       document.getElementById('admin-content-box').classList.toggle('hidden', !isAdminUnlocked);
-      document.getElementById('tab-admin').textContent = isAdminUnlocked ? '✏️ Editor del Profesor' : '🔒 Editor del Profesor';
+      document.getElementById('nav-admin').textContent = isAdminUnlocked ? '✏️ Editor' : '🔒 Editor';
 
       if (!isAdminUnlocked) {
         const inp = document.getElementById('admin-pass-input');
@@ -3567,7 +4917,6 @@
       showToast('✅ Contraseña actualizada correctamente.', 'success');
     }
 
-    /* D) Exportar e Importar Copia de Seguridad (.json) */
     function exportChallengesBackup() {
       const today = new Date().toISOString().slice(0, 10);
       const backupObj = {
@@ -3624,7 +4973,6 @@
           if (mode === 'replace') {
             appData.challenges = normalizeChallengeList(validated);
           } else {
-            // Añadir a los actuales manteniendo IDs únicos y numeración correlativa en Sustantivos
             const combined = [
               ...appData.challenges,
               ...validated.map((c, idx) => ({
@@ -3648,7 +4996,7 @@
             'success'
           );
         } catch (err) {
-          showToast('❌ Error al leer el archivo JSON. Comprueba que no esté dañado.', 'danger');
+          showToast('❌ Error al leer el archivo JSON.', 'danger');
         }
       };
       reader.readAsText(file);
@@ -3691,7 +5039,9 @@
       const countInBlock = appData.challenges.filter(c => c.block === block).length;
       const newTitle = block === 'sustantivos'
         ? `Desafío ${countInBlock + 1}`
-        : `Adjetivos · Desafío ${countInBlock + 1}`;
+        : (block === 'adjetivos'
+          ? `Adjetivos · Desafío ${countInBlock + 1}`
+          : `Verbos · Desafío ${countInBlock + 1}`);
 
       const newCh = {
         id: `${block}_${Date.now()}`,
@@ -3740,6 +5090,11 @@
       const block = document.getElementById('admin-block-select').value;
       const schema = SCHEMAS[block];
       const container = document.getElementById('admin-dynamic-cat-fields');
+      const isVerbs = block === 'verbos';
+
+      document.getElementById('admin-verb-format-wrap').classList.toggle('hidden', !isVerbs);
+      document.getElementById('admin-verb-basic-tense-wrap').classList.toggle('hidden', !isVerbs);
+      onAdminVerbFormatChange();
 
       container.innerHTML = schema.map((col, idx) => `
         <div style="margin-bottom:10px;">
@@ -3753,29 +5108,70 @@
       `).join('');
     }
 
+    function onAdminVerbFormatChange() {
+      const block = document.getElementById('admin-block-select').value;
+      const fmt = document.getElementById('admin-verb-format').value;
+      const isRadar = block === 'verbos' && fmt === 'conjugation_radar';
+
+      document.getElementById('admin-conj-table-wrap').classList.toggle('hidden', !isRadar);
+      document.getElementById('admin-context-wrap').classList.toggle('hidden', isRadar);
+      document.getElementById('admin-word-label').textContent = isRadar
+        ? 'Título de la serie verbal (ej. Verbo CANTAR · Serie completa)'
+        : 'Palabra o expresión';
+
+      if (isRadar) {
+        const c1 = document.getElementById('admin-cat-1');
+        const c2 = document.getElementById('admin-cat-2');
+        const c3 = document.getElementById('admin-cat-3');
+        if (c1) c1.value = 'Personal';
+        if (c2) c2.value = 'No procede';
+        if (c3) c3.value = 'No procede';
+      }
+    }
+
     function onAdminCatAutoAdjust(changedIdx) {
       const block = document.getElementById('admin-block-select').value;
-      if (block !== 'sustantivos') return;
-      const c0 = document.getElementById('admin-cat-0');
-      const c1 = document.getElementById('admin-cat-1');
-      const c2 = document.getElementById('admin-cat-2');
-      const c3 = document.getElementById('admin-cat-3');
-      if (!c0 || !c1 || !c2 || !c3) return;
+      if (block === 'sustantivos') {
+        const c0 = document.getElementById('admin-cat-0');
+        const c1 = document.getElementById('admin-cat-1');
+        const c2 = document.getElementById('admin-cat-2');
+        const c3 = document.getElementById('admin-cat-3');
+        if (!c0 || !c1 || !c2 || !c3) return;
 
-      if (changedIdx === 0 && c0.value === 'Propio') {
-        c1.value = 'No procede';
-        c2.value = 'No procede';
-        c3.value = 'No procede';
-      } else if (changedIdx === 1 && c1.value === 'Abstracto') {
-        c2.value = 'No procede';
-        c3.value = 'No procede';
+        if (changedIdx === 0 && c0.value === 'Propio') {
+          c1.value = 'No procede';
+          c2.value = 'No procede';
+          c3.value = 'No procede';
+        } else if (changedIdx === 1 && c1.value === 'Abstracto') {
+          c2.value = 'No procede';
+          c3.value = 'No procede';
+        } else if (changedIdx === 2 && c2.value === 'No contable') {
+          c3.value = 'No procede';
+        }
+      } else if (block === 'verbos') {
+        const c1 = document.getElementById('admin-cat-1');
+        const c2 = document.getElementById('admin-cat-2');
+        const c3 = document.getElementById('admin-cat-3');
+        const c4 = document.getElementById('admin-cat-4');
+        const c5 = document.getElementById('admin-cat-5');
+        const basicSel = document.getElementById('admin-inp-basic-tense');
+
+        if (changedIdx === 1 && c1 && ['Infinitivo', 'Gerundio', 'Participio'].includes(c1.value)) {
+          if (c2) c2.value = 'No procede';
+          if (c3) c3.value = 'No procede';
+          if (c4) c4.value = 'No procede';
+          if (c5) c5.value = 'No procede';
+          if (basicSel) basicSel.value = 'No procede';
+        } else if (changedIdx === 5 && c5 && basicSel) {
+          basicSel.value = inferBasicTense(c5.value, c1 ? c1.value : 'Personal');
+        }
       }
     }
 
     function saveAdminElement() {
       const word = document.getElementById('admin-inp-word').value.trim();
       if (!word) {
-        showToast('⚠️ Escribe una palabra o expresión.', 'warn');
+        showToast('⚠️ Escribe una palabra o título de serie.', 'warn');
         return;
       }
 
@@ -3787,19 +5183,45 @@
       const editIdx = Number(document.getElementById('admin-edit-idx').value);
 
       const entry = { word, context, cats, explanation };
+
+      if (ch.block === 'verbos') {
+        const fmt = document.getElementById('admin-verb-format').value;
+        entry.format = fmt === 'conjugation_radar' ? 'conjugation_radar' : 'sentence';
+        if (entry.format === 'conjugation_radar') {
+          const lines = document.getElementById('admin-inp-conj-lines').value
+            .split('\n')
+            .map(l => l.trim())
+            .filter(Boolean);
+          if (lines.length === 0) {
+            showToast('⚠️ Escribe las 6 formas conjugadas (una por línea).', 'warn');
+            return;
+          }
+          entry.conjugationTable = lines;
+          entry.context = '';
+          entry.cats[1] = 'Personal';
+          entry.cats[2] = 'No procede';
+          entry.cats[3] = 'No procede';
+        } else {
+          entry.conjugationTable = [];
+        }
+        entry.tiempoBasico = document.getElementById('admin-inp-basic-tense').value;
+      }
+
       if (editIdx >= 0 && editIdx < ch.words.length) {
         ch.words[editIdx] = entry;
+        showToast(`✅ "${word}" actualizado.`, 'success');
       } else {
         ch.words.push(entry);
+        showToast(`➕ "${word}" añadido a ${ch.title}.`, 'success');
       }
 
       saveAppData();
-      populateAdminSelectors();
-      document.getElementById('admin-challenge-select').value = ch.id;
       resetAdminElementForm();
       renderAdminTable();
+      populateAdminSelectors();
+      document.getElementById('admin-challenge-select').value = ch.id;
       syncAllViews(true);
-      showToast('💾 Elemento guardado correctamente.', 'success');
+      AudioFX.success();
     }
 
     function editAdminElement(idx) {
@@ -3807,11 +5229,20 @@
       const item = ch.words[idx];
       if (!item) return;
 
-      document.getElementById('admin-edit-idx').value = idx;
-      document.getElementById('admin-form-heading').textContent = '✏️ Editando elemento';
+      document.getElementById('admin-edit-idx').value = String(idx);
+      document.getElementById('admin-form-heading').textContent = `✏️ Editando: ${item.word}`;
       document.getElementById('admin-inp-word').value = item.word;
       document.getElementById('admin-inp-context').value = item.context || '';
       document.getElementById('admin-inp-explanation').value = item.explanation || '';
+
+      if (ch.block === 'verbos') {
+        document.getElementById('admin-verb-format').value = item.format || 'sentence';
+        onAdminVerbFormatChange();
+        document.getElementById('admin-inp-conj-lines').value =
+          Array.isArray(item.conjugationTable) ? item.conjugationTable.join('\n') : '';
+        document.getElementById('admin-inp-basic-tense').value =
+          item.tiempoBasico || inferBasicTense(item.cats[5], item.cats[1]);
+      }
 
       item.cats.forEach((val, cIdx) => {
         const sel = document.getElementById(`admin-cat-${cIdx}`);
@@ -3819,37 +5250,65 @@
       });
 
       document.getElementById('admin-cancel-edit-btn').classList.remove('hidden');
-    }
-
-    function deleteAdminElement(idx) {
-      const ch = getAdminSelectedChallenge();
-      if (!ch) return;
-      ch.words.splice(idx, 1);
-      saveAppData();
-      populateAdminSelectors();
-      document.getElementById('admin-challenge-select').value = ch.id;
-      renderAdminTable();
-      syncAllViews(true);
-      showToast('🗑️ Elemento eliminado.', 'info');
+      AudioFX.click();
     }
 
     function resetAdminElementForm() {
-      document.getElementById('admin-edit-idx').value = -1;
+      document.getElementById('admin-edit-idx').value = '-1';
       document.getElementById('admin-form-heading').textContent = '➕ Añadir elemento';
       document.getElementById('admin-inp-word').value = '';
       document.getElementById('admin-inp-context').value = '';
       document.getElementById('admin-inp-explanation').value = '';
+      document.getElementById('admin-inp-conj-lines').value = '';
       document.getElementById('admin-cancel-edit-btn').classList.add('hidden');
       renderAdminEditorFields();
     }
 
-    function getBadgeColorClass(val) {
-      if (val === 'No procede') return 'badge-slate';
-      if (val === 'Común' || val === 'Positivo') return 'badge-indigo';
-      if (val === 'Propio' || val === 'Superlativo absoluto') return 'badge-purple';
-      if (val === 'Concreto' || val === 'Contable' || val === 'Comparativo de igualdad') return 'badge-emerald';
-      if (val === 'Abstracto' || val === 'No contable' || val === 'Comparativo de inferioridad') return 'badge-amber';
-      return 'badge-sky';
+    async function deleteAdminElement(idx) {
+      const ch = getAdminSelectedChallenge();
+      const item = ch.words[idx];
+      if (!item) return;
+
+      const ok = await showModal({
+        title: 'Borrar elemento',
+        text: `¿Eliminar "${item.word}" de ${ch.title}?`,
+        confirmLabel: 'Eliminar',
+        confirmClass: 'btn-danger'
+      });
+      if (!ok) return;
+
+      ch.words.splice(idx, 1);
+      saveAppData();
+      resetAdminElementForm();
+      renderAdminTable();
+      populateAdminSelectors();
+      document.getElementById('admin-challenge-select').value = ch.id;
+      syncAllViews(true);
+      showToast('🗑️ Elemento eliminado.', 'info');
+    }
+
+    async function restoreInitialData() {
+      const ok = await showModal({
+        title: 'Restaurar banco inicial',
+        text: 'Se restablecerán los desafíos originales de Sustantivos (1-5), Adjetivos (1-2) y Verbos (1-2). ¿Continuar?',
+        confirmLabel: 'Restaurar',
+        confirmClass: 'btn-warning'
+      });
+      if (!ok) return;
+
+      appData.challenges = JSON.parse(JSON.stringify(INITIAL_CHALLENGES));
+      saveAppData();
+      matchState.challengeId = appData.challenges[0].id;
+      matchState.block = 'sustantivos';
+      matchState.wordIndex = 0;
+      matchState.revealed = false;
+      matchState.phase = 'playing';
+
+      populateAdminSelectors();
+      resetAdminElementForm();
+      renderAdminTable();
+      syncAllViews(true);
+      showToast('↩️ Banco inicial restaurado.', 'success');
     }
 
     function renderAdminTable() {
@@ -3858,80 +5317,86 @@
       const schema = SCHEMAS[ch.block];
 
       document.getElementById('admin-table-title').textContent = ch.title;
-      document.getElementById('admin-table-subtitle').textContent =
-        'Columnas evaluadas: ' + schema.map(s => s.label).join(' | ');
+      const blockLabel = ch.block === 'sustantivos'
+        ? 'Sustantivos'
+        : (ch.block === 'adjetivos' ? 'Adjetivos' : 'Verbos');
+      document.getElementById('admin-table-subtitle').textContent = `Bloque: ${blockLabel}`;
       document.getElementById('admin-table-count').textContent = `${ch.words.length} elementos`;
 
-      document.getElementById('admin-table-head').innerHTML = `
+      const headEl = document.getElementById('admin-table-head');
+      const bodyEl = document.getElementById('admin-table-body');
+
+      headEl.innerHTML = `
         <tr>
-          <th>Palabra / Contexto</th>
-          ${schema.map(s => `<th>${escapeHTML(s.label)}</th>`).join('')}
+          <th>#</th>
+          <th>Palabra / Serie y Contexto</th>
+          ${schema.map(c => `<th>${escapeHTML(c.label)}</th>`).join('')}
+          ${ch.block === 'verbos' ? '<th>⭐ Adaptado</th>' : ''}
           <th>Acciones</th>
         </tr>
       `;
 
-      const tbody = document.getElementById('admin-table-body');
       if (ch.words.length === 0) {
-        tbody.innerHTML = `
+        bodyEl.innerHTML = `
           <tr>
-            <td colspan="${schema.length + 2}" style="text-align:center; padding:24px; color:var(--muted);">
-              Este desafío aún no tiene elementos. Añade el primero usando el formulario de la izquierda.
+            <td colspan="${schema.length + 4}" style="text-align:center; padding:24px; color:var(--muted);">
+              Este desafío aún no tiene elementos. Añade uno desde el formulario de la izquierda.
             </td>
           </tr>
         `;
         return;
       }
 
-      tbody.innerHTML = ch.words.map((item, idx) => `
-        <tr>
-          <td>
-            <strong>${escapeHTML(item.word)}</strong>
-            ${item.context ? `<div style="font-size:0.8rem; color:var(--muted); font-style:italic;">«${escapeHTML(item.context)}»</div>` : ''}
-            ${item.explanation ? `<div style="font-size:0.78rem; color:#047857;">💡 ${escapeHTML(item.explanation)}</div>` : ''}
-          </td>
-          ${item.cats.map(c => `<td><span class="badge ${getBadgeColorClass(c)}">${escapeHTML(c)}</span></td>`).join('')}
-          <td style="white-space:nowrap;">
-            <button class="btn btn-soft btn-sm" onclick="editAdminElement(${idx})" title="Editar">✏️ Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteAdminElement(${idx})" title="Eliminar">🗑️</button>
-          </td>
-        </tr>
-      `).join('');
+      bodyEl.innerHTML = ch.words.map((item, idx) => {
+        const subInfo = item.format === 'conjugation_radar' && Array.isArray(item.conjugationTable)
+          ? `<div style="font-size:0.76rem; color:#0369a1; margin-top:2px;">📡 ${escapeHTML(item.conjugationTable.join(' · '))}</div>`
+          : (item.context ? `<div style="font-size:0.78rem; color:var(--muted); font-style:italic; margin-top:2px;">«${escapeHTML(item.context)}»</div>` : '');
+
+        return `
+          <tr>
+            <td style="font-weight:800; color:var(--muted);">${idx + 1}</td>
+            <td>
+              <strong>${escapeHTML(item.word)}</strong>
+              ${subInfo}
+            </td>
+            ${item.cats.map(cat => {
+              let cls = 'badge-indigo';
+              if (cat === 'No procede') cls = 'badge-slate';
+              else if (['Común', 'Concreto', 'Contable', 'Individual', 'Positivo', 'Indicativo'].includes(cat)) cls = 'badge-sky';
+              else if (['Colectivo', 'Superlativo absoluto', 'Superlativo relativo', 'Subjuntivo'].includes(cat)) cls = 'badge-emerald';
+              else if (['Propio', 'Abstracto', 'No contable', 'Imperativo'].includes(cat)) cls = 'badge-amber';
+              return `<td><span class="badge ${cls}">${escapeHTML(cat)}</span></td>`;
+            }).join('')}
+            ${ch.block === 'verbos' ? `<td><span class="badge badge-purple">${escapeHTML(item.tiempoBasico || 'No procede')}</span></td>` : ''}
+            <td>
+              <div style="display:flex; gap:5px;">
+                <button class="btn btn-soft btn-sm" onclick="editAdminElement(${idx})" title="Editar">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteAdminElement(${idx})" title="Borrar">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    async function restoreInitialData() {
-      const ok = await showModal({
-        title: 'Restaurar datos iniciales',
-        text: '¿Quieres restaurar los 5 desafíos iniciales de Sustantivos (Desafío 1 a 5) y los 2 desafíos iniciales de Adjetivos?',
-        confirmLabel: 'Sí, restaurar',
-        confirmClass: 'btn-danger'
-      });
-      if (!ok) return;
-
-      appData.challenges = JSON.parse(JSON.stringify(INITIAL_CHALLENGES));
-      saveAppData();
-      matchState.block = 'sustantivos';
-      matchState.challengeId = appData.challenges[0].id;
-      matchState.wordIndex = 0;
-      matchState.revealed = false;
-      matchState.phase = 'playing';
-      populateAdminSelectors();
-      resetAdminElementForm();
-      renderAdminTable();
-      syncAllViews(true);
-      showToast('↩️ Banco inicial restaurado.', 'success');
-    }
-
-    /* ==================== 12. SINCRONIZACIÓN GLOBAL E INICIO ==================== */
+    /* ==================== 13. SINCRONIZACIÓN GLOBAL E INICIALIZACIÓN ==================== */
     function syncAllViews(shouldBroadcast = false) {
-      renderBoard();
-      renderStudentView();
-      if (shouldBroadcast) {
-        broadcastMatchState();
-      }
+      if (shouldBroadcast) broadcastMatchState();
+      if (activeView === 'board') renderBoard();
+      if (activeView === 'play') renderStudentView();
+      if (activeView === 'admin' && isAdminUnlocked) renderAdminTable();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      syncAllViews(false);
+      // Si se abre con ?view=board o ?view=play, abrir esa vista; si no, abrir pantalla de inicio con 4 accesos
+      const params = new URLSearchParams(window.location.search);
+      const initialView = params.get('view');
+      if (['home', 'board', 'play', 'study', 'admin'].includes(initialView)) {
+        switchView(initialView);
+      } else {
+        switchView('home');
+      }
+
       if (syncChannel) {
         try {
           syncChannel.postMessage({ type: 'REQUEST_STATE' });
