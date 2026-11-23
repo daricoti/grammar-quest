@@ -5404,6 +5404,365 @@
       }
     });
   </script>
+  <script>
+(function () {
+  'use strict';
+
+  const ROOM_PREFIX = 'lq_daricoti_k7x2';
+  const BROKERS = [
+    'wss://broker.emqx.io:8084/mqtt',
+    'wss://broker.hivemq.com:8884/mqtt',
+    'wss://test.mosquitto.org:8081'
+  ];
+  const LIB_URLS = [
+    'https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js',
+    'https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js'
+  ];
+
+  const clientId = 'c_' + Math.random().toString(36).slice(2, 10);
+  let isHost = false;
+  let mqttClient = null;
+  let mqttOk = false;
+  let brokerIdx = 0;
+  let localChannel = null;
+  const wanted = new Set();
+  const studentNet = { pin: '', lastRaw: '', lastResultKey: '', joinTimer: null };
+
+  const topic = (pin) => ROOM_PREFIX + '/' + pin;
+
+  function buildPill() {
+    const btn = document.getElementById('sound-toggle');
+    if (!btn || document.getElementById('lq-net-pill')) return;
+    const pill = document.createElement('span');
+    pill.id = 'lq-net-pill';
+    pill.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:800;' +
+      'padding:6px 12px;border-radius:999px;background:#f8fafc;border:2px solid #cbd5e1;color:#334155;';
+    pill.innerHTML = '<span class="d" style="width:9px;height:9px;border-radius:50%;background:#f59e0b;display:inline-block"></span><span class="t">Conectando aula...</span>';
+    btn.parentNode.insertBefore(pill, btn);
+  }
+
+  function setConn(state, text) {
+    const pill = document.getElementById('lq-net-pill');
+    if (!pill) return;
+    pill.querySelector('.d').style.background = state === 'on' ? '#10b981' : (state === 'off' ? '#ef4444' : '#f59e0b');
+    pill.querySelector('.t').textContent = text;
+  }
+
+  function netSend(pin, type, data) {
+    if (!pin) return;
+    const packet = { sender: clientId, pin: String(pin), type, data: data || {}, ts: Date.now() };
+    if (localChannel) { try { localChannel.postMessage(packet); } catch (e) {} }
+    if (mqttClient && mqttOk) { try { mqttClient.publish(topic(pin), JSON.stringify(packet)); } catch (e) {} }
+  }
+
+  function netSubscribe(pin) {
+    if (!pin) return;
+    wanted.add(topic(pin));
+    if (mqttClient && mqttOk) mqttClient.subscribe(topic(pin));
+  }
+
+  function netUnsubscribe(pin) {
+    if (!pin) return;
+    wanted.delete(topic(pin));
+    if (mqttClient && mqttOk) mqttClient.unsubscribe(topic(pin));
+  }
+
+  function connectMqtt() {
+    setConn('wait', 'Conectando aula...');
+    const c = mqtt.connect(BROKERS[brokerIdx % BROKERS.length], {
+      clientId: 'lq_' + Math.random().toString(16).slice(2, 10),
+      clean: true, connectTimeout: 6000, reconnectPeriod: 0
+    });
+    let closed = false;
+
+    c.on('connect', () => {
+      mqttClient = c; mqttOk = true;
+      wanted.forEach(t => c.subscribe(t));
+      setConn('on', 'Aula conectada');
+      if (isHost) window.broadcastMatchState();
+      else if (studentNet.pin) netSend(studentNet.pin, 'HELLO', {});
+    });
+
+    c.on('message', (t, payload) => {
+      try { handleNet(JSON.parse(payload.toString())); } catch (e) {}
+    });
+
+    c.on('close', () => {
+      if (closed) return;
+      closed = true;
+      if (mqttClient === c) mqttClient = null;
+      mqttOk = false;
+      setConn('off', 'Sin conexión · reintentando...');
+      brokerIdx++;
+      setTimeout(connectMqtt, 2000);
+    });
+    c.on('error', () => {});
+  }
+
+  function loadLib(i) {
+    if (typeof mqtt !== 'undefined') { connectMqtt(); return; }
+    if (i >= LIB_URLS.length) { setConn('off', 'Red bloqueada (solo este navegador)'); return; }
+    const s = document.createElement('script');
+    s.src = LIB_URLS[i];
+    s.onload = () => (typeof mqtt !== 'undefined' ? connectMqtt() : loadLib(i + 1));
+    s.onerror = () => loadLib(i + 1);
+    document.head.appendChild(s);
+  }
+
+  function handleNet(msg) {
+    if (!msg || msg.sender === clientId || !msg.pin) return;
+    if (isHost) hostHandle(msg); else studentHandle(msg);
+  }
+
+  window.broadcastMatchState = function () {
+    if (!isHost) return;
+    const slim = Object.assign({}, matchState, { answerLog: [] });
+    netSend(matchState.roomPin, 'STATE', { state: slim, challenge: getActiveChallenge() });
+  };
+
+  function hostAddPlayer(d) {
+    if (!d.playerId) return 'Datos incompletos.';
+    const name = String(d.name || '').trim().slice(0, 20);
+    if (!name) return 'Falta el nombre.';
+
+    const existing = matchState.players.find(x => x.id === d.playerId);
+    if (existing) { existing.name = name; existing.adapted = Boolean(d.adapted); return ''; }
+
+    let team = 0, icon;
+    if (matchState.mode === 'teams') {
+      const cap = Number(matchState.teamCap) || 0;
+      team = (Number.isInteger(d.team) && d.team >= 0 && d.team < 4) ? d.team : getSmallestAvailableTeam();
+      if (team !== -1 && cap > 0 && getTeamMemberCount(team) >= cap) team = getSmallestAvailableTeam();
+      if (team === -1) return 'Todos los equipos están completos.';
+      icon = TEAMS_CONFIG[team].icon;
+    } else {
+      if (matchState.players.length >= MAX_INDIVIDUAL_PLAYERS) return 'Sala completa (20/20).';
+      const used = new Set(matchState.players.map(x => x.icon));
+      icon = ANIMAL_AVATARS.find(ic => !used.has(ic)) || ANIMAL_AVATARS[matchState.players.length % ANIMAL_AVATARS.length];
+    }
+
+    matchState.players.push({
+      id: d.playerId, name, icon, team, score: 0, streak: 0, maxStreak: 0,
+      adapted: Boolean(d.adapted), isDemo: false
+    });
+    AudioFX.join();
+    return '';
+  }
+
+  function hostHandle(msg) {
+    const pin = String(matchState.roomPin);
+    if (msg.pin !== pin) return '';
+    const d = msg.data || {};
+
+    if (msg.type === 'HELLO') {
+      window.broadcastMatchState();
+    } else if (msg.type === 'JOIN') {
+      const reason = hostAddPlayer(d);
+      if (reason) { netSend(pin, 'JOIN_REJECT', { playerId: d.playerId, reason }); return reason; }
+      syncAllViews(true);
+    } else if (msg.type === 'ANSWER') {
+      if (matchState.phase === 'finished' || matchState.revealed) return '';
+      if (d.wordIndex !== matchState.wordIndex || !Array.isArray(d.picks)) return '';
+      const res = processPlayerSubmission(d.playerId, d.picks);
+      if (!res) return '';
+      if (res.triggeredStreakBoost) AudioFX.streakBoost();
+      netSend(pin, 'RESULT', { playerId: d.playerId, wordIndex: matchState.wordIndex, ts: Date.now(), result: res });
+      if (d.playerId === studentLocal.playerId) showStudentResult(res);
+      syncAllViews(true);
+    }
+    return '';
+  }
+
+  function sendToHost(type, data) {
+    if (isHost) return hostHandle({ pin: String(matchState.roomPin), type, data });
+    netSend(studentNet.pin, type, data);
+    return '';
+  }
+
+  function studentHandle(msg) {
+    if (!studentNet.pin || msg.pin !== studentNet.pin) return;
+    const d = msg.data || {};
+
+    if (msg.type === 'STATE') {
+      const raw = JSON.stringify(d.state);
+      if (raw === studentNet.lastRaw) return;
+      studentNet.lastRaw = raw;
+      matchState = d.state;
+      const c = d.challenge;
+      if (c && c.id) {
+        const i = appData.challenges.findIndex(x => x.id === c.id);
+        if (i >= 0) appData.challenges[i] = c; else appData.challenges.push(c);
+      }
+      setConn('on', 'Sala ' + msg.pin + ' conectada');
+      if (studentNet.joinTimer && matchState.players.some(p => p.id === studentLocal.playerId)) {
+        clearTimeout(studentNet.joinTimer);
+        studentNet.joinTimer = null;
+        showToast('🎉 ¡Ya estás dentro de la sala!', 'success');
+      }
+      syncAllViews(false);
+    } else if (msg.type === 'RESULT') {
+      if (d.playerId !== studentLocal.playerId) return;
+      const key = d.playerId + ':' + d.wordIndex + ':' + d.ts;
+      if (key === studentNet.lastResultKey) return;
+      studentNet.lastResultKey = key;
+      showStudentResult(d.result);
+    } else if (msg.type === 'JOIN_REJECT') {
+      if (d.playerId !== studentLocal.playerId) return;
+      clearTimeout(studentNet.joinTimer);
+      studentNet.joinTimer = null;
+      showToast('⚠️ ' + d.reason, 'warn');
+    }
+  }
+
+  function showStudentResult(result) {
+    const ch = getActiveChallenge();
+    const item = ch.words[matchState.wordIndex] || {};
+    const expl = item.explanation
+      ? `<div style="margin-top:6px; font-weight:600;">💡 ${escapeHTML(item.explanation)}</div>` : '';
+
+    if (result.triggeredStreakBoost) {
+      AudioFX.streakBoost();
+      studentLocal.lastFeedbackClass = 'boost';
+      studentLocal.lastFeedbackHtml =
+        `🔥 <strong>¡RACHA x${result.streak}! +Impulso (+${result.pointsAdded} pts)</strong><br>` +
+        `¡Encadenaste ${result.streak} aciertos seguidos y tu torre sube un impulso extra!`;
+    } else if (result.isPerfect) {
+      AudioFX.success();
+      studentLocal.lastFeedbackClass = 'ok';
+      studentLocal.lastFeedbackHtml =
+        `🎉 <strong>¡Correcto! +${result.pointsAdded} puntos</strong> (Racha actual: ${result.streak}/3 para impulso)` + expl;
+    } else {
+      AudioFX.wrong();
+      studentLocal.lastFeedbackClass = 'partial';
+      studentLocal.lastFeedbackHtml =
+        `❌ Has acertado <strong>${result.hits} de ${result.totalRows}</strong> (la racha vuelve a 0).<br>` +
+        `Solución correcta: <strong>${result.rows.map(r => escapeHTML(r.expected)).join(' · ')}</strong>` + expl;
+    }
+    renderStudentView();
+  }
+
+  window.joinAsStudent = function (forcedTeam = null) {
+    const pinInp = document.getElementById('stu-pin-input');
+    const nameInp = document.getElementById('stu-name-input');
+    const adaptedChk = document.getElementById('stu-adapted-checkbox');
+    const pin = pinInp.value.trim();
+    const name = nameInp.value.trim();
+
+    if (!/^\d{4}$/.test(pin)) { showToast('🔑 Escribe el PIN de 4 cifras de la pizarra.', 'danger'); pinInp.focus(); return; }
+    if (!name) { showToast('Escribe tu nombre antes de entrar.', 'warn'); nameInp.focus(); return; }
+
+    if (studentNet.pin !== pin) {
+      if (studentNet.pin) netUnsubscribe(studentNet.pin);
+      studentNet.pin = pin;
+      studentNet.lastRaw = '';
+      netSubscribe(pin);
+    }
+
+    const team = (typeof forcedTeam === 'number')
+      ? forcedTeam
+      : (matchState.mode === 'teams' ? studentLocal.selectedTeam : -1);
+
+    const playerId = studentLocal.playerId || ('stu_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6));
+    studentLocal.playerId = playerId;
+    studentLocal.lastWordIndex = -1;
+    SafeSession.setItem('lq_tab_player_id', playerId);
+    SafeSession.setItem('lq_student_pin', pin);
+
+    const reason = sendToHost('JOIN', { playerId, name, adapted: Boolean(adaptedChk.checked), team });
+    if (reason) { showToast('⚠️ ' + reason, 'warn'); return; }
+    if (isHost) { renderStudentView(); return; }
+
+    showToast('🔎 Buscando la sala ' + pin + '...', 'info');
+    clearTimeout(studentNet.joinTimer);
+    studentNet.joinTimer = setTimeout(() => {
+      studentNet.joinTimer = null;
+      if (!matchState.players.some(p => p.id === studentLocal.playerId)) {
+        showToast('❌ No encuentro la sala ' + pin + '. Revisa el PIN y que la Pizarra esté abierta (mira el indicador de conexión de arriba).', 'danger');
+      }
+    }, 5000);
+  };
+
+  window.checkStudentResponse = function () {
+    const me = matchState.players.find(p => p.id === studentLocal.playerId);
+    if (!me) return;
+    if (studentLocal.picks.some(v => v === null)) {
+      showToast('Marca una opción en cada fila antes de comprobar.', 'warn');
+      return;
+    }
+    const btn = document.getElementById('btn-check-answer');
+    btn.disabled = true;
+    const wi = matchState.wordIndex;
+    sendToHost('ANSWER', { playerId: me.id, wordIndex: wi, picks: studentLocal.picks });
+
+    setTimeout(() => {
+      const done = matchState.answeredByWord[wi] && matchState.answeredByWord[wi][me.id];
+      if (!done && matchState.wordIndex === wi && !matchState.revealed) {
+        btn.disabled = false;
+        showToast('⚠️ Tu respuesta no ha llegado. Pulsa Comprobar otra vez.', 'warn');
+      }
+    }, 4000);
+  };
+
+  const _switchView = window.switchView;
+  window.switchView = function (v) {
+    if (v === 'board' && !isHost) { isHost = true; netSubscribe(String(matchState.roomPin)); }
+    _switchView(v);
+    if (v === 'board') window.broadcastMatchState();
+  };
+
+  const _regenPin = window.regenerateRoomPin;
+  window.regenerateRoomPin = function () {
+    const old = String(matchState.roomPin);
+    _regenPin();
+    netUnsubscribe(old);
+    netSubscribe(String(matchState.roomPin));
+    window.broadcastMatchState();
+  };
+
+  const _renderJoin = window.renderStudentJoinCard;
+  window.renderStudentJoinCard = function () {
+    const sel = document.getElementById('stu-existing-select');
+    const prev = sel ? sel.value : '';
+    _renderJoin();
+    if (sel && prev && Array.from(sel.options).some(o => o.value === prev)) sel.value = prev;
+  };
+
+  function init() {
+    try { if (typeof syncChannel !== 'undefined' && syncChannel) syncChannel.close(); } catch (e) {}
+    buildPill();
+
+    if ('BroadcastChannel' in window) {
+      localChannel = new BroadcastChannel('lq_net_v8');
+      localChannel.onmessage = (ev) => handleNet(ev.data);
+    }
+
+    const pinInp = document.getElementById('stu-pin-input');
+    pinInp.addEventListener('input', () => {
+      const pin = pinInp.value.trim();
+      if (!/^\d{4}$/.test(pin)) return;
+      if (studentNet.pin !== pin) {
+        if (studentNet.pin) netUnsubscribe(studentNet.pin);
+        studentNet.pin = pin;
+        studentNet.lastRaw = '';
+        netSubscribe(pin);
+      }
+      netSend(pin, 'HELLO', {});
+    });
+
+    const savedPin = SafeSession.getItem('lq_student_pin');
+    if (savedPin && studentLocal.playerId) {
+      studentNet.pin = savedPin;
+      pinInp.value = savedPin;
+      netSubscribe(savedPin);
+    }
+
+    setInterval(() => { if (isHost) window.broadcastMatchState(); }, 3000);
+    loadLib(0);
+  }
+
+  init();
+})();
+</script>
 </body>
   <script src="red-aula.js"></script>
 </html>
